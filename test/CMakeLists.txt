@@ -1,7 +1,7 @@
 #Etext (Engine Test)
 cmake_minimum_required(VERSION 2.6)
 
-SET(testSrc main.cpp)
+SET(testSrc main.cpp IniTest.cpp)
 SET(PA ../dependencies/bin ../dependencies/lib)
 SET(PA2 ../bin ../lib)
 #find_library(CORE_LIB Core2 PATHS ${PA})

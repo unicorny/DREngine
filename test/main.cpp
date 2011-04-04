@@ -1,7 +1,10 @@
 #include <iostream>
 #include "Engine2Main.h"
 
+#include "IniTest.h"
+
 using namespace std;
+
 DRTextur* tex = NULL;
 
 DRReturn render(float ftime)
@@ -37,6 +40,13 @@ int main()
     cout << "Hello world!" << endl;
     EnInit_Simple();
     EnInit_OpenGL(1.0, DRVideoConfig(640, 480), "Test Suit!");
+
+    printf("\n");
+    IniTest ini("test.ini");
+    if(!ini.test(false))
+        printf("Fehler in der Klasse: DRIni!\n");
+    else
+        printf("Der Test fuer die Klasse DRIni war erfolgreich!\n");
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();

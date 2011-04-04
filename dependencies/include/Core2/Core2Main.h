@@ -111,6 +111,7 @@ enum CORE2_API DRReturn;
 #include "DRColor.h"
 #include "DRPlane.h"
 #include "DRMatrix.h"
+#include "DRIni.h"
 #include "DRDampingSpring.h"
 #include "DRHash.hpp"
 #include "DRHashList.hpp"

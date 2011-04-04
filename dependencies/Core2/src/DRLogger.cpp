@@ -68,19 +68,18 @@ void DRLogger::exit()
 
 	m_File.close();
 }
-/*
 
-//*************************************************************
-// ******************************************************************
+
+// *****************************************************************
 // Einen 2D-Vektor in die Logbuchdatei schreiben
 DRReturn DRLogger::writeVector2ToLog(DRVector2& v)
 {
 	// 2D-Vektor in die Logbuchdatei schreiben
 	return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">2D-Vektor:</font></b> x = <i>%.3f</i>, y = <i>%.3f</i>, Länge = <i>%.3f</i></td></tr>",
-		                      v.x, v.y, DRVector2Length(v));
+		                      v.x, v.y, v.length());
 }
-
-// ******************************************************************
+/*
+// *****************************************************************
 // Einen 3D-Vektor in die Logbuchdatei schreiben
 DRReturn DRLogger::writeVector3ToLog(DRVector3& v, const char* pcName /* = NULL *//*)
 {
