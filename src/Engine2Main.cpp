@@ -1,9 +1,9 @@
 #include "Engine2Main.h"
 
-//Für Versionskontrolle
+//Fï¿½r Versionskontrolle
 const DRReal g_fVersion = 2.0f;
 
-//Zähler, wie oft die dll gerade benutzt wird
+//Zï¿½hler, wie oft die dll gerade benutzt wird
 int         g_iProzess = 0;
 int			g_iProzessFunk = 0;
 SDL_Surface* g_pSDLWindow = NULL;
@@ -25,14 +25,14 @@ int WINAPI DllMain(HINSTANCE DllHandle, unsigned long ReasonForCall, void* Reser
    {
       case DLL_PROCESS_ATTACH:
       {
-         //Der Referenzzähler wird um eins erhöht
+         //Der Referenzzï¿½hler wird um eins erhï¿½ht
 		  //Start
 		  g_iProzess++;
       } break;
 
       case DLL_PROCESS_DETACH:
       {
-         //Der Referenzzähler wird um eins reduziert
+         //Der Referenzzï¿½hler wird um eins reduziert
 		  //Ende
 		  g_iProzess--;
 
@@ -70,7 +70,7 @@ DRReturn fVersionCheck(DRReal fVersion)
 {
 	if(fVersion > g_fVersion)
 	{
-		DRLog.writeToLog("Programm benötigt eine zu hohe EngineDLL Version, benötigt: %f, verfügbar: %f", fVersion, g_fVersion);
+		DRLog.writeToLog("Programm benï¿½tigt eine zu hohe EngineDLL Version, benï¿½tigt: %f, verfï¿½gbar: %f", fVersion, g_fVersion);
 		return DR_ERROR;
 	}
 	return DR_OK;
@@ -79,7 +79,6 @@ DRReturn fVersionCheck(DRReal fVersion)
 //****************************************************************************************************************************
 DRReturn EnInit_Simple(DRReal fVersion /* = 0.0f*/, bool initSound/* = false*/)
 {
-	FMARK;
 	if(fVersionCheck(fVersion)) return DR_ERROR;
 
 	if(!g_bEnInit)
@@ -189,7 +188,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 	srand(SDL_GetTicks());
 #endif //_WIN32
 
-	//OpenGL Einstellungen tätigen
+	//OpenGL Einstellungen tï¿½tigen
 	video.setGLParams();
 
 	Uint32 uiVorGLInit = SDL_GetTicks();
@@ -211,9 +210,9 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 		return DR_ERROR;
 	}
 	Uint32 uiNachGLInit = SDL_GetTicks();
-	DRLog.writeToLog("Für OpenGL Init benötigte zeit: %f Sekunden", (float)(uiNachGLInit-uiVorGLInit)/1000.0f);
+	DRLog.writeToLog("Fï¿½r OpenGL Init benï¿½tigte zeit: %f Sekunden", (float)(uiNachGLInit-uiVorGLInit)/1000.0f);
 
-	//OpenGL einrichten für Ohrtogonale Projection
+	//OpenGL einrichten fï¿½r Ohrtogonale Projection
 	glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
 
     glMatrixMode(GL_PROJECTION);
@@ -233,14 +232,14 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 		DRLog.WriteToLog("Grafikkarten Hersteller: %s", glGetString(GL_VENDOR));
 		DRLog.WriteToLog("Grafikkarte: %s", glGetString(GL_RENDERER));
 		DRLog.WriteToLog("Version: %s", glGetString(GL_VERSION));
-		DRLog.WriteToLog("Unterstützte Erweiterungen:");
+		DRLog.WriteToLog("Unterstï¿½tzte Erweiterungen:");
 		*/
 		fprintf(pFile, "\n\n");
 		fprintf(pFile, "------------------OpenGL Daten------------------------\n");
 		fprintf(pFile, "Grafikkarten Hersteller: %s\n", glGetString(GL_VENDOR));
 		fprintf(pFile, "Grafikkarte: %s\n", glGetString(GL_RENDERER));
 		fprintf(pFile, "Version: %s\n", glGetString(GL_VERSION));
-		fprintf(pFile, "Unterstützte Erweiterungen:\n");
+		fprintf(pFile, "Unterstï¿½tzte Erweiterungen:\n");
 
 		//DRWriteExtensionsToLog((const char*)glGetString(GL_EXTENSIONS), pFile);
 
@@ -352,14 +351,14 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
 	SDL_GetKeyState(&iNumKeys);
 	g_piPressed = new Uint8[iNumKeys];
 
-	//Time Variablen (Frames Per Seecond geglättet)
+	//Time Variablen (Frames Per Seecond geglï¿½ttet)
 	Uint32 uiStartTime = 0;
 	Uint32 uiEndTime = SDL_GetTicks();
 	DRReal fTime = 0.0f;
 	double dTimes[6]; memset(dTimes, 0, 5*sizeof(double));
 	char    cCounter = 0;
 
-	//Variablen für Time Statistik
+	//Variablen fï¿½r Time Statistik
 	double dGesTime = 0.0, dGesTime2 = 0.0;
 	long   lNumWerte = 0;
 
@@ -422,7 +421,7 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
 		}
 
 		uiEndTime = SDL_GetTicks();
-		//fTimes glätten, Zwischen 5 Werten interpolieren (den Durschnitt errechnen)
+		//fTimes glï¿½tten, Zwischen 5 Werten interpolieren (den Durschnitt errechnen)
 		if(uiEndTime > uiStartTime) dTimes[cCounter++] = (double)(uiEndTime - uiStartTime)/1000.0;
 		else if(uiStartTime == uiEndTime) dTimes[cCounter++] = 0.0001;
 		else continue;
@@ -438,8 +437,8 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
 
 	//Time Statistik Auswertung
 	DRLog.writeToLog("\n--------Geschwindigkeitsstatistik-----------\n");
-	DRLog.writeToLog("Mögliche Frames Per Second im Schnitt: %d", (int)(1.0/(dGesTime/(double)lNumWerte)));
-	DRLog.writeToLog("Tatsächliche Frames Per Second im Schnitt: %d", (int)(1.0/(dGesTime2/(double)lNumWerte)));
+	DRLog.writeToLog("Mï¿½gliche Frames Per Second im Schnitt: %d", (int)(1.0/(dGesTime/(double)lNumWerte)));
+	DRLog.writeToLog("Tatsï¿½chliche Frames Per Second im Schnitt: %d", (int)(1.0/(dGesTime2/(double)lNumWerte)));
 	DRLog.writeToLog("Programmgesamtlaufzeit %.2f Sekunden", (double)SDL_GetTicks()/1000.0);
 	DRLog.writeToLog("Gemesssende Anzahl Gesamt Frames: %d", lNumWerte);
 	DRLog.writeToLog("\n---------Ende Geschwindigkeitsstatistik-------------\n");

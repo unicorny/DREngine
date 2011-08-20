@@ -25,11 +25,11 @@ DRReturn DRLogger::init(const char* pcFilename)
 	//sprintf(m_acFilename, pcFilename);
 	strcpy(m_acFilename, pcFilename);
 
-	//öffnen zum überschreiben
+	//ï¿½ffnen zum ï¿½berschreiben
 	//m_pFile = fopen(m_acFilename, "w");
 	m_File.open(m_acFilename, true, "wt");
 
-	//prüfen
+	//prï¿½fen
 	if(!m_File.isOpen()) return DR_ERROR;
 
 	//Was reinschreiben
@@ -44,7 +44,7 @@ DRReturn DRLogger::init(const char* pcFilename)
 //	m_File.write(acTemp2, sizeof(char), strlen(acTemp2));
 
 
-	//schließen
+	//schlieï¿½en
 //	fclose(m_pFile);
 //	m_pFile = NULL;
 	m_File.close();
@@ -75,7 +75,7 @@ void DRLogger::exit()
 DRReturn DRLogger::writeVector2ToLog(DRVector2& v)
 {
 	// 2D-Vektor in die Logbuchdatei schreiben
-	return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">2D-Vektor:</font></b> x = <i>%.3f</i>, y = <i>%.3f</i>, Länge = <i>%.3f</i></td></tr>",
+	return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">2D-Vektor:</font></b> x = <i>%.3f</i>, y = <i>%.3f</i>, Lï¿½nge = <i>%.3f</i></td></tr>",
 		                      v.x, v.y, v.length());
 }
 /*
@@ -89,10 +89,10 @@ DRReturn DRLogger::writeVector3ToLog(DRVector3& v, const char* pcName /* = NULL 
 		sprintf(acName, "3D-Vektor %s:", pcName);
 	else
 		sprintf(acName, "3D-Vektor:");
-	return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">%s</font></b> x = <i>%.3f</i>, y = <i>%.3f</i>, z = <i>%.3f</i>, Länge = <i>%.3f</i></td></tr>",
+	return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">%s</font></b> x = <i>%.3f</i>, y = <i>%.3f</i>, z = <i>%.3f</i>, Lï¿½nge = <i>%.3f</i></td></tr>",
 		                     acName, v.x, v.y, v.z, DRVector3Length(v));
 }
-
+*/
 // ******************************************************************
 // Eine Matrix in die Logbuchdatei schreiben
 DRReturn DRLogger::writeMatrixToLog(DRMatrix& m)
@@ -104,9 +104,9 @@ DRReturn DRLogger::writeMatrixToLog(DRMatrix& m)
 		writeToLogDirect("<tr>");
 		for(int iColumn = 0; iColumn < 4; iColumn++)
 		{
-			WriteToLogDirect("<td><font size=\"1\">");
-			WriteToLogDirect("<i>%.3f</i>", m.m[iRow][iColumn]);
-			WriteToLogDirect("</td>");
+			writeToLogDirect("<td><font size=\"1\">");
+			writeToLogDirect("<i>%.3f</i>", m.m[iRow][iColumn]);
+			writeToLogDirect("</td>");
 		}
 
 		writeToLogDirect("</tr>");
@@ -120,7 +120,7 @@ DRReturn DRLogger::writeMatrixToLog(DRMatrix& m)
 /*DRReturn DRLogger::WritePlaneToLog(tbPlane& p)
 {
 	// Ebene in die Logbuchdatei schreiben
-	return tbWriteToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">Ebene:</font></b> a = <i>%.3f</i>, b = <i>%.3f</i>, c = <i>%.3f</i>, d = <i>%.3f</i>, Normalenvektorlänge = <i>%.3f</i></td></tr>",
+	return tbWriteToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">Ebene:</font></b> a = <i>%.3f</i>, b = <i>%.3f</i>, c = <i>%.3f</i>, d = <i>%.3f</i>, Normalenvektorlï¿½nge = <i>%.3f</i></td></tr>",
                               p.a, p.b, p.c, p.d, tbVector3Length(p.n));
 }
 */
@@ -152,7 +152,7 @@ DRReturn DRLogger::writeToLog(const char* pcText, ...)
 	char acBuffer2[1024];
 	va_list   Argumente;
 
-	//Datei zum anhängen öffnen (wenn sie es nicht schon ist)
+	//Datei zum anhï¿½ngen ï¿½ffnen (wenn sie es nicht schon ist)
 //	if(!m_pFile)
 //		m_pFile = fopen(m_acFilename, "a");
 	if(!m_File.isOpen()) m_File.open(m_acFilename, false, "at");
@@ -163,7 +163,7 @@ DRReturn DRLogger::writeToLog(const char* pcText, ...)
 
 	m_File.setFilePointer(0, SEEK_END);
 
-	//Buffer füllen
+	//Buffer fï¿½llen
 	va_start(Argumente, pcText);
  	vsprintf(acBuffer, pcText, Argumente);
 	va_end(Argumente);
@@ -186,7 +186,7 @@ DRReturn DRLogger::writeToLog(const char* pcText, ...)
 		}
 	}
 
-	//einfügen eines Zeilenumbruchs und Formationen
+	//einfï¿½gen eines Zeilenumbruchs und Formationen
 	sprintf(acBuffer2, "<tr><td><font size=\"2\" color=\"#000080\">%s</font></td></tr>", acBuffer1);
 	if(m_File.getFile())
 		fprintf(m_File.getFile(), "<tr><td><font size=\"2\" color=\"#000080\">%s</font></td></tr>", acBuffer1);
@@ -200,13 +200,13 @@ DRReturn DRLogger::writeToLog(const char* pcText, ...)
 	printf("%s\n", acBuffer1);
 
 
-	//und Datei schließen (nur im Debug Modus)
+	//und Datei schlieï¿½en (nur im Debug Modus)
 #ifdef _DEBUG
 //	fclose(m_pFile);
 	fflush(m_File.getFile());
 	//m_File.close();
 //	m_pFile = NULL;
-	// Zusätzlich wird noch eine Debug-Ausgabe erzeugt.
+	// Zusï¿½tzlich wird noch eine Debug-Ausgabe erzeugt.
 	OutputDebugString(acBuffer1);
 
 #endif
@@ -226,7 +226,7 @@ DRReturn DRLogger::writeToLogDirect(const char* pcText, ...)
 	char acBuffer2[1024];
 	memset(acBuffer1, 0, 1024*sizeof(char));
 	va_list   Argumente;
-	//Datei zum anhängen öffnen (wenn sie es nicht schon ist)
+	//Datei zum anhï¿½ngen ï¿½ffnen (wenn sie es nicht schon ist)
 //	if(!m_pFile)
 //		m_pFile = fopen(m_acFilename, "a");
 	if(!m_File.isOpen()) m_File.open(m_acFilename, false, "at");
@@ -237,7 +237,7 @@ DRReturn DRLogger::writeToLogDirect(const char* pcText, ...)
 
 	m_File.setFilePointer(0, SEEK_END);
 
-	//Buffer füllen
+	//Buffer fï¿½llen
 	va_start(Argumente, pcText);
 	vsprintf(acBuffer, pcText, Argumente);
 	va_end(Argumente);
@@ -269,12 +269,12 @@ DRReturn DRLogger::writeToLogDirect(const char* pcText, ...)
 //	fprintf(m_pFile, acBuffer);
 	if(m_File.write(acBuffer2, sizeof(char), strlen(acBuffer2))) return DR_ERROR;
 
-	//und Datei schließen (nur im Debug Modus)
+	//und Datei schlieï¿½en (nur im Debug Modus)
 #ifdef _DEBUG
 //	fclose(m_pFile);
 	m_File.close();
 //	m_pFile = NULL;
-	// Zusätzlich wird noch eine Debug-Ausgabe erzeugt.
+	// Zusï¿½tzlich wird noch eine Debug-Ausgabe erzeugt.
 	DRRemoveHTMLTags(acBuffer2, acBuffer1, 1024);
 	OutputDebugString(acBuffer1);
 

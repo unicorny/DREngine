@@ -19,7 +19,7 @@
  *                                                                       *
  *************************************************************************/
 /*
-Klasse für vereinfachten Datei zugriff
+Klasse fï¿½r vereinfachten Datei zugriff
 Autor: Dario Rekowski
 Datum: 16.12.06
 
@@ -64,7 +64,7 @@ struct CORE2_API DRSBlockHeaderF
 	char* 		   pcDateiname;
 };
 
-//Header für einen Block (ein System)
+//Header fï¿½r einen Block (ein System)
 struct CORE2_API DRSBlockHeader
 {
 	int		  iBlockSize;
@@ -75,10 +75,10 @@ struct CORE2_API DRSBlockHeader
 //Hauptheader
 struct CORE2_API DRSMasterHeader
 {
-	char  	acID[14];	//Identifer (Jetzt für alle eigenen Datenformate nehmen)
+	char  	acID[14];	//Identifer (Jetzt fï¿½r alle eigenen Datenformate nehmen)
 	DRReal	fVersion;	//Datei Version
-	int		iHeaderSize;//Größe des Headers
-	int		iNumBlocks;	//Anzahl Blöcke
+	int		iHeaderSize;//Grï¿½ï¿½e des Headers
+	int		iNumBlocks;	//Anzahl Blï¿½cke
 };
 
 
@@ -96,10 +96,10 @@ public:
 	inline static DRFileManager* getSingletonPtr() {return &Instance();};
 	static bool	isInitialized()	{return Instance().m_bInitialized;};
 
-	//Init, erstellen der IndexList (alle vorhandene Dateien prüfen)
-	DRReturn init();	//"Fremd" Daten bekommen für Typ den HASH von "NULL"
+	//Init, erstellen der IndexList (alle vorhandene Dateien prï¿½fen)
+	DRReturn init();	//"Fremd" Daten bekommen fï¿½r Typ den HASH von "NULL"
 
-	//Zeiger auf geöffnetem File liefern, schließen und freigeben muss der User.
+	//Zeiger auf geï¿½ffnetem File liefern, schlieï¿½en und freigeben muss der User.
 	DRFile* getFileByHASH(DHASH ID);									//Nach beenden CloseFile aufrufen nicht vergessen
 //	inline DRFile* GetFileByName(DRString* pstrTyp, DRString* pstrFilename);	//Nach beenden CloseFile aufrufen nicht vergessen
 	inline DRFile* getFileByName(char*    pcTyp,   char*    pcFilename);	//Nach beenden File.close() und File delete aufrufen nicht vergessen
@@ -116,9 +116,11 @@ public:
 	//Andere Dinge
 	const char* getWholePfad(const char* pcFileName);
 	DRReturn	addOrdner(const char* pcPfadName);
+        
+        static DRReturn addFolderToFileSystem(const char* folderName);
 
 private:
-	//Struktur für Index List
+	//Struktur fï¿½r Index List
 
 	DRFileManager() {}
 	struct SIndex

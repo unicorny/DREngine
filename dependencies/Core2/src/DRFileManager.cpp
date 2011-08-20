@@ -35,10 +35,10 @@ DRReturn DRFileManager::addFile(char* pcFilename)
 		sprintf(acWPfad, pcFilename);
 		*/
 	DRFile File(pcFilename);
-	if(!File.isOpen()) LOG_ERROR("Datei konnt nicht geöffnet werden!", DR_ERROR);
+	if(!File.isOpen()) LOG_ERROR("Datei konnt nicht geï¿½ffnet werden!", DR_ERROR);
 	if(!isFileOK(&File))
 	{
-		//Kein eigenes Format, trozdem übernehmen
+		//Kein eigenes Format, trozdem ï¿½bernehmen
 		DHASH ID = DRMakeDoubleHash("NULL", pcFilename);
 		SIndex* pTIndexx = new SIndex;
 		pTIndexx->ID = ID;
@@ -184,7 +184,7 @@ DRFile* DRFileManager::startWriting(char* pcPfadName, char* pcFilename, char* pc
 	unsigned long ulCurrentPointerPos = pTempFile->getFilePointer();
 
 	//Hauptheader aktualisieren
-	//Dateigröße
+	//Dateigrï¿½ï¿½e
 	pTempFile->setFilePointer(8, SEEK_SET);
 	unsigned long ulDateiGesLength;
 	pTempFile->read(&ulDateiGesLength, sizeof(unsigned long), 1);
@@ -192,7 +192,7 @@ DRFile* DRFileManager::startWriting(char* pcPfadName, char* pcFilename, char* pc
 	pTempFile->setFilePointer(8, SEEK_SET);
 	pTempFile->write(&ulDateiGesLength, sizeof(unsigned long), 1);
 
-	//NumBlöcke
+	//NumBlï¿½cke
 	pTempFile->setFilePointer(8 + sizeof(long) + sizeof(DRReal), SEEK_SET);
 	unsigned long ulNumBloecke;
 	pTempFile->read(&ulNumBloecke, sizeof(unsigned long), 1);
@@ -220,8 +220,8 @@ DRReturn DRFileManager::endWriting(DRFile* pOpenFile)
 	pOpenFile->read(&ulDateiGesLength, sizeof(unsigned long), 1);
 	if(ulDateiGesLength != pOpenFile->getSize())
 	{
-		LOG_WARNING("Werte für Datei Length stimmen nicht überein!")
-		DRLog.writeToLog("Berechnet: %d, über GetSize(): %d", ulDateiGesLength, pOpenFile->getSize());
+		LOG_WARNING("Werte fï¿½r Datei Length stimmen nicht ï¿½berein!")
+		DRLog.writeToLog("Berechnet: %d, ï¿½ber GetSize(): %d", ulDateiGesLength, pOpenFile->getSize());
 		pOpenFile->setFilePointer(7, SEEK_SET);
 		ulDateiGesLength = pOpenFile->getSize();
 		pOpenFile->write(&ulDateiGesLength, sizeof(unsigned long), 1);
@@ -251,11 +251,11 @@ bool DRFileManager::isFileOK(DRFile* pOpenFile, bool bPointerOnEnd /* = true */)
 
 
 	unsigned long ulCurrentFilePointerPos = pOpenFile->getFilePointer();
-	//FilePointer setzen und Größe prüfen
+	//FilePointer setzen und Grï¿½ï¿½e prï¿½fen
 	pOpenFile->setFilePointer(0, SEEK_SET);
 	if(pOpenFile->getSize() < 19)
 	{
-		DRLog.writeToLog("DateiGröße: %d", pOpenFile->getSize());
+		DRLog.writeToLog("DateiGrï¿½ï¿½e: %d", pOpenFile->getSize());
 		LOG_ERROR("zu klein", false);
 	}
 	char acStart[8];
@@ -313,7 +313,7 @@ DRReturn DRFileManager::Init()
 				char acKey[32];
 				sprintf(acKey, "Pfad%d", i);
 				GetPrivateProfileString("Pfade", acKey, "[NOT FOUND]", acTemp, 256, "Data\\Data.ini");
-				//überprüfen
+				//ï¿½berprï¿½fen
 				if(strcmp(acTemp, "[NOT FOUND]"))
 				{
 					//In Liste eintragen
@@ -418,7 +418,7 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 	//NullPointer check
 	if(!pcFilename) LOG_ERROR("pcFilename ist Null", DR_ZERO_POINTER);
 
-	//erstaml schauen ob es überhaupt eine Datei ist
+	//erstaml schauen ob es ï¿½berhaupt eine Datei ist
 	//char acVergleichText[5];
 	//sprintf(acVergleichText, ".");
 /*	char* pcTemp = pstrFile->GetString();
@@ -478,9 +478,9 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 	DRFile* pTempFile = new DRFile(pcFilename);
 	if(!pTempFile->isOpen())
 	{
-		DRLog.writeToLog("%s konnte nicht geöffnet werden!", pcFilename);
+		DRLog.writeToLog("%s konnte nicht geï¿½ffnet werden!", pcFilename);
 		#ifdef _DEBUG
-		LOG_ERROR("Fehler beim öffnen von pstrFile", DR_ERROR);
+		LOG_ERROR("Fehler beim ï¿½ffnen von pstrFile", DR_ERROR);
 #endif
 		return DR_ERROR;
 	}
@@ -490,7 +490,7 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 //	pTempFile->read(&m_iNumChars, 4, 1);
 //	pTempFile->SetFilePointer(0, SEEK_SET);
 //	DRString* pstrTemp = NULL;
-	//Nur einlesen wenn es möglich ist
+	//Nur einlesen wenn es mï¿½glich ist
 //	if(m_iNumChars <= 10 && pTempFile->GetSize() > 14)
 //		pstrTemp = new DRString(pTempFile);	//4 Bytes + 6 oder 7 Bytes
 	char acTemp[8];
@@ -547,7 +547,7 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 	if(strcmp(acTemp, "DEnde"))
 	{
 		//Fehler
-		DRLog.writeToLog("%s ist Fehlerhaft, DEnde fehlt, Datei wird gelöscht!", pcFilename);
+		DRLog.writeToLog("%s ist Fehlerhaft, DEnde fehlt, Datei wird gelï¿½scht!", pcFilename);
 		pTempFile->close();
 		DR_SAVE_DELETE(pTempFile);
 	//	DR_SAVE_DELETE(pstrFile);
@@ -556,13 +556,13 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 
 	}
 
-	//lesen und eintragen aller Blöcke
+	//lesen und eintragen aller Blï¿½cke
 	pTempFile->setFilePointer(18, SEEK_SET);
 //	pstrTemp->Load(pTempFile);
 	//pTempFile->SetFilePointer(12, SEEK_CUR);
-	//Pointer am ersten Block (müsste jedenfalls)
+	//Pointer am ersten Block (mï¿½sste jedenfalls)
 
-	//Alle Blöcke durchgehen und eintragen
+	//Alle Blï¿½cke durchgehen und eintragen
 	for (int i = 0; i < dwNumBloecke; i++)
 	{
 		pTempIn = new SIndex;
@@ -601,7 +601,7 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 void DRFileManager::exit()
 {
 	if(!m_bInitialized) return;
-	//OrdnerList leeren (müsste eigentlich leer sein)
+	//OrdnerList leeren (mï¿½sste eigentlich leer sein)
 	m_OrdnerList.clear();
 	m_OrdnerPfadList.clear();
 
@@ -635,12 +635,12 @@ DRFile* DRFileManager::getFileByHASH(DHASH ID)
 	}
 	DRFile* pFile = new DRFile(pTemp->strFilename.data(), "r+b");
 
-	//datei kann nicht geöffnet werden
+	//datei kann nicht geï¿½ffnet werden
 	if(!pFile->isOpen())
 	{
-		DRLog.writeToLog("pFile: %s konnte nicht geöffnet werden!", pTemp->strFilename.data());
+		DRLog.writeToLog("pFile: %s konnte nicht geï¿½ffnet werden!", pTemp->strFilename.data());
 		DR_SAVE_DELETE(pFile);
-		LOG_ERROR("Datei konnte nicht geöffnet werden!", NULL);
+		LOG_ERROR("Datei konnte nicht geï¿½ffnet werden!", NULL);
 	}
 
 	pFile->setFilePointer(pTemp->ulCursorInFilePos, SEEK_SET);
@@ -684,6 +684,19 @@ DRReturn DRFileManager::addOrdner(const char* pcPfadName)
 	return DR_OK;
 }
 
+DRReturn DRFileManager::addFolderToFileSystem(const char* folderName)
+{
+#ifdef _WIN32
+    
+#else
+    int state = mkdir(folderName, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if(!state)
+    {
+        DRLog.writeToLog("Fehlernummer: %d", errno);
+        LOG_ERROR("Fehler beim anlegen eines Ordners", DR_ERROR);
+    }
+#endif
+}
 
 //********************************************************************************************************************++
 

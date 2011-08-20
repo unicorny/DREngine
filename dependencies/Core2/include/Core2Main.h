@@ -25,6 +25,9 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <sys/stat.h>
+#include <sys/errno.h>
 #endif
 
 // standard includes
@@ -35,6 +38,7 @@
 #include <stdlib.h>
 #include <cstdarg>
 #include <math.h>
+
 
 
 /*  To use this exported function of dll, include this header
@@ -111,6 +115,7 @@ enum CORE2_API DRReturn;
 #include "DRColor.h"
 #include "DRPlane.h"
 #include "DRMatrix.h"
+#include "DRObjekt.h"
 #include "DRIni.h"
 #include "DRDampingSpring.h"
 #include "DRHash.hpp"

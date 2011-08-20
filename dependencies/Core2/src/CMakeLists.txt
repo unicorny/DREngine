@@ -3,13 +3,15 @@ cmake_minimum_required(VERSION 2.6)
 
 SET(CoreSrc 
 	Core2Main.cpp DRFile.cpp DRFileManager.cpp DRHashList.cpp
-	DRLogger.cpp DRUtils.cpp DRMatrix.cpp DRVector2.cpp DRDampingSpring.cpp DRIni.cpp)
+	DRLogger.cpp DRUtils.cpp DRMatrix.cpp DRVector2.cpp DRDampingSpring.cpp DRIni.cpp
+        DRVector3.cpp DRObjekt.cpp)
 
 	
 #IF(WIN32)
 SET(CoreSrc ${CoreSrc} ../include/Core2Main.h ../include/DRFile.h ../include/DRFileManager.h ../include/DRHash.hpp ../include/DRHashList.hpp
                        ../include/DRLogger.h ../include/DRUtils.h ../include/DRVector2.h ../include/DRVector3.h ../include/DRMatrix.h
-					   ../include/DRColor.h ../include/DRPlane.h ../include/DRDampingSpring.h ../include/DRIni.h)
+					   ../include/DRColor.h ../include/DRPlane.h ../include/DRDampingSpring.h ../include/DRIni.h
+                        ../include/DRObjekt.h)
 #ENDIF(WIN32)
 ADD_LIBRARY(Core2 SHARED ${CoreSrc})
 
