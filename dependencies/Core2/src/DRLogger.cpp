@@ -72,16 +72,18 @@ void DRLogger::exit()
 
 // *****************************************************************
 // Einen 2D-Vektor in die Logbuchdatei schreiben
-DRReturn DRLogger::writeVector2ToLog(DRVector2& v)
+DRReturn DRLogger::writeVector2ToLog(DRVector2& v, const char* name)
 {
 	// 2D-Vektor in die Logbuchdatei schreiben
-	return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">2D-Vektor:</font></b> x = <i>%.3f</i>, y = <i>%.3f</i>, L�nge = <i>%.3f</i></td></tr>",
-		                      v.x, v.y, v.length());
+    if(name)
+        writeToLogDirect("<tr><td><b>%s</b></td></tr>", name);
+    return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">2D-Vektor:</font></b> x = <i>%.5f</i>, y = <i>%.5f</i>, L�nge = <i>%.5f</i></td></tr>",
+                            v.x, v.y, v.length());
 }
-/*
+
 // *****************************************************************
 // Einen 3D-Vektor in die Logbuchdatei schreiben
-DRReturn DRLogger::writeVector3ToLog(DRVector3& v, const char* pcName /* = NULL *//*)
+DRReturn DRLogger::writeVector3ToLog(DRVector3& v, const char* pcName /* = NULL */)
 {
 	// 3D-Vektor in die Logbuchdatei schreiben
 	char acName[64];
@@ -90,29 +92,31 @@ DRReturn DRLogger::writeVector3ToLog(DRVector3& v, const char* pcName /* = NULL 
 	else
 		sprintf(acName, "3D-Vektor:");
 	return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">%s</font></b> x = <i>%.3f</i>, y = <i>%.3f</i>, z = <i>%.3f</i>, L�nge = <i>%.3f</i></td></tr>",
-		                     acName, v.x, v.y, v.z, DRVector3Length(v));
+		                     acName, v.x, v.y, v.z, v.length());
 }
-*/
+
 // ******************************************************************
 // Eine Matrix in die Logbuchdatei schreiben
-DRReturn DRLogger::writeMatrixToLog(DRMatrix& m)
+DRReturn DRLogger::writeMatrixToLog(DRMatrix& m, const char* name)
 {
 	// Matrix in die Logbuchdatei schreiben
-	writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">Matrix:</font></b><table>");
-	for(int iRow = 0; iRow < 4; iRow++)
-	{
-		writeToLogDirect("<tr>");
-		for(int iColumn = 0; iColumn < 4; iColumn++)
-		{
-			writeToLogDirect("<td><font size=\"1\">");
-			writeToLogDirect("<i>%.3f</i>", m.m[iRow][iColumn]);
-			writeToLogDirect("</td>");
-		}
+    if(name)
+        writeToLogDirect("<tr><td><b>%s</b></td></tr>", name);
+    writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">Matrix:</font></b><table>");
+    for(int iRow = 0; iRow < 4; iRow++)
+    {
+            writeToLogDirect("<tr>");
+            for(int iColumn = 0; iColumn < 4; iColumn++)
+            {
+                    writeToLogDirect("<td><font size=\"1\">");
+                    writeToLogDirect("<i>%.3f</i>", m.m[iRow][iColumn]);
+                    writeToLogDirect("</td>");
+            }
 
-		writeToLogDirect("</tr>");
-	}
+            writeToLogDirect("</tr>");
+    }
 
-	return writeToLogDirect("</table>");
+    return writeToLogDirect("</table>");
 }
 
 // ******************************************************************
@@ -127,17 +131,17 @@ DRReturn DRLogger::writeMatrixToLog(DRMatrix& m)
 
 // ******************************************************************
 // Eine Farbe in die Logbuchdatei schreiben
-/*
+
 DRReturn DRLogger::writeColorToLog(DRColor& c)
 {
 	char acHexColor[9];
 
-	sprintf(acHexColor, "%x", (DWORD)(c) << 8);
+	sprintf(acHexColor, "%x", (int)(c) << 8);
 	acHexColor[6] = 0;
 
 	// Farbe in die Logbuchdatei schreiben
 	return writeToLogDirect("<tr><td><font size=\"2\"><b><font color=\"#000080\">Farbe:</font></b> a = <i>%.3f</i>, r = <i>%.3f</i>, g = <i>%.3f</i>, b = <i>%.3f</i>, Hexadezimal: <i>0x%x</i>, <font color=\"#%s\"><i>Probetext</i></font></td></tr>",
-                              c.a, c.r, c.g, c.b, (DWORD)(c), acHexColor);
+                              c.a, c.r, c.g, c.b, (int)(c), acHexColor);
 }
 
 //**************************************************************************************************************************

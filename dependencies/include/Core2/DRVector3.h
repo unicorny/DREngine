@@ -18,101 +18,154 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *                                                                       *
  *************************************************************************/
+#ifndef __DR_CORE_VECTOR3_
+#define __DR_CORE_VECTOR3_
 
+class DRMatrix;
 
-#ifndef __DR_VECTOR3__
-#define __DR_VECTOR3__
+/*!  \brief repr&auml;sentiert einen 3D Vektor, bzw. Punkt
 
-/*
-Vector3D Klasse, übernommen aus der TriBase-Engine von David Scherfgen
+    eine Klasse zum einfachen Rechnen mit 3D Vektoren.
+    Die Struktur der Klasse habe ich &uuml;bernommen von <a href="http://www.spieleprogrammierer.de/" target="_blank">David Scherfgens</a>
+    tbVector3 Klasse aus seiner TriBase Engine
+    \author Dario Rekowski
+    \date 07.12.09
 */
-class CORE2_API DRVector3
+class DRVector3
 {
 public:
+    //! setzt alle werte auf null
+    //! \brief Standardkonstruktor
+    DRVector3() : x(0.0f), y(0.0f), z(0.0f) {}
+    //!  setzt die werte auf die &uuml;bergebenden
+    //! \brief Konstruktor
+    //! \param _x x Koordinate
+    //! \param _y y Koordinate
+    //! \param _z z Koordinate
+    DRVector3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+    //!  setzt alle Werte auf einen Wert
+    //! \brief Konstruktor
+    //! \param c setzt alle 3 Koordinaten auf den Wert von c
+    DRVector3(float c): x(c), y(c), z(c) {}
+    //!  kopiert die Koordinaten eines anderen Vektors
+    //! \brief Kopierkonstruktor
+    //! \param v Vektor von dem die Koordinaten kopiert werden
+    DRVector3(const DRVector3& v): x(v.x), y(v.y), z(v.z) {}
+    //!  setzt alle werte auf die Werte des &uuml;bergebenden Arrays
+    //! \brief Konstruktor
+    //! \param ar ein Zeiger auf ein float array, mind. L&auml;nge 3
+    DRVector3(const float* ar) : x(ar[0]), y(ar[1]), z(ar[2]) {}
 
-	// Variablen
-	union
-	{
-		struct
-		{
-			DRReal x;	// Koordinaten
-			DRReal y;
-			DRReal z;
-		};
+    union
+    {
+    //! zugriff via x, y z
+       struct
+       {
+           float x;
+           float y;
+           float z;
+       };
+    //! zugriff via c array
+       float c[3];
+    };
 
-		struct
-		{
-			DRReal u;	// Texturkoordinaten
-			DRReal v;
-			DRReal w;
-		};
+    //! \brief () zugriffsoperator
+    //! \param index [0,2] f&uuml;r die gesuchte koordinate (x = 0, y = 1, z = 2)
+    //! \return eine Referenz, wenn ver&auml;ndert wird, wird der wert im Vektor ver&auml;ndert
+    float& operator [] (int index) {return c[index];}
+    //! \brief () zugriffsoperator, const
+    //! \param index [0,2] f&uuml;r die gesuchte koordinate (x = 0, y = 1, z = 2)
+    //! \return eine Kopie des Wertes, kann gefahrlos ver&auml;ndert werden
+    float operator [] (int index) const {return c[index];}
 
-		DRReal		c[3];		// Array der Koordinaten
-	};
+    //! \brief Casting operator
+    //! \return einen Zeiger auf das Werte Array
+    operator float* () {return c;}
 
-	// Konstruktoren
-	DRVector3()	: x(0.0f), y(0.0f), z(0.0f)																					{}
-	DRVector3(const DRVector3& v) : x(v.x), y(v.y), z(v.z)											{}
-	DRVector3(const DRReal f) : x(f), y(f), z(f)														{}
-	DRVector3(const DRReal _x, const DRReal _y, const DRReal _z) : x(_x), y(_y), z(_z)					{}
-	DRVector3(const DRReal* pfComponent) : x(pfComponent[0]), y(pfComponent[1]), z(pfComponent[2])	{}
-	//DRVector3(double dx, double dy, double dz): x(dx), y(dy), z(dz)									{}
+    //!  addiert auf den aktuellen Vektor, die Koordinaten des &uuml;bergebenden Vektors hinzu
+    //! \brief additions operator
+    //! \param v der Vektor der aufaddiert wird
+    //! \return referenz auf diesen Vektor
+    DRVector3 operator += (const DRVector3& v) {x += v.x; y += v.y; z += v.z; return *this;}
+    //! addiert den Vektor mit dem &uuml;bergebenden und liefert den neuen Vektor zur&uuml;ck
+    //! \brief additions operator
+    //! \param v der Vektor mit dem addiert wird
+    //! \return einen neuen Vektor
+    DRVector3 operator +  (const DRVector3& v) const {return DRVector3(x+v.x, y+v.y, z+v.z);}
+    //! subtrahiert den Vektor vom &uuml;bergebenden und liefert den neuen Vektor zur&uuml;ck
+    //! \brief subtraktions operator
+    //! \param v der Vektor der subtrahiert wird
+    //! \return einen neuen Vektor
+    DRVector3 operator - (const DRVector3& v) const {return DRVector3(x-v.x, y-v.y, z-v.z);}
+    //!  weist dem Vektor den Wert des &uuml;bergebenden zu
+    //! \brief Zuweisungsoperator
+    //! \param v &uuml;bergebender Vector
+    //! \return Referenz auf diesen Vektor
+    DRVector3 operator =  (const DRVector3& v) {x = v.x; y = v.y; z = v.z; return *this;}
+    //! dreht den Vektor um
+    //! \brief Negationsoperator
+    //! \return einen neuen Vektor, als Negation dieses Vektors
+    DRVector3 operator -  ()		  const    {return DRVector3(-x, -y, -z);}
 
-	// Casting-Operatoren
-	operator DRReal* ()					{return (DRReal*)(c);}
+    //!  teilt diesen Vektor durch einen Skalar, const
+    //! \brief / operator
+    //! \param f Skalar durch den geteilt wird
+    //! \return einen neuen Vektor
+    DRVector3 operator / (const float f)       const {return DRVector3(x/f, y/f, z/f);}
+    //!  multiplieziert diesen Vektor mit einem Skalar, const
+    //! \brief * operator
+    //! \param f Skalar mit dem multipliziert wird
+    //! \return einen neuen Vektor
+    DRVector3 operator * (const float f)       const {return DRVector3(x*f, y*f, z*f);}
 
-	// Zuweisungsoperatoren
-	inline DRVector3& operator = (const DRVector3& v)	{x = v.x; y = v.y; z = v.z; return *this;}
-	inline DRVector3& operator += (const DRVector3& v)	{x += v.x; y += v.y; z += v.z; return *this;}
-	inline DRVector3& operator -= (const DRVector3& v)	{x -= v.x; y -= v.y; z -= v.z; return *this;}
-	inline DRVector3& operator *= (const DRVector3& v)	{x *= v.x; y *= v.y; z *= v.z; return *this;}
-	inline DRVector3& operator *= (const DRReal f)		{x *= f; y *= f; z *= f; return *this;}
-	inline DRVector3& operator /= (const DRVector3& v)	{x /= v.x; y /= v.y; z /= v.z; return *this;}
-	inline DRVector3& operator /= (const DRReal f)		{x /= f; y /= f; z /= f; return *this;}
+    //! \brief transformiert diesen Vektor mit der Matrix m, const
+    //! \param die &uuml;bergebende Mtrix m
+    //! \return einen neuen, transformierten Vektor
+    DRVector3 transformNormal(const DRMatrix& m) const;
+    //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
+    //! \return einen neuen normalisierten Vektor
+    DRVector3 normalize()                      const  {return *this / length();}
+    //! \brief berechnet das Kreuzprodukt mit dem &uuml;bergebendem Vektor, const
+    //! \param v2 der Vector mit dem das Kreuzprodukt errechnet werden soll
+    //! \return einen neuen Vektor, das Kreuzprodukt aus diesem und dem &uuml;bergebendem Vektor
+    DRVector3 cross(const DRVector3& v2)         const {return DRVector3(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x);}
+    //! \brief berechnet das Punktprodukt mit dem &uuml;bergebendem Vektor, const
+    //! \param v2 der Vectro mit dem das Punktprodukt errechnet werden soll
+    //! \return ein float Wert mit dem Punktprodukt
+    float 	dot(const DRVector3& v2)		 const {return x * v2.x + y * v2.y + z * v2.z;}
 
+    //! \brief berechnet die L&auml;nge des Vektors, const
+    //! \return die l&auml;nge des Vektors
+    float   length()                         const {return sqrtf(x*x + y*y + z*z);}
 
-	//********************************************************************************************************************++
+    //! \brief gibt den Vektor auf die Konsole aus, const
+    //! \param name wenn angegeben, wird name mit auf der Konsole ausgegeben
+    void print(const char* name = NULL) const
+    {
+        if(!name)
+            printf("x: %f, y: %f, z: %f\n", x, y, z);
+        else
+            printf("%s: x: %f, y: %f, z: %f\n",name, x, y, z);
+    }
 
+    //! \brief Vergelichsoperator f&uuml;r ungleich, const
+    //! \param a Vektor mit dem verglichen wird
+    //! \return true bei ungleichheit, sonst false
+    bool operator != (const DRVector3& a) const
+    {
+        if(x != a.x || y != a.y || z != a.z) return true;
+        return false;
+    }
+   /* //! \brief standard value x Achse (1,0,0)
+    static const DRVector3 DRVector3::X_AXIS;
+    //! \brief standard value y Achse (0,1,0)
+    static const DRVector3 DRVector3::Y_AXIS;
+    //! \brief standard value y Achse (0,0,1)
+    static const DRVector3 DRVector3::Z_AXIS;
+    * */
 
-// Arithmetische Operatoren
-    inline DRVector3 operator + (const DRVector3& b) const	{return DRVector3(x + b.x, y + b.y, z + b.z);}
-    inline DRVector3 operator - (const DRVector3& b) const	{return DRVector3(x - b.x, y - b.y, z - b.z);}
-    inline DRVector3 operator - ()					 const 	{return DRVector3(-x, -y, -z);}
-    inline DRVector3 operator * (const DRVector3& b) const 	{return DRVector3(x * b.x, y * b.y, z * b.z);}
-    inline DRVector3 operator * (const DRReal f)     const	{return DRVector3(x * f, y * f, z * f);}
-    inline DRVector3 operator / (const DRVector3& b) const	{return DRVector3(x / b.x, y / b.y, z / b.z);}
-    inline DRVector3 operator / (const DRReal f)	 const	{return DRVector3(x / f, y / f, z / f);}
-
-    //----------------------------------------------------------------------------------------------------------------------
-
-    // Vergleichsoperatoren
-    inline bool operator == (const DRVector3& b) const {if(x != b.x) return false; if(y != b.y) return false; return z == b.z;}
-    inline bool operator != (const DRVector3& b) const {if(x != b.x) return true; if(y != b.y) return true; return z != b.z;}
-
-    //----------------------------------------------------------------------------------------------------------------------
-    // Funktionen deklarieren
-    inline DRReal		length()										        const {return sqrtf(x*x + y*y + z*z);}
-    inline DRReal		lengthSq()  											const {return x*x + y*y + z*z;}
-    inline DRVector3	normalize()												const {return *this / length();}
-    inline DRVector3	normalizeEx()											const {return *this / (length() + 0.0001f);}
-    inline DRVector3	cross(const DRVector3& v2)							    const {return DRVector3(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x);}
-    inline DRReal		dot(const DRVector3& v2)								const {return x * v2.x + y * v2.y + z * v2.z;}
-    inline DRReal		angle(const DRVector3& v2)							    const {return acosf((x * v2.x + y * v2.y + z * v2.z) / length() * v2.length());}
-    inline DRVector3	interpolateCoords(const DRVector3& v2, const DRReal p)  const {return *this + DRVector3((v2 - *this) * p);}
-    inline DRVector3	interpolateNormal(const DRVector3& v2, const DRReal p)	const {return interpolateCoords(v2, p).normalize();}
- //   inline DRVector3	min(const DRVector3& v2)								const {return DRVector3(DR_MIN(x, v2.x), DR_MIN(y, v2.y), DR_MIN(z, v2.z));}
- //   inline DRVector3	max(const DRVector3& v2)								const {return DRVector3(DR_MAX(x, v2.x), DR_MAX(y, v2.y), DR_MAX(z, v2.z));}
-    //inline DRVector3	DVector3fRandom()																	{return DRVector3NormalizeEx(DRVector3(tbdoubleRandom(-1.0f, 1.0f), tbdoubleRandom(-1.0f, 1.0f), tbdoubleRandom(-1.0f, 1.0f)));}
-    //! Achtung, moeglicherweise nicht sehr performant (wegen powf)
-    //inline DRReal		distanceToPoint(const DRVector3& v2)					{return sqrtf(powf(fabs(x - v2.x), 2.0f) + powf(fabs(y - v2.y), 2.0f) + powf(fabs(z - v2.z), 2.0f));}
-    inline DRReal       distanceToPoint(const DRVector3& v2)                    {return DRVector3(fabs(x-v2.x), fabs(y-v2.y), fabs(z-v2.z)).length();}
-    //*/
-
-
+private:
 
 };
 
-
-inline DRVector3 operator * (const DRReal f, const DRVector3& v)			{return DRVector3(v.x * f, v.y * f, v.z * f);}
-
-#endif //__DR_VECTOR3__
+#endif

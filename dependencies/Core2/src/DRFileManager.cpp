@@ -704,10 +704,16 @@ const char* DRFileManager::getWholePfad(const char* pcFileName)
 {
 	if(!m_bInitialized) return NULL;
 
-	FILE* pTempFile = NULL;
+	FILE* pTempFile = NULL;/*fopen(pcFileName, "rb");
+        if(pTempFile)
+        {
+            fclose(pTempFile);
+            return pcFileName;
+        }*/
+        
 	for(list<string>::iterator it = m_OrdnerPfadList.begin(); it != m_OrdnerPfadList.end(); it++)
 	{
-        pTempFile = fopen(string(string(pcFileName) + "/" + *it).data(), "rb");
+        pTempFile = fopen(string(*it + "/" + string(pcFileName)).data(), "rb");
         if(pTempFile)
 		{
 			fclose(pTempFile);

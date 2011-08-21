@@ -466,7 +466,7 @@ const char* DRGetGLErrorText(GLenum eError)
 }
 
 
-DRReturn DRGrafikError(char* pcErrorMessage)
+DRReturn DRGrafikError(const char* pcErrorMessage)
 {
 	GLenum GLError = glGetError();
 	if(GLError)

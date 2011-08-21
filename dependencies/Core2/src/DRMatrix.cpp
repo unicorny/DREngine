@@ -6,6 +6,7 @@ DRMatrix DRMatrix::translation(const DRVector3& v)
     m(0,3) = v.x;
     m(1,3) = v.y;
     m(2,3) = v.z;
+    
     return m;
 }
 DRMatrix DRMatrix::rotationX(const float f)

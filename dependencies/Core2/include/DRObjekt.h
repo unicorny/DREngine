@@ -38,7 +38,7 @@
     \author Dario Rekowski
     \date 07.12.09
 */
-class DRObjekt
+class CORE2_API DRObjekt
 {
 public:
     //! Konstruktor welcher die Startposition und Startrotation erwartet

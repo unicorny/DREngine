@@ -1,14 +1,14 @@
 #include "Engine2Main.h"
 
 DRTextur::DRTextur()
-: mParent(DRIImage::newImage()), mTexturID(0)
+: mParent(DRIImage::newImage()), mTexturID(0), mSucessfullLoaded(false)
 {
 }
 
-DRTextur::DRTextur(const char* filename, bool keepImage /* = false */)
-: mParent(DRIImage::newImage()), mTexturID(0)
+DRTextur::DRTextur(const char* filename, bool keepImage /* = false */, GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* = GL_LINEAR*/)
+: mParent(DRIImage::newImage()), mTexturID(0), mSucessfullLoaded(false)
 {
-    load(filename, keepImage);
+    load(filename, keepImage, glMinFilter, glMagFilter);
 }
 
 DRTextur::~DRTextur()
@@ -16,23 +16,33 @@ DRTextur::~DRTextur()
     unload();
 }
 
-DRReturn DRTextur::load(const char* filename, bool keepImage /* = false*/)
+DRReturn DRTextur::load(const char* filename, bool keepImage /* = false*/, GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* = GL_LINEAR*/)
 {
     if(mTexturID != 0)
         unload();
     
     if(!mParent)
         mParent = DRIImage::newImage();
-    if(mParent->loadFromFile(filename))
-        LOG_ERROR("Fehler beim Textur laden", DR_ERROR);
+    
+    const char* path = DRFileManager::Instance().getWholePfad(filename);
+    if(!path)
+    {
+        if(mParent->loadFromFile(filename))
+            LOG_ERROR("Fehler beim Textur laden", DR_ERROR);
+    }
+    else
+    {
+        if(mParent->loadFromFile(DRString(DRString(path)+"/"+DRString(filename)).data()))
+            LOG_ERROR("Fehler2 beim Textur laden", DR_ERROR);
+    }
 
     //generate an OpenGL texture ID for this texture
 	glGenTextures(1, &mTexturID);
 	//bind to the new texture ID
 	glBindTexture(GL_TEXTURE_2D, mTexturID);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glMinFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glMagFilter);
 
 	//store the texture data for OpenGL use
 /*	glTexImage2D(GL_TEXTURE_2D, 0, uiNumComponents, width, height,
@@ -56,12 +66,14 @@ DRReturn DRTextur::load(const char* filename, bool keepImage /* = false*/)
         DRIImage::deleteImage(mParent);
         mParent = NULL;
     }
+    mSucessfullLoaded = true;
 
     return DR_OK;
 }
 
 void DRTextur::unload()
 {
+    mSucessfullLoaded = false;
     if(mParent)
     {
         DRIImage::deleteImage(mParent);

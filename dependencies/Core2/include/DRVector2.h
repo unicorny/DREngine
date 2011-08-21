@@ -23,7 +23,7 @@
  *************************************************************************/
 
 /*
-Vector2D Klasse, übernommen aus der TriBase-Engine von David Scherfgen
+Vector2D Klasse, ï¿½bernommen aus der TriBase-Engine von David Scherfgen
 */
 class DRMatrix;
 class CORE2_API DRVector2
@@ -95,12 +95,13 @@ public:
     DRVector2	transformCoords(const DRMatrix& m, DRReal* const pfOutW = NULL) const; // 2D-Vektor mit Matrix multiplizieren
     DRVector2	transformNormal(const DRMatrix& m)								const; // 2D-Normalenvektor mit Matrix multiplizieren
     //DRVector2	transformNormal_TranspInv(const DRMatrix& m)					const; // 2D-Normalenvektor mit Matrix multiplizieren
-
+    
+    
 
     //----------------------------------------------------------------------------------------------------------------------
 
     // Vergleichsoperatoren
-    //! Mit Vorsicht zu genießen!
+    //! Mit Vorsicht zu genieï¿½en!
     inline bool operator == (const DRVector2& b) const {if(this->x != b.x) return false; return this->y == b.y;}
     inline bool operator != (const DRVector2& b) const {if(this->x != b.x) return true;  return this->y != b.y;}
     inline bool	operator <  (const DRVector2& b) const {if(this->x < b.x)  return true;  if(this->x == b.x & this->y < b.y) return true; return false;}

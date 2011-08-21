@@ -10,7 +10,7 @@ mValid(false)
 	char c;
 	if(!mFilePointer)
 	{
-		fprintf(stderr, "Achtung, %s konnte nicht geöffnet werden!! (DRIni::DRIni)", fileName);
+		fprintf(stderr, "Achtung, %s konnte nicht geï¿½ffnet werden!! (DRIni::DRIni)", fileName);
 	}
 	else
 	{
@@ -110,7 +110,7 @@ int DRIni::getInt(const char *section, const char *key)
 DRVector3 DRIni::getVector3(const char* section, const char* key)
 {
 	string* tStr = getStr(section, key);
-	if(tStr->empty()) return DRVector3(0.0f);
+	if(tStr->empty()) return DRVector3(-1.0f);
 	DRVector3 vec;
 	sscanf(tStr->data(), "%f, %f, %f", &vec.x, &vec.y, &vec.z);
 	return vec;
@@ -127,7 +127,7 @@ DRReal DRIni::getReal(const char* section, const char* key)
 DRVector2 DRIni::getVector2(const char* section, const char* key)
 {
 	string* tStr = getStr(section, key);
-	if(tStr->empty()) return DRVector2(0.0f);
+	if(tStr->empty()) return DRVector2(-1.0f);
 	DRVector2 vec;
 	sscanf(tStr->data(), "%f, %f", &vec.x, &vec.y);
 	return vec;

@@ -88,6 +88,10 @@ typedef unsigned char u8;
 typedef char s8;
 #endif
 
+#ifndef u64
+typedef unsigned long long u64;
+#endif
+
 typedef unsigned int HASH;
 typedef unsigned long DHASH;
 

@@ -60,23 +60,23 @@ public:
 	DRFile(const DRFile& otherFile);
 	~DRFile();
 
-	//Öffnen einer Datei
+	//ï¿½ffnen einer Datei
 #ifdef _WIN32
 	DRFileErrorCodes open(const wchar_t* pstFilename, const wchar_t* pstMode = L"a+b");
 #endif
 	DRFileErrorCodes open(const char* pcFilename, bool bForceNew = false, const char* pcMode = "a+b");
 
-	//schließen eine Datei
+	//schlieï¿½en eine Datei
 	void close();
 
-	//Prüfen, ob die Datei geöffnet ist
+	//Prï¿½fen, ob die Datei geï¿½ffnet ist
 	bool isOpen();
-
-	//! \brief Größe der Datei
-	//! \return 0 bei Error, sonst Dateigröße
+        
+	//! \brief Grï¿½ï¿½e der Datei
+	//! \return 0 bei Error, sonst Dateigrï¿½ï¿½e
 	unsigned long getSize();
 
-	//Daten in die geöffnete Datei schreiben
+	//Daten in die geï¿½ffnete Datei schreiben
 	DRFileErrorCodes write(const void* pDatenIn, unsigned long ulSize, unsigned long ulCount, unsigned long* plWrittenBytesOut = NULL);
 
 	//Daten aus datei lesen
