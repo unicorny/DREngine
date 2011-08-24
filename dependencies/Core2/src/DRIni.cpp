@@ -81,7 +81,7 @@ void DRIni::readParameters(string _name, string line)
 	string name;
 	string key;
 	string* target = &name;
-	for(int i = 0; i < line.size(); i++)
+	for(u32 i = 0; i < line.size(); i++)
 	{
 		c = line.data()[i];
 		if(c == '=') target = &key;
@@ -121,7 +121,7 @@ DRReal DRIni::getReal(const char* section, const char* key)
 {
 	string* tStr = getStr(section, key);
 	if(tStr->empty()) return 0.0f;
-	return atof(tStr->data());
+	return (DRReal)atof(tStr->data());
 }
 //-----------------------------------------------------------------------------------------------------------
 DRVector2 DRIni::getVector2(const char* section, const char* key)

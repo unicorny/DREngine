@@ -130,8 +130,8 @@ DRReturn DRFont::init(const char* pcTGAFilename, const char* pcTBFFilename)
 
 	fclose(file);
 	SDL_Surface* pTempS = SDL_GetVideoSurface();
-	m_vScreenSize.x = pTempS->w;
-	m_vScreenSize.y = pTempS->h;
+	m_vScreenSize.x = (DRReal)pTempS->w;
+	m_vScreenSize.y = (DRReal)pTempS->h;
 
 	return DR_OK;
 }
@@ -151,7 +151,7 @@ float DRFont::computeTextWidth(const char* pcText, int iLength /* = -1 */, const
 	if( 0 == iLength) return 0.0f;
 
 	//Jedes Zeichen durchgehen und Gr��e addieren
-	for(unsigned int i = 0; i < iLength; i++)
+	for(int i = 0; i < iLength; i++)
 		fWidth += m_FInfo.afCharWidth[pcText[i]];
 
 	// n Zeichen: n - 1 Leerr�ume

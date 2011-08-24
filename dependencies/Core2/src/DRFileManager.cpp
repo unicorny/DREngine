@@ -563,7 +563,7 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 	//Pointer am ersten Block (m�sste jedenfalls)
 
 	//Alle Bl�cke durchgehen und eintragen
-	for (int i = 0; i < dwNumBloecke; i++)
+	for (u32 i = 0; i < dwNumBloecke; i++)
 	{
 		pTempIn = new SIndex;
 
@@ -687,7 +687,11 @@ DRReturn DRFileManager::addOrdner(const char* pcPfadName)
 DRReturn DRFileManager::addFolderToFileSystem(const char* folderName)
 {
 #ifdef _WIN32
-    
+    int state = _mkdir(folderName);
+	if(state)
+	{
+		DRLog.writeToLog("Fehler bei erstellen des Ordners: %s, fehlernr: %d", folderName, errno);
+	}
 #else
     int state = mkdir(folderName, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if(!state)
@@ -696,6 +700,7 @@ DRReturn DRFileManager::addFolderToFileSystem(const char* folderName)
         LOG_ERROR("Fehler beim anlegen eines Ordners", DR_ERROR);
     }
 #endif
+	return DR_OK;
 }
 
 //********************************************************************************************************************++

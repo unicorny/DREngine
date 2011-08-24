@@ -25,6 +25,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <direct.h>
 #else
 #include <sys/stat.h>
 #include <sys/errno.h>
@@ -46,6 +47,8 @@
  */
 
 #ifdef _WIN32
+#pragma warning (disable : 4251) 
+#define _CRT_SECURE_NO_WARNINGS 1
 #ifdef BUILD_CORE_DLL
     #define CORE2_API __declspec(dllexport)
 #else
@@ -90,7 +93,7 @@ typedef char s8;
 
 #ifndef u64
 typedef unsigned long long u64;
-#endif
+#endif // u64
 
 typedef unsigned int HASH;
 typedef unsigned long DHASH;

@@ -89,6 +89,7 @@
 #include "DRIImage.h"
 #include "DRVideoConfig.h"
 #include "DRTextur.h"
+#include "DRText.h"
 /*#include "FileFormats.h"
 #include "Utils.h"
 #include "Font.h"
@@ -109,9 +110,9 @@ ENGINE_API extern Uint8*    g_piPressed;
 
 /**	Engine Funktionen
 	Verschieden Init-Funktionen und anderes
-	Init alleine für SDL
-	für SDL und OpenGL
-	für SDL und Ogre3D
+	Init alleine fï¿½r SDL
+	fï¿½r SDL und OpenGL
+	fï¿½r SDL und Ogre3D
 */
 ENGINE_API DRReturn EnInit_Simple(DRReal fVersion = 1.0f, bool initSound = false);
 ENGINE_API DRReturn EnInit(DRReal fVersion = 1.0f, bool initSound = false);
@@ -126,6 +127,6 @@ ENGINE_API bool		EnIsButtonPressed(SDLKey button);
 //----------------------------------------------------------------------------------------------------------------------
 // Ein paar Helferfunktionen
 //! Fragt nach einem Fehler in OpenGL
-ENGINE_API DRReturn DRGrafikError(char* pcErrorMessage);
+ENGINE_API DRReturn DRGrafikError(const char* pcErrorMessage);
 
 #endif //__DR_ENGINE2MAIN__

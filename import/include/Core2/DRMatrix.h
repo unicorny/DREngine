@@ -1,8 +1,10 @@
+#ifndef __DR_CORE_MATRIX_
+#define __DR_CORE_MATRIX_
 
 /*/*************************************************************************
  *                                                                       *
  * Core, Core-Lib for my programs, Core doesn't need any libraries		 *
- * Copyright (C) 2009, 2010, 2011 Dario Rekowski.						 *
+ * Copyright (C) 2007, 2008, 2009 Dario Rekowski.						 *
  * Email: dariofrodo@gmx.de   Web: www.mathe-programme.de.tk             *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
@@ -20,258 +22,266 @@
  *                                                                       *
  *************************************************************************/
 
-/********************************************************************
-	 _________        __    _____
-	/\___  ___\      /\_\  /\  __\
-	\/__/\ \__/ _  __\/_/_ \ \ \_\\   ____    _____      __
-	    \ \ \  /\`´__\ /\ \ \ \  __\ /\ __\_ /\  __\   /´__`\
-	     \ \ \ \ \ \/  \ \ \ \ \ \_\\\ \\_\ \\ \____\ /\  __/
-	      \ \_\ \ \_\   \ \_\ \ \____\\ \___\ \ \____\\ \____\
-	       \/_/  \/_/    \/_/  \/____/ \/__/   \/____/ \/____/
 
-	DRMatrix.h
-	==========
-	Diese Datei ist Teil der TriBase-Engine.
+#include "stdio.h"
+#include "memory.h"
+#include "math.h"
 
-	Zweck:
-	Matrizenrechnung
+#include "DRVector3.h"
 
-	Autor:
-	David Scherfgen
+/*! \brief Diese Klasse representiert eine DRMatrix
 
-********************************************************************/
-
-#ifndef __DR_MATRIX__
-#define __DR_MATRIX__
-
-// Verwendete Symbole vordefinieren
-//class DRMatrix;
-
-
-// ******************************************************************
-// Die Matrixklasse
+    Zum rechnen und erstellen von Matritzen
+    Die Struktur der Klasse habe ich &uuml;bernommen von <a href="http://www.spieleprogrammierer.de/" target="_blank">David Scherfgens</a>
+    tbMatrix Klasse aus seiner TriBase Engine
+    \author Dario Rekowski
+    \date 07.12.09
+*/
 class CORE2_API DRMatrix
 {
 public:
-	// Variablen
+    // Konstruktoren
+    //! setzt die DRMatrix auf die Identit&auml;ts DRMatrix
+    //! \brief Standardkonstruktor
+    DRMatrix() {*this = identity();}
+
+    //! \brief Kopierkonstruktor
+    //!     erwartet eine DRMatrix deren Werte &uuml;bernommen werden
+    //! \param m andere DRMatrix von der die Werte genommen werden
+	DRMatrix(const DRMatrix& m) {memcpy(n, m.n, sizeof(float)*16);}
+	//! \brief Konstruktor, der jeden einzelnen DRMatrix Wert erwartet
+	//! \param _m00 = x Achse x Koordinate
+	//! \param _m01 = x Achse y Koordinate
+	//! \param _m02 = x Achse z Koordinate
+	//! \param _m03 = 0
+	//! \param _m04 = y Achse x Koordinate
+	//! \param _m05 = y Achse y Koordinate
+	//! \param _m06 = y Achse z Koordinate
+	//! \param _m07 = 0
+	//! \param _m08 = z Achse x Koordinate
+	//! \param _m09 = z Achse y Koordinate
+	//! \param _m10 = z Achse z Koordinate
+	//! \param _m11 = 0
+	//! \param _m12 x Translation
+	//! \param _m13 y Translation
+	//! \param _m14 z Translation
+	//! \param _m15 = 1
+	DRMatrix(float _m00, float _m04, float _m08, float _m12,
+           float _m01, float _m05, float _m09, float _m13,
+           float _m02, float _m06, float _m10, float _m14,
+           float _m03, float _m07, float _m11, float _m15) : m00(_m00), m04(_m04), m08(_m08), m12(_m12),
+			                                                 m01(_m01), m05(_m05), m09(_m09), m13(_m13),
+													         m02(_m02), m06(_m06), m10(_m10), m14(_m14),
+				   											 m03(_m03), m07(_m07), m11(_m11), m15(_m15) {}
+    //! \brief Kontruktor
+    //!    erwartet einen Wert, setzt alle Felder auf diesen Wert
+    //! \param f ein float Wert auf den alle Felder gesetzt werden
+    DRMatrix(const float f) {memset(n, (int)f, sizeof(float)*16);}
+    //! \brief Konstruktor
+    //!     erwartet ein Zeiger auf ein float Array mit mind. 16 Felder
+    //! \param v float Zeiger auf Array von dem die Werte kopiert werden
+    DRMatrix(const float* v) {memcpy(n, v, sizeof(float)*16);}
+
+
+    // Variablen
 	union
 	{
 		struct
 		{
-			DRReal m11, m12, m13, m14,	// Elemente der Matrix
-				  m21, m22, m23, m24,
-				  m31, m32, m33, m34,
-				  m41, m42, m43, m44;
+        //! DRMatrix als benannte Elemente
+			float m00, m04, m08, m12,	// Elemente der DRMatrix
+				  m01, m05, m09, m13,
+				  m02, m06, m10, m14,
+				  m03, m07, m11, m15;
 		};
-
-		DRReal		m[4][4];			// Zweidimensionales Array der Elemente
-		DRReal		n[16];				// Eindimensionales Array der Elemente
+        //! DRMatrix als zwei dimensionales Array/Feld
+		float		m[4][4];			// Zweidimensionales Array der Elemente
+		//! DRMatrix als ein dimensionales Array/Feld
+		float		n[16];				// Eindimensionales Array der Elemente
 	};
 
-	// Konstruktoren
-	DRMatrix() {}
+    // Casting-Opeatoren
+    //! \brief casting operator
+    //! \return float Zeiger auf DRMatrix Elemente Array
+	operator float* ()					{return (float*)(n);}
+	//! \brief casting operator, const
+    //! \return float Zeiger auf DRMatrix Elemente Array
+	operator const float* ()	const	{return (float*)(n);}
+	//! \brief Klammer Operator
+	//! \param iRow Zeile der DRMatrix [0,3]
+	//! \param iColumn Spalte der DRMatrix [0,3]
+	//! \return eine referenz auf das gew&uuml;nschte Feld, bei &auml;nderung des Wertes, &auml;nderung in der DRMatrix!
+	float& operator () (int iRow, int iColumn) {return m[iRow][iColumn];}
+	//! \brief Klammer Operator, const
+    //! \param iRow Zeile der DRMatrix [0,3]
+	//! \param iColumn Spalte der DRMatrix [0,3]
+	//! \return eine Kopie des Wertes im gew&uuml;nschtem Feld, bei &auml;nderung, bleibt DRMatrix wie sie ist
+	float operator () (int iRow, int iColumn) const {return m[iRow][iColumn];}
 
-	DRMatrix(const DRMatrix& m) : m11(m.m11), m12(m.m12), m13(m.m13), m14(m.m14),
-                                  m21(m.m21), m22(m.m22), m23(m.m23), m24(m.m24),
-								  m31(m.m31), m32(m.m32), m33(m.m33), m34(m.m34),
-								  m41(m.m41), m42(m.m42), m43(m.m43), m44(m.m44) {}
+	//! \brief Klammer Operator
+	//! \param iRow Zeile der DRMatrix [0,3]
+	//! \param iColumn Spalte der DRMatrix [0,3]
+	//! \return eine referenz auf das gew&uuml;nschte Feld, bei &auml;nderung des Wertes, &auml;nderung in der DRMatrix!
+	float& operator () (int index) {return n[index];}
+	//! \brief Klammer Operator, const
+    //! \param iRow Zeile der DRMatrix [0,3]
+	//! \param iColumn Spalte der DRMatrix [0,3]
+	//! \return eine Kopie des Wertes im gew&uuml;nschtem Feld, bei &auml;nderung, bleibt DRMatrix wie sie ist
+	float operator () (int index) const {return n[index];}
 
-	DRMatrix(DRReal _m11, DRReal _m12, DRReal _m13, DRReal _m14,
-			 DRReal _m21, DRReal _m22, DRReal _m23, DRReal _m24,
-			 DRReal _m31, DRReal _m32, DRReal _m33, DRReal _m34,
-			 DRReal _m41, DRReal _m42, DRReal _m43, DRReal _m44) : m11(_m11), m12(_m12), m13(_m13), m14(_m14),
-			                                                   m21(_m21), m22(_m22), m23(_m23), m24(_m24),
-															   m31(_m31), m32(_m32), m33(_m33), m34(_m34),
-															   m41(_m41), m42(_m42), m43(_m43), m44(_m44) {}
-
-	// Casting-Opeatoren
-	operator DRReal* ()					{return (DRReal*)(n);}
-
-	// Zugriffsoperatoren
-	DRReal& operator () (int iRow, int iColumn) {return m[iRow - 1][iColumn - 1];}
-	DRReal operator () (int iRow, int iColumn) const {return m[iRow - 1][iColumn - 1];}
-
-    // Zuweisungsoperatoren (mit Rechnung)
-	DRMatrix& operator += (const DRMatrix& m)
+	//Rechen operationen
+	//! \brief Multiplikations Operator, const
+    //!     zum erstellen einer neuen DRMatrix als Ergebnis aus dieser DRMatrix * &uuml;bergebende DRMatrix
+	//! \param DRMatrix mit welcher Multipliziert werden soll
+	//! \return eine neue DRMatrix als Ergebnis aus this * mm
+	DRMatrix operator * (const DRMatrix& mm) const
 	{
-		m11 += m.m11; m12 += m.m12; m13 += m.m13; m14 += m.m14;
-		m21 += m.m21; m22 += m.m22; m23 += m.m23; m24 += m.m24;
-		m31 += m.m31; m32 += m.m32; m33 += m.m33; m34 += m.m34;
-		m41 += m.m41; m42 += m.m42; m43 += m.m43; m44 += m.m44;
-		return *this;
+	    DRMatrix e(0.0f);
+
+	    for(int i = 0; i < 4; i++)
+            for(int j = 0; j < 4; j++)
+                e.m[i][j] = mm.m[0][j] * m[i][0] + 
+                			mm.m[1][j] * m[i][1] + 
+                			mm.m[2][j] * m[i][2] + 
+                			mm.m[3][j] * m[i][3];
+        return e;
 	}
+	//! \brief Multiplikations Operator
+    //!     zum auf Auf-Multiplizieren einer DRMatrix auf diese DRMatrix
+	//! \param DRMatrix mit welcher Multipliziert werden soll
+	//! \return diese DRMatrix, da diese die neuen Werte enth&auml;lt
+	DRMatrix& operator *= (const DRMatrix& mm) {return *this = *this*mm;}
 
-	DRMatrix& operator -= (const DRMatrix& m)
-	{
-		m11 -= m.m11; m12 -= m.m12; m13 -= m.m13; m14 -= m.m14;
-		m21 -= m.m21; m22 -= m.m22; m23 -= m.m23; m24 -= m.m24;
-		m31 -= m.m31; m32 -= m.m32; m33 -= m.m33; m34 -= m.m34;
-		m41 -= m.m41; m42 -= m.m42; m43 -= m.m43; m44 -= m.m44;
-		return *this;
-	}
-
-	DRMatrix& operator *= (const DRMatrix& m)
-	{
-		return *this = DRMatrix(m.m11 * m11 + m.m21 * m12 + m.m31 * m13 + m.m41 * m14,
-								m.m12 * m11 + m.m22 * m12 + m.m32 * m13 + m.m42 * m14,
-								m.m13 * m11 + m.m23 * m12 + m.m33 * m13 + m.m43 * m14,
-								m.m14 * m11 + m.m24 * m12 + m.m34 * m13 + m.m44 * m14,
-								m.m11 * m21 + m.m21 * m22 + m.m31 * m23 + m.m41 * m24,
-								m.m12 * m21 + m.m22 * m22 + m.m32 * m23 + m.m42 * m24,
-								m.m13 * m21 + m.m23 * m22 + m.m33 * m23 + m.m43 * m24,
-								m.m14 * m21 + m.m24 * m22 + m.m34 * m23 + m.m44 * m24,
-								m.m11 * m31 + m.m21 * m32 + m.m31 * m33 + m.m41 * m34,
-								m.m12 * m31 + m.m22 * m32 + m.m32 * m33 + m.m42 * m34,
-								m.m13 * m31 + m.m23 * m32 + m.m33 * m33 + m.m43 * m34,
-								m.m14 * m31 + m.m24 * m32 + m.m34 * m33 + m.m44 * m34,
-								m.m11 * m41 + m.m21 * m42 + m.m31 * m43 + m.m41 * m44,
-								m.m12 * m41 + m.m22 * m42 + m.m32 * m43 + m.m42 * m44,
-								m.m13 * m41 + m.m23 * m42 + m.m33 * m43 + m.m43 * m44,
-								m.m14 * m41 + m.m24 * m42 + m.m34 * m43 + m.m44 * m44);
-	}
-
-	DRMatrix& operator *= (const DRReal f)
-	{
-		m11 *= f; m12 *= f; m13 *= f; m14 *= f;
-		m21 *= f; m22 *= f; m23 *= f; m24 *= f;
-		m31 *= f; m32 *= f; m33 *= f; m34 *= f;
-		m41 *= f; m42 *= f; m43 *= f; m44 *= f;
-		return *this;
-	}
-
-	DRMatrix& operator /= (const DRMatrix& m)
-	{
-		return *this *= m.invert();
-	}
-
-	DRMatrix& operator /= (const DRReal f)
-	{
-		m11 /= f; m12 /= f; m13 /= f; m14 /= f;
-		m21 /= f; m22 /= f; m23 /= f; m24 /= f;
-		m31 /= f; m32 /= f; m33 /= f; m34 /= f;
-		m41 /= f; m42 /= f; m43 /= f; m44 /= f;
-		return *this;
-	}
-
-
-    // Arithmetische Operatoren
-    inline DRMatrix operator + (const DRMatrix& b)	const {return DRMatrix(m11 + b.m11, m12 + b.m12, m13 + b.m13, m14 + b.m14, m21 + b.m21, m22 + b.m22, m23 + b.m23, m24 + b.m24, m31 + b.m31, m32 + b.m32, m33 + b.m33, m34 + b.m34, m41 + b.m41, m42 + b.m42, m43 + b.m43, m44 + b.m44);}
-    inline DRMatrix operator - (const DRMatrix& b)	const {return DRMatrix(m11 - b.m11, m12 - b.m12, m13 - b.m13, m14 - b.m14, m21 - b.m21, m22 - b.m22, m23 - b.m23, m24 - b.m24, m31 - b.m31, m32 - b.m32, m33 - b.m33, m34 - b.m34, m41 - b.m41, m42 - b.m42, m43 - b.m43, m44 - b.m44);}
-    inline DRMatrix operator - ()					const {return DRMatrix(-m11, -m12, -m13, -m14, -m21, -m22, -m23, -m24, -m31, -m32, -m33, -m34, -m41, -m42, -m43, -m44);}
-
-    inline DRMatrix operator * (const DRMatrix& b) const
+	// Vergleichsoperatoren
+	//! \brief vegleicht 2 Matritzen miteinander, const
+	//! \param mm DRMatrix mit der verglichen werden soll
+	//! \return true wenn beide Matritzen, d.h. alle Felder den gleichen Wert haben
+	//! \return false wenn auch nur ein Wert abweicht
+    bool operator == (const DRMatrix& mm) const
     {
-        return DRMatrix(b.m11 * m11 + b.m21 * m12 + b.m31 * m13 + b.m41 * m14,
-                        b.m12 * m11 + b.m22 * m12 + b.m32 * m13 + b.m42 * m14,
-                        b.m13 * m11 + b.m23 * m12 + b.m33 * m13 + b.m43 * m14,
-                        b.m14 * m11 + b.m24 * m12 + b.m34 * m13 + b.m44 * m14,
-                        b.m11 * m21 + b.m21 * m22 + b.m31 * m23 + b.m41 * m24,
-                        b.m12 * m21 + b.m22 * m22 + b.m32 * m23 + b.m42 * m24,
-                        b.m13 * m21 + b.m23 * m22 + b.m33 * m23 + b.m43 * m24,
-                        b.m14 * m21 + b.m24 * m22 + b.m34 * m23 + b.m44 * m24,
-                        b.m11 * m31 + b.m21 * m32 + b.m31 * m33 + b.m41 * m34,
-                        b.m12 * m31 + b.m22 * m32 + b.m32 * m33 + b.m42 * m34,
-                        b.m13 * m31 + b.m23 * m32 + b.m33 * m33 + b.m43 * m34,
-                        b.m14 * m31 + b.m24 * m32 + b.m34 * m33 + b.m44 * m34,
-                        b.m11 * m41 + b.m21 * m42 + b.m31 * m43 + b.m41 * m44,
-                        b.m12 * m41 + b.m22 * m42 + b.m32 * m43 + b.m42 * m44,
-                        b.m13 * m41 + b.m23 * m42 + b.m33 * m43 + b.m43 * m44,
-                        b.m14 * m41 + b.m24 * m42 + b.m34 * m43 + b.m44 * m44);
+        for(int i = 0; i < 16; i++)
+            if(n[i] != mm.n[i]) return false;
+
+        return true;
     }
 
-    inline DRMatrix operator * (const DRReal f) const
+    //! \brief vergleicht 2 Matritzen auf ungleichheit miteinander, const
+    //! \param mm DRMatrix mit der verglichen werden soll
+    //! \return true wenn eines der Felder ungleich dem Feld der anderen DRMatrix ist
+    //! \return false wenn alle Felder gleich sind
+    bool operator != (const DRMatrix& mm) const
     {
-        return DRMatrix(m11 * f, m12 * f, m13 * f, m14 * f,
-                        m21 * f, m22 * f, m23 * f, m24 * f,
-                        m31 * f, m32 * f, m33 * f, m34 * f,
-                        m41 * f, m42 * f, m43 * f, m44 * f);
+        for(int i = 0; i < 16; i++)
+            if(n[i] != mm.n[i]) return true;
+
+        return false;
     }
 
-    inline DRMatrix operator / (const DRMatrix& b) const {return *this * b.invert();}
+    // Zuweisungsoperator
+    //! \brief damit werden alle Werte der rechtsstehenden DRMatrix dieser DRMatrix hinzugef&uuml;gt
+    //! \param mm DRMatrix deren Werte kopiert werden
+    //! \return eine Referenz auf diese DRMatrix, die jetzt die Werte der anderen DRMatrix enth&auml;lt
+    DRMatrix& operator = (const DRMatrix& mm) {memcpy(n, mm.n, sizeof(float)*16); return *this;}
 
-    inline DRMatrix operator / (const DRReal f) const
-    {
-        return DRMatrix(m11 / f, m12 / f, m13 / f, m14 / f,
-                        m21 / f, m22 / f, m23 / f, m24 / f,
-                        m31 / f, m32 / f, m33 / f, m34 / f,
-                        m41 / f, m42 / f, m43 / f, m44 / f);
-    }
+    // tools
+    //! \brief zum ausgeben der aktuellen DRMatrix auf die Konsole
+    //! mit 3 Nachkommastellen, in tabellenforn
+    //! \param name name wird, falls &uuml;bergeben, &uuml;ber der DRMatrix angezeigt
+    void print(const char* name = NULL) const
+	{
+	    if(name) printf("DRMatrix %s: \n", name);
+        else printf("DRMatrix: \n");
+	    for(int i = 0; i < 4; i++)
+	    {
+            for(int j = 0; j < 4; j++)
+                printf("%.3f ", m[i][j]);
+            printf("\n");
+	    }
+	    printf("..end..\n");
+	}
 
-    // Vergleichsoperatoren
-    inline bool operator == (const DRMatrix& b) const
-    {
-        if(m11 != b.m11) return false;
-        if(m12 != b.m12) return false;
-        if(m13 != b.m13) return false;
-        if(m14 != b.m14) return false;
-        if(m21 != b.m21) return false;
-        if(m22 != b.m22) return false;
-        if(m23 != b.m23) return false;
-        if(m24 != b.m24) return false;
-        if(m31 != b.m31) return false;
-        if(m32 != b.m32) return false;
-        if(m33 != b.m33) return false;
-        if(m34 != b.m34) return false;
-        if(m41 != b.m41) return false;
-        if(m42 != b.m42) return false;
-        if(m43 != b.m43) return false;
-        return m44 == b.m44;
-    }
-
-    // Vergleichsoperatoren
-    inline bool operator != (const DRMatrix& b) const
-    {
-        if(m11 != b.m11) return true;
-        if(m12 != b.m12) return true;
-        if(m13 != b.m13) return true;
-        if(m14 != b.m14) return true;
-        if(m21 != b.m21) return true;
-        if(m22 != b.m22) return true;
-        if(m23 != b.m23) return true;
-        if(m24 != b.m24) return true;
-        if(m31 != b.m31) return true;
-        if(m32 != b.m32) return true;
-        if(m33 != b.m33) return true;
-        if(m34 != b.m34) return true;
-        if(m41 != b.m41) return true;
-        if(m42 != b.m42) return true;
-        if(m43 != b.m43) return true;
-        return m44 != b.m44;
-    }
-
-    // ******************************************************************
     // Funktionen deklarieren
-    inline static DRMatrix	identity() {return DRMatrix(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);}	// Identitätsmatrix liefern
-    static DRMatrix	translation(const DRVector3& v);                          			// Translationsmatrix (Verschiebungsmatrix) berechnen
-    static DRMatrix	rotationX(const DRReal f);                                			// Rotationsmatrix um die X-Achse berechnen
-    static DRMatrix	rotationY(const DRReal f);                                			// Rotationsmatrix um die Y-Achse berechnen
-    static DRMatrix	rotationZ(const DRReal f);                                			// Rotationsmatrix um die Z-Achse berechnen
-    static DRMatrix	rotation(const DRReal x, const DRReal y, const DRReal z); 			// Rotiert um alle drei Achsen
-    static DRMatrix	rotation(const DRVector3& v);                             			// Rotiert um alle drei Achsen
-    static DRMatrix	rotationAxis(const DRVector3& v, const DRReal f);					// Rotationsmatrix um eine beliebige Achse berechnen
-    static DRMatrix	scaling(const DRVector3& v);										// Skalierungsmatrix berechnen
-    static DRMatrix axes(const DRVector3& vXAxis, const DRVector3& vYAxis, const DRVector3& vZAxis); // Liefert eine Achsenmatrix
-    DRMatrix invert()           const;
-    DRReal	 det()              const;																// Determinante berechnen
-    DRMatrix transpose()        const;																// Transponierte Matrix berechnen
-    static DRMatrix projection(const DRReal fFOV, const DRReal fAspect, const DRReal fNearPlane, const DRReal fFarPlane);       // Projektionsmatrix berechnen
-    static DRMatrix	camera(const DRVector3& vPos, const DRVector3& vLookAt, const DRVector3& vUp = DRVector3(0.0f, 1.0f, 0.0f));// Kameramatrix erzeugen
-    DRMatrix toTex2DRMatrix() const;																							// In Texturmatrix umwandeln
-    //! ist das gleiche wie transpose
-    //! same as transpose
-    DRMatrix getglMatrix() const;
+    //! \brief liefert die Identit&auml;tsmatrix, static
+    //!     (Multiplaikation mit ihr ergibt die DRMatrix die mit ihr Multipliziert wurde)
+    //! \return eine neue DRMatrix, gef&uuml;llt mit nullen und 1<br>
+    //! <p align="center"> 1 0 0 0 <br>
+    //!                    0 1 0 0 <br>
+    //!                    0 0 1 0 <br>
+    //!                    0 0 0 1 </p>
+    inline static DRMatrix	identity() {return DRMatrix(1.0f, 0.0f, 0.0f, 0.0f,
+    												  0.0f, 1.0f, 0.0f, 0.0f,
+    												  0.0f, 0.0f, 1.0f, 0.0f, 
+    												  0.0f, 0.0f, 0.0f, 1.0f);}	// Identit&auml;tsmatrix liefern
+    //! \brief liefert die Translationsmatrix zu einem Vektor, static
+    //! \param v translations Vektor
+    //! \return eine neue Translationsmatrix <br>
+    //! <p align="center"> 1 0 0 v.x <br>
+    //!                    0 1 0 v.y <br>
+    //!                    0 0 1 v.z <br>
+    //!                    0 0 0 1 </p>
+    static DRMatrix	translation(const DRVector3& v); 	// Translationsmatrix (Verschiebungsmatrix) berechnen
+    //! \brief liefert die Achsen DRMatrix aus drei Achsen, static
+    //! \param x_axis x Achse
+    //! \param y_axis y Achse
+    //! \param z_axis z Achse
+    //! \return eine neue DRMatrix <br>
+    //! <p align="center"> x_axis.x x_axis.y x_axis.z 0 <br>
+    //!                    y_axis.x y_axis.y y_axis.z 0 <br>
+    //!                    z_axis.x z_axis.y z_axis.z 0 <br>
+    //!                    0        0        0        1 </p>
+    static DRMatrix   axis(const DRVector3& x_axis, const DRVector3& y_axis, const DRVector3& z_axis);
+    //! \brief liefert die Rotationsmatrix um die x Achse, static
+    //! \param f rotation in Grad um die x-Achse
+    //! \return eine neue DRMatrix <br>
+    //! <p align="center"> 1  0      0      0 <br>
+    //!                    0  cos(f) sin(f) 0 <br>
+    //!                    0 -sin(f) cos(f) 0 <br>
+    //!                    0  0      0      1 </p>
+    static DRMatrix	rotationX(const float f);       // Rotationsmatrix um die X-Achse berechnen
+    //! \brief liefert die Rotationsmatrix um die y Achse, static
+    //! \param f rotation in Grad um die y-Achse
+    //! \return eine neue DRMatrix <br>
+    //! <p align="center"> cos(f) 0 -sin(f) 0 <br>
+    //!                    0      1  0      0 <br>
+    //!                    sin(f) 0  cos(f) 0 <br>
+    //!                    0      0  0      1 </p>
+    static DRMatrix	rotationY(const float f);       // Rotationsmatrix um die Y-Achse berechnen
+    //! \brief liefert die Rotationsmatrix um die z Achse, static
+    //! \param f rotation in Grad um die z-Achse
+    //! \return eine neue DRMatrix <br>
+    //! <p align="center"> cos(f) sin(f) 0 0 <br>
+    //!                    0      1      0 0 <br>
+    //!                    sin(f) cos(f) 1 0 <br>
+    //!                    0      0      0 1 </p>
+    static DRMatrix	rotationZ(const float f);       // Rotationsmatrix um die Z-Achse berechnen
+    //! \brief liefert die Rotationsmatrix um alle 3 Achsen, static
+    //! \param v rotationen in Grad um die jeweilge Achse
+    //! \return eine neue DRMatrix
+    //!  rotationZ(v.z) * rotationY(v.y) * rotationX(v.x)
+    static DRMatrix	rotation(const DRVector3& v);   // Rotiert um alle drei Achsen
+    //! \brief liefert die Rotationsmatrix um eine beliebige Achse, static
+    //! \param v die beliebige Achse
+    //! \param f rotation in Grad um diese Achse
+    //! \return eine neue DRMatrix Rotationsmatrix
+    static DRMatrix	rotationAxis(const DRVector3& v, const float f); // Rotationsmatrix um eine beliebige Achse berechnen
+    //! \brief liefert die Skalierungs DRMatrix, static
+    //! \param v die Skalierungsfaktoren auf den 3 Achsen
+    //! \return eine neue Skalierungsmatrix <br>
+    //! <p align="center"> v.x 0   0   0 <br>
+    //!                    0   v.y 0   0 <br>
+    //!                    0   0   v.z 0 <br>
+    //!                    0   0   0   1 </p>
+    static DRMatrix	scaling(const DRVector3& v);		// Skalierungsmatrix berechnen
 
+    //! \brief liefert eine transponierte DRMatrix zur&uuml;ck, const
+    //! \return eine neue DRMatrix, diese transponiert
+    DRMatrix transpose() const;
+    //! \brief liefert eine invertierte DRMatrix, const
+    //! \return eine neue DRMatrix, diese invertiert
+    DRMatrix invert() const;
+    //! \brief liefert die determinante dieser DRMatrix, const
+    //! \return die determinante dieser DRMatrix als float (z.B. zum berechnen der invertierten DRMatrix)
+    float det() const;
 };
-// externer Operator
-inline DRMatrix operator * (const DRReal f,
-							const DRMatrix& m)
-{
-	return DRMatrix(m.m11 * f, m.m12 * f, m.m13 * f, m.m14 * f,
-			        m.m21 * f, m.m22 * f, m.m23 * f, m.m24 * f,
-					m.m31 * f, m.m32 * f, m.m33 * f, m.m34 * f,
-					m.m41 * f, m.m42 * f, m.m43 * f, m.m44 * f);
-}
 
-// ******************************************************************
-
-#endif
+#endif //__DR_CORE_MATRIX_

@@ -37,7 +37,7 @@
     \author Dario Rekowski
     \date 07.12.09
 */
-class DRMatrix
+class CORE2_API DRMatrix
 {
 public:
     // Konstruktoren

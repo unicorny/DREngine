@@ -153,7 +153,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 		}
 	}
 
-	if(fVersionCheck(fVersionCheck(fVersion)))
+	if(fVersionCheck(fVersion))
 	{
 	    fprintf(stderr, "Falsche Version\n");
 	    return DR_ERROR;

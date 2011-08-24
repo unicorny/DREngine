@@ -20,23 +20,27 @@
  *************************************************************************/
 
 /*
-Logging System ähnlich dem der TriBase-Engine von David Scherfgen
+Logging System ï¿½hnlich dem der TriBase-Engine von David Scherfgen
 Programmierer: Dario Rekowski
 */
 //Hier kommt alles rein, was mit Fehlerbehandlung zu tun hat
 
-//Eine Aufzählung für Rückgabewerte für die meisten Funktionen
-//können wir je nach dem noch erweitern
+//Eine Aufzï¿½hlung fï¿½r Rï¿½ckgabewerte fï¿½r die meisten Funktionen
+//kï¿½nnen wir je nach dem noch erweitern
 #ifndef __DR_LOGGER__
 #define __DR_LOGGER__
 
-//Vorwärtsdeklaarionen für den Logger
+//Vorwï¿½rtsdeklaarionen fï¿½r den Logger
 class DRVector2;
 class DRVector3;
 class DRColor;
 class DRMatrix;
 
-//Klasse für LogDatei wo alle Fehler reingeschrieben werden können
+#ifndef __FUNCTION__
+#define __FUNCTION__ "no funktion"
+#endif
+
+//Klasse fï¿½r LogDatei wo alle Fehler reingeschrieben werden kï¿½nnen
 class CORE2_API DRLogger
 {
 
@@ -46,7 +50,7 @@ private:
 	char  m_acFilename[256];//Dateinamen des Log-Files
 
 public:
-	//Und die öffentlichen Funktionen
+	//Und die ï¿½ffentlichen Funktionen
 	DRLogger();
 	~DRLogger();
 
@@ -57,9 +61,9 @@ public:
 	DRReturn writeToLog(const char* pcText, ...);
 	DRReturn writeToLogDirect(const char* pcText, ...);
 
-	DRReturn writeVector2ToLog(DRVector2& v);			// 2D-Vektor ins Logbuch schreiben
+	DRReturn writeVector2ToLog(DRVector2& v, const char* name = NULL);			// 2D-Vektor ins Logbuch schreiben
     DRReturn writeVector3ToLog(DRVector3& v, const char* pcName = NULL);			// 3D-Vektor ins Logbuch schreiben
-    DRReturn writeMatrixToLog(DRMatrix& m);			// Matrix ins Logbuch schreiben
+    DRReturn writeMatrixToLog(DRMatrix& m, const char* name = NULL);			// Matrix ins Logbuch schreiben
 	//DRReturn WritePlaneToLog(DRPlane& p);				// Ebene ins Logbuch schreiben
 	DRReturn writeColorToLog(DRColor& c);				// Farbe ins Logbuch schreiben
 
@@ -67,7 +71,7 @@ public:
 	//inline um Variablen abzufragen
 	inline DRFile* getFile() {return &m_File;};
 
-	//Funktionszeiger für SDL Mutex bei verwendung von SDL
+	//Funktionszeiger fï¿½r SDL Mutex bei verwendung von SDL
 	void (*mLockMutex)(void);
 	void (*mUnlockMutex)(void);
 	void*	mMutex;

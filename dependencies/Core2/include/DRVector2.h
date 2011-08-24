@@ -104,7 +104,7 @@ public:
     //! Mit Vorsicht zu genie�en!
     inline bool operator == (const DRVector2& b) const {if(this->x != b.x) return false; return this->y == b.y;}
     inline bool operator != (const DRVector2& b) const {if(this->x != b.x) return true;  return this->y != b.y;}
-    inline bool	operator <  (const DRVector2& b) const {if(this->x < b.x)  return true;  if(this->x == b.x & this->y < b.y) return true; return false;}
+    inline bool	operator <  (const DRVector2& b) const {if(this->x < b.x)  return true;  if(this->x == b.x && this->y < b.y) return true; return false;}
     inline bool	operator >  (const DRVector2& b) const {if(this->x > b.x && this->y > b.y) return true; else return false;}
     inline bool operator <= (const DRVector2& b) const {if(this->x <= b.x && this->y <= b.y) return true; else return false;}
     inline bool operator >= (const DRVector2& b) const {if(this->x >= b.x && this->y >= b.y) return true; else return false;}

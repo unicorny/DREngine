@@ -15,8 +15,8 @@ public:
 
     DRReturn bind();
     
-    __inline__ DRReal getWidth() {if(mParent) return mParent->getWidth(); LOG_ERROR("parent is zero, set keepImage to true!", -1);}
-    __inline__ DRReal getHeight() {if(mParent) return mParent->getHeight(); LOG_ERROR("parent is zero, set keepImage to true!", -1);}
+    __inline__ u32 getWidth() {if(mParent) return mParent->getWidth(); LOG_ERROR("parent is zero, set keepImage to true!", -1);}
+    __inline__ u32 getHeight() {if(mParent) return mParent->getHeight(); LOG_ERROR("parent is zero, set keepImage to true!", -1);}
 
 protected:
     DRIImage* mParent;

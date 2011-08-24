@@ -138,7 +138,7 @@ GLenum DRImage::getImageFormat()
 	}
 	else if(colorType == FIC_PALETTE)
 	{
-        imageFormat = GL_COLOR_INDEX;
+                imageFormat = GL_COLOR_INDEX;
 	}
 	else if(colorType == FIC_RGB)
 	{

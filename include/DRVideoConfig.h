@@ -59,7 +59,7 @@ public:
     __inline__ int getMultiSampling() {return mMultiSampling;}
 
     // get and setter
-    __inline__ DRVector2 getResolution() {return DRVector2(mWidth, mHeight);}
+    __inline__ DRVector2 getResolution() {return DRVector2((DRReal)mWidth, (DRReal)mHeight);}
 
 private:
     DRReal mVersion;

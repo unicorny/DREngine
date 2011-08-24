@@ -36,6 +36,10 @@ class DRVector3;
 class DRColor;
 class DRMatrix;
 
+#ifndef __FUNCTION__
+#define __FUNCTION__ "no funktion"
+#endif
+
 //Klasse f�r LogDatei wo alle Fehler reingeschrieben werden k�nnen
 class CORE2_API DRLogger
 {

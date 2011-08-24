@@ -25,6 +25,10 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#include <sys/errno.h>
 #endif
 
 // standard includes
@@ -37,11 +41,14 @@
 #include <math.h>
 
 
+
 /*  To use this exported function of dll, include this header
  *  in your project.
  */
 
 #ifdef _WIN32
+#pragma warning (disable : 4251) 
+#define _CRT_SECURE_NO_WARNINGS 1
 #ifdef BUILD_CORE_DLL
     #define CORE2_API __declspec(dllexport)
 #else
@@ -84,6 +91,10 @@ typedef unsigned char u8;
 typedef char s8;
 #endif
 
+#ifndef u64
+typedef unsigned long long u64;
+#endif // u64
+
 typedef unsigned int HASH;
 typedef unsigned long DHASH;
 
@@ -111,6 +122,8 @@ enum CORE2_API DRReturn;
 #include "DRColor.h"
 #include "DRPlane.h"
 #include "DRMatrix.h"
+#include "DRObjekt.h"
+#include "DRIni.h"
 #include "DRDampingSpring.h"
 #include "DRHash.hpp"
 #include "DRHashList.hpp"

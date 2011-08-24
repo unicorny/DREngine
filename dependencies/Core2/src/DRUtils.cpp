@@ -16,7 +16,7 @@ int DRGetNextPotenz(int iIn)
 
 DRReturn DRGetTermVorChar(DRString* sInput, DRString* sOutput, char cTrenn)
 {
-	int n = 0, n2 = 0;
+	u32 n = 0, n2 = 0;
 	const char* pcTemp = sInput->data();
 	char* pcOut = new char[sInput->length()];
 	while(pcTemp[n] != cTrenn &&
@@ -87,7 +87,7 @@ int DRCountCharsOf(DRString* sInput, char cCountable)
 	int iret = 0;
 	const char* pcTemp = sInput->data();
 
-	for(int i = 0; i < sInput->length(); i++)
+	for(u32 i = 0; i < sInput->length(); i++)
 	{
 		if(pcTemp[i] == cCountable) iret++;
 	}
@@ -99,7 +99,7 @@ int DRCountCharsOf(DRString* sInput, char cCountable)
 int DRCountNumbers(DRString* sInput)
 {
 	int iret = 0;
-	for(int i = 0; i < sInput->length(); i++)
+	for(u32 i = 0; i < sInput->length(); i++)
 	{
 		int c = (int)(sInput->data()[i]);
 		if(c >= 48 &&
@@ -163,7 +163,7 @@ const char* DRRemoveDir(const char* pcFilename)
 		iChar++;
 	}
 
-	// String ab dem letzten Back-Slash plus 1 zurückliefern
+	// String ab dem letzten Back-Slash plus 1 zurï¿½ckliefern
 	return pcFilename + iLastBackSlash + 1;
 }
 
@@ -183,12 +183,12 @@ DRVector2 DRVector2TransformCoords(const DRVector2& v,
 		              v.x * m.m12 + v.y * m.m22 + m.m42);
 
 	// Vierte Koordinate (w) berechnen. Wenn diese ungleich eins
-	// ist, müssen die anderen Vektorelemente durch sie geteilt
+	// ist, mï¿½ssen die anderen Vektorelemente durch sie geteilt
 	// werden.
 	const DRReal w = v.x * m.m14 + v.y * m.m24 + m.m44;
 	if(w != 1.0f) vResult /= w;
 
-	// Wenn erwünscht, w kopieren
+	// Wenn erwï¿½nscht, w kopieren
 	if(pfOutW) *pfOutW = w;
 
 	return DRVector2Normalize(vResult) * DRVector2Length(v);
@@ -199,14 +199,14 @@ DRVector2 DRVector2TransformCoords(const DRVector2& v,
 DRVector2 DRVector2TransformNormal(const DRVector2& v,
 											   const DRMatrix& m)
 {
-	// Vektorlänge berechnen
+	// Vektorlï¿½nge berechnen
 	const DRReal fLength = DRVector2Length(v);
 	if(fLength == 0.0f) return v;
 
 	// Transponierte inverse Matrix berechnen
 	const DRMatrix mTransform(DRMatrixTranspose(DRMatrixInvert(m)));
 
-	// Vektor mit Matrix transformieren und ursprüngliche Länge wiederherstellen
+	// Vektor mit Matrix transformieren und ursprï¿½ngliche Lï¿½nge wiederherstellen
 	return DRVector2Normalize(DRVector2(v.x * mTransform.m11 + v.y * mTransform.m21,
 		                                v.x * mTransform.m12 + v.y * mTransform.m22))
 	       * fLength;
@@ -217,11 +217,11 @@ DRVector2 DRVector2TransformNormal(const DRVector2& v,
 DRVector2 DRVector2TransformNormal_TranspInv(const DRVector2& v,
 														 const DRMatrix& m)
 {
-	// Vektorlänge berechnen
+	// Vektorlï¿½nge berechnen
 	const DRReal fLength = DRVector2Length(v);
 	if(fLength == 0.0f) return v;
 
-	// Vektor mit Matrix transformieren und ursprüngliche Länge wiederherstellen
+	// Vektor mit Matrix transformieren und ursprï¿½ngliche Lï¿½nge wiederherstellen
 	return DRVector2Normalize(DRVector2(v.x * m.m11 + v.y * m.m21,
 		                                v.x * m.m12 + v.y * m.m22))
 	       * fLength;
@@ -239,12 +239,12 @@ DRVector3 DRVector3TransformCoords(const DRVector3& v,
 					  v.x * m.m13 + v.y * m.m23 + v.z * m.m33 + m.m43);
 
 	// Vierte Koordinate (w) berechnen. Wenn diese ungleich eins
-	// ist, müssen die anderen Vektorelemente durch sie geteilt
+	// ist, mï¿½ssen die anderen Vektorelemente durch sie geteilt
 	// werden.
 	const DRReal w = v.x * m.m14 + v.y * m.m24 + v.z * m.m34 + m.m44;
 	if(w != 1.0f) vResult /= w;
 
-	// Wenn erwünscht, w kopieren
+	// Wenn erwï¿½nscht, w kopieren
 	if(pfOutW) *pfOutW = w;
 
 	return vResult;
@@ -255,14 +255,14 @@ DRVector3 DRVector3TransformCoords(const DRVector3& v,
 DRVector3 DRVector3TransformNormal(const DRVector3& v,
 											   const DRMatrix& m)
 {
-	// Vektorlänge berechnen
+	// Vektorlï¿½nge berechnen
 	const DRReal fLength = DRVector3Length(v);
 	if(fLength == 0.0f) return v;
 
 	// Transponierte invertierte Matrix berechnen
 	const DRMatrix mTransform(DRMatrixTranspose(DRMatrixInvert(m)));
 
-	// Vektor mit Matrix transformieren und ursprüngliche Länge wiederherstellen
+	// Vektor mit Matrix transformieren und ursprï¿½ngliche Lï¿½nge wiederherstellen
 	return DRVector3Normalize(DRVector3(v.x * mTransform.m11 + v.y * mTransform.m21 + v.z * mTransform.m31,
 		                                v.x * mTransform.m12 + v.y * mTransform.m22 + v.z * mTransform.m32,
 										v.x * mTransform.m13 + v.y * mTransform.m23 + v.z * mTransform.m33))
@@ -274,11 +274,11 @@ DRVector3 DRVector3TransformNormal(const DRVector3& v,
 DRVector3 DRVector3TransformNormal_TranspInv(const DRVector3& v,
 														 const DRMatrix& m)
 {
-	// Vektorlänge berechnen
+	// Vektorlï¿½nge berechnen
 	const DRReal fLength = DRVector3Length(v);
 	if(fLength == 0.0f) return v;
 
-	// Vektor mit Matrix transformieren und ursprüngliche Länge wiederherstellen
+	// Vektor mit Matrix transformieren und ursprï¿½ngliche Lï¿½nge wiederherstellen
 	return DRVector3Normalize(DRVector3(v.x * m.m11 + v.y * m.m21 + v.z * m.m31,
 		                                v.x * m.m12 + v.y * m.m22 + v.z * m.m32,
 										v.x * m.m13 + v.y * m.m23 + v.z * m.m33))
@@ -317,7 +317,7 @@ bool DRCheckEndung(const char* pcInput, const char* pcEndung)
 		iChar++;
 	}
 
-	// String ab dem letzten Punkt plus 1 zurückliefern
+	// String ab dem letzten Punkt plus 1 zurï¿½ckliefern
 	return !strcmp(&pcInput[iLastDot+1], pcEndung);
 }
 

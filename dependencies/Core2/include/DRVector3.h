@@ -31,7 +31,7 @@ class DRMatrix;
     \author Dario Rekowski
     \date 07.12.09
 */
-class DRVector3
+class CORE2_API DRVector3
 {
 public:
     //! setzt alle werte auf null

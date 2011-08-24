@@ -28,7 +28,7 @@
 #ifndef __DR_INTERFACE__
 #define __DR_INTERFACE__
 
-class DRInterface
+class ENGINE_API DRInterface
 {
 public:
     virtual ~DRInterface();
