@@ -66,25 +66,72 @@ void DRGeometrieSphere::makeSphericalLandscape(GLuint numIterations, GLuint rand
     if(!mVertexCount) LOG_ERROR_VOID("keine Vertices zum manipulieren!");
     DRRandom::seed(randomSeed);
     
-    int m = 1;
-    float max = 0.0f, min = 1.0f;
-    for(int i = 0; i < numIterations; i++)
+    const int threadCount = 4;   
+    PlaneData planes(numIterations);
+    LandscapeGenerateMultithreadData workingData[threadCount];
+    SDL_Thread* threads[threadCount];
+    
+    for(int i = 0; i < threadCount; i++)
     {
-        DRVector3 n = DRRandom::rVector3(1.0f);
-        DRPlane pl(n, n.length());
+        workingData[i].planes = &planes;
+        workingData[i].vertices = &mVertices[mVertexCount/threadCount*i];
+        workingData[i].vertexCount = mVertexCount/threadCount;
+        threads[i] = SDL_CreateThread(makeLandscapeThread, &workingData[i]);
+    }
+    
+    for(int i = 0; i < threadCount; i++)
+    {
+        int returnValue = 0;
+        SDL_WaitThread(threads[i], &returnValue);
+        if(returnValue)
+        {
+            LOG_WARNING("Fehler in Thread occured");
+            DRLog.writeToLog("Thread %d return with error: %d", i, returnValue);            
+        }
+    }
+    
+}
+
+int DRGeometrieSphere::makeLandscapeThread(void* data)
+{
+    LandscapeGenerateMultithreadData* d = (LandscapeGenerateMultithreadData*)data;
+    PlaneData* planes = d->planes;
+    DRVector3* vertices = d->vertices;
+            
+    int m = 1;
+    DRPlane pl;
+    
+    for(int i = 0; i < planes->absPlaneCount; i++)
+    {
+        planes->lock();
+        //plane gibts noch nicht? dann machen wir eine neue
+        if(planes->planeCount < i)
+        {
+           DRVector3 n = DRRandom::rVector3(1.0f);
+           pl = DRPlane(n, n.length());
+           planes->planes[i] = pl;
+           planes->planeCount++;
+        }
+        else
+        {
+            //vorhandene Plane holen
+            pl = planes->planes[i];
+        }        
+        planes->unlock();
         m = -m;
         
-        for(int j = 0; j < mVertexCount; j++)
+        for(int j = 0; j < d->vertexCount; j++)
         {
-            float d = 1.0f - mVertices[j].length();
-            if(pl.dotCoords(mVertices[j]) >= 1)
+            float d = 1.0f -  vertices[j].length();
+            if(pl.dotCoords(vertices[j]) >= 1)
             {
-                mVertices[j] = mVertices[j] * (1.0f+(float)m/(float)numIterations);
+                vertices[j] = vertices[j] * (1.0f+(float)m/(float)planes->absPlaneCount);
             }
             else
             {
-                mVertices[j] = mVertices[j] * (1.0f-(float)m/(float)numIterations);
+                vertices[j] = vertices[j] * (1.0f-(float)m/(float)planes->absPlaneCount);
             }
         }
     }
+    return 0;
 }

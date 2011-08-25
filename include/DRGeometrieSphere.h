@@ -28,7 +28,36 @@ public:
      */
     void makeSphericalLandscape(GLuint numIterations, GLuint randomSeed);
     
+    
 private:
+    static int makeLandscapeThread(void* data);
+    
+    struct PlaneData
+    {
+        PlaneData(GLuint gesPlaneCount) 
+        : mutex(NULL), planes(NULL), planeCount(0), absPlaneCount(gesPlaneCount)
+        {
+            mutex = SDL_CreateMutex();
+            planes = new DRPlane[gesPlaneCount];
+        }
+        
+        ~PlaneData() {SDL_DestroyMutex(mutex); DR_SAVE_DELETE_ARRAY(planes);}
+        
+        SDL_mutex* mutex;
+        DRPlane*   planes;
+        GLuint        planeCount;
+        GLuint        absPlaneCount;
+        
+        void lock() {SDL_mutexP(mutex);}
+        void unlock() {SDL_mutexV(mutex);}
+    };
+    
+    struct LandscapeGenerateMultithreadData
+    {
+        PlaneData* planes;        
+        DRVector3* vertices;
+        int        vertexCount;
+    };
 };
 
 #endif	/* _DR_ENGINE_GEOMETRIE_SPHERE_H */

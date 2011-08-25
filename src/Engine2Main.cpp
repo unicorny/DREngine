@@ -13,6 +13,7 @@ bool		g_bEnInit = false;
 bool		g_bGL = false;
 
 Uint8*		g_piPressed = NULL;
+u16             g_CPUCount = 0;
 
 //********************************************************************************************************************++
 
@@ -93,6 +94,7 @@ DRReturn EnInit_Simple(DRReal fVersion /* = 0.0f*/, bool initSound/* = false*/)
 		DRLog.writeToLog("SDL konnte nicht initalisiert werden! Fehler: %s\n", SDL_GetError());
 		LOG_ERROR("Fehler bei SDL Init", DR_ERROR);
 	}
+
 	//Logger mutex
 	DRLog.mMutex = (void*)SDL_CreateMutex();
 	DRLog.mLockMutex = &LockLoggerMutex;
@@ -168,6 +170,10 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 	DRLog.mMutex = (void*)SDL_CreateMutex();
 	DRLog.mLockMutex = &LockLoggerMutex;
 	DRLog.mUnlockMutex = &UnlockLoggerMutex;
+        
+#if SDL_VERSION_ATLEAST(1,3,0)
+        g_CPU_Count = SDL_GetCPUCount();
+#endif
 
 	//Not Exit Funktion festlegen
 	atexit(SDL_Quit);
