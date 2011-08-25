@@ -21,7 +21,7 @@
  *************************************************************************/
 
 /*!
-    Eine Klasse welche ein Bild repr�sentiert,
+    Eine Klasse welche ein Bild repr�sentiert,
     welches zum Beispiel als Textur verwendet werden kann
     @author Dario Rekowski
     @date 05.11.10
@@ -49,12 +49,28 @@ public:
     static void deleteImage(DRIImage *pData);
 
     virtual GLenum getImageFormat();
-    virtual unsigned int getWidth();
-    virtual unsigned int getHeight();
-    virtual unsigned char* getPixel();
+    virtual void setImageFormat(GLenum format);
+    virtual u32 getWidth();
+    virtual void setWidth(u32 width);
+    virtual u32 getHeight();
+    virtual void setHeight(u32 height);
+    virtual void setSize(DRVector2 size);
+    virtual DRVector2 getSize();
+    virtual u8* getPixel();
+    virtual void getPixel(DRColor* buffer);
+    //! \brief setzt neue Pixel f&uuml;r das Bild
+    //! 
+    //! Dabei wird ein Pixelarray erwartet der gr&ouml;&szlig;e width*height*u32
+    //! width und height müssen vorher gesetzt werden!
+    //! \param pixel zeigt auf einen Puffer gefüllt mit Pixeln, Daten werden kopiert,
+    //! Puffer kann danach freigegeben werden
+    virtual void setPixel(u8* pixel);
+    virtual void setPixel(DRColor* pixel);
+    
 
     //! Functionen
     virtual DRReturn loadFromFile(const char* filename);
+    virtual DRReturn saveIntoFile(const char* filename);
 protected:
 
 

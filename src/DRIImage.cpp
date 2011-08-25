@@ -31,24 +31,73 @@ DRReturn DRIImage::loadFromFile(const char* filename)
     return DR_OK;
 }
 
+DRReturn DRIImage::saveIntoFile(const char* filename)
+{
+    LOG_WARNING("Not implemented!");
+    return DR_OK;    
+}
+
 GLenum DRIImage::getImageFormat()
 {
     LOG_WARNING("Not implemented!");
     return 0;
 }
 
-unsigned int DRIImage::getWidth()
+void DRIImage::setImageFormat(GLenum format)
+{
+    LOG_WARNING("Not implemented!");
+}
+
+u32 DRIImage::getWidth()
 {
     LOG_WARNING("Not implemented!");
     return 0;
 }
-unsigned int DRIImage::getHeight()
+
+void DRIImage::setWidth(u32 width)
+{
+    LOG_WARNING("Not implemented!");
+}
+
+u32 DRIImage::getHeight()
 {
     LOG_WARNING("Not implemented!");
     return 0;
 }
-unsigned char* DRIImage::getPixel()
+
+void DRIImage::setHeight(u32 height)
+{
+    LOG_WARNING("Not implemented!");
+}
+
+u8* DRIImage::getPixel()
 {
     LOG_WARNING("Not implemented!");
     return NULL;
+}
+
+void DRIImage::getPixel(DRColor* buffer)
+{
+    LOG_WARNING("Not implemented!");
+}
+
+void DRIImage::setPixel(u8* pixel)
+{
+    LOG_WARNING("Not implemented!");
+}
+
+void DRIImage::setSize(DRVector2 size)
+{
+    LOG_WARNING("Not implemented!");
+}
+
+DRVector2 DRIImage::getSize()
+{
+    LOG_WARNING("Not implemented!");
+    return DRVector2(0.0f);
+}
+
+void DRIImage::setPixel(DRColor* pixel)
+{
+    LOG_WARNING("Not implemented!");    
 }
