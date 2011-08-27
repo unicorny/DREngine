@@ -96,6 +96,7 @@ const double PI = 3.1415926535;
 #include "DRTextur.h"
 #include "DRGeometrie.h"
 #include "DRGeometrieSphere.h"
+#include "DRGeometrieIcoSphere.h"
 #include "DRText.h"
 
 /*#include "FileFormats.h"

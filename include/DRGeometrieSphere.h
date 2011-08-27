@@ -21,6 +21,7 @@ public:
      * */
     DRReturn initSphere(GLuint segmentSize);
     
+    
     /*! \brief manipulate a sphere, to make a landscape from it
      *  \param numIterations iteration count, for every iteration,<br>
      *         every point will be manipulated
@@ -30,6 +31,7 @@ public:
     
     
 private:
+    DRGeometrieSphere(const DRGeometrieSphere& orig) {LOG_WARNING("not exist");};
     static int makeLandscapeThread(void* data);
     
     struct PlaneData

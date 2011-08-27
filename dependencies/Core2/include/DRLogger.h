@@ -36,11 +36,11 @@ class DRVector3;
 class DRColor;
 class DRMatrix;
 
-#ifdef _WIN32
-#ifndef __FUNCTION__
-#define __FUNCTION__ "no funktion"
+#if _MSC_VER < 1300
+	#define DR_FUNCTION_ ("(Unbekannt)")
+#else
+	#define DR_FUNCTION_ (__FUNCTION__)
 #endif
-#endif //_WIN32
 
 //Klasse f�r LogDatei wo alle Fehler reingeschrieben werden k�nnen
 class CORE2_API DRLogger

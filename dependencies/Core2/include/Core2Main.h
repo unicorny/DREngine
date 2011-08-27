@@ -74,6 +74,9 @@
 typedef float DRReal;
 #ifndef u32
 typedef unsigned long u32;
+#ifndef uint
+typedef unsigned int uint;
+#endif
 #endif
 #ifndef s32
 typedef long s32;
@@ -145,6 +148,7 @@ CORE2_API extern DRLogger DRLog;
 
 // core includes (mit log)
 #include "DRFileManager.h"
+#include "DRMemoryList.h"
 
 CORE2_API DRReturn Core2_init(const char* logFileName = "Logger.html");
 CORE2_API void      Core2_exit();

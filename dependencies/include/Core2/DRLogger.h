@@ -36,8 +36,10 @@ class DRVector3;
 class DRColor;
 class DRMatrix;
 
-#ifndef __FUNCTION__
-#define __FUNCTION__ "no funktion"
+#if _MSC_VER < 1300
+	#define DR_FUNCTION_ ("(Unbekannt)")
+#else
+	#define DR_FUNCTION_ (__FUNCTION__)
 #endif
 
 //Klasse f�r LogDatei wo alle Fehler reingeschrieben werden k�nnen
@@ -62,8 +64,8 @@ public:
 	DRReturn writeToLogDirect(const char* pcText, ...);
 
 	DRReturn writeVector2ToLog(DRVector2& v, const char* name = NULL);			// 2D-Vektor ins Logbuch schreiben
-    DRReturn writeVector3ToLog(DRVector3& v, const char* pcName = NULL);			// 3D-Vektor ins Logbuch schreiben
-    DRReturn writeMatrixToLog(DRMatrix& m, const char* name = NULL);			// Matrix ins Logbuch schreiben
+        DRReturn writeVector3ToLog(DRVector3& v, const char* pcName = NULL);			// 3D-Vektor ins Logbuch schreiben
+        DRReturn writeMatrixToLog(DRMatrix& m, const char* name = NULL);			// Matrix ins Logbuch schreiben
 	//DRReturn WritePlaneToLog(DRPlane& p);				// Ebene ins Logbuch schreiben
 	DRReturn writeColorToLog(DRColor& c);				// Farbe ins Logbuch schreiben
 

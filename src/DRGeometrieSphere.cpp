@@ -61,6 +61,8 @@ DRReturn DRGeometrieSphere::initSphere(GLuint segmentSize)
     return DR_OK;
 }
 
+
+
 void DRGeometrieSphere::makeSphericalLandscape(GLuint numIterations, GLuint randomSeed)
 {
     if(!mVertexCount) LOG_ERROR_VOID("keine Vertices zum manipulieren!");

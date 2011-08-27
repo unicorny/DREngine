@@ -54,6 +54,7 @@ DRReturn DRGeometrie::init(u32 vertexCount, u32 indexCount/* = 0*/, u32 textureC
     {
         mIndices = new GLuint[indexCount];
         mIndexCount = indexCount;
+        memset(mIndices, 0, sizeof(GLuint)*indexCount);
         if(!mIndices) LOG_ERROR("kein Speicher fuer indices erhalten", DR_ERROR);
     }
     return DR_OK;    
@@ -73,9 +74,9 @@ DRReturn DRGeometrie::render()
     }     
     
     if(mIndices)
-        glDrawElements(GL_QUAD_STRIP, mIndexCount, GL_UNSIGNED_INT, mIndices);
+        glDrawElements(mRenderMode, mIndexCount, GL_UNSIGNED_INT, mIndices);
     else
-        glDrawArrays(GL_QUADS, 0, mVertexCount);    
+        glDrawArrays(mRenderMode, 0, mVertexCount);    
     
     glDisableClientState(GL_VERTEX_ARRAY);
     if(mColors)
