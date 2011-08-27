@@ -128,7 +128,7 @@ enum CORE2_API DRReturn;
 #include "DRObjekt.h"
 #include "DRIni.h"
 #include "DRDampingSpring.h"
-#include "DRGeometrieGenerator.h"
+//#include "DRGeometrieGenerator.h"
 #include "DRHash.hpp"
 #include "DRHashList.hpp"
 #include "DRUtils.h"

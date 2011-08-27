@@ -11,7 +11,7 @@ SET(NetworkLibs ${SDL_LIB} Core2 Engine2 ${SDLNET_LIB})
 #DEFINE_SYMBOL(BUILD_DLL)
 #IF(WIN32)
 SET(NetworkSrc ${NetworkSrc} ../include/Network ../include/NetworkMain
-							 ../include/Connection ../include/Request ../include/NetCallback)
+			     ../include/Connection ../include/Request ../include/NetCallback)
 #ENDIF(WIN32)
 
 ADD_LIBRARY(Network SHARED ${NetworkSrc})
