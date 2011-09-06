@@ -115,7 +115,7 @@ enum /*CORE_API*/ DRReturn
 };
 
 #ifdef _WIN32
-enum CORE2_API DRReturn;
+//enum CORE2_API DRReturn;
 #endif
 
 

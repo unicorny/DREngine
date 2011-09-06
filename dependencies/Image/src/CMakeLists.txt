@@ -1,10 +1,14 @@
+PROJECT(Image CXX)
+
+cmake_minimum_required(VERSION 2.6)
+
 # Image src
 SET(ImageSrc Image ImageMain)
+
 SET(PA ../../bin)
 SET(PA2 ../dependencies/freeimage)
-find_library(FREEIMAGE_LIB freeimage PATHS ${PA2})
-find_library(CORE_LIB Core2 PATHS ${PA})
-SET(ImageLibs Core2 Engine2 ${FREEIMAGE_LIB})
+find_library(FREEIMAGE_STATIC1_LIB FreeImage PATHS ${PA2} REQUIRED)
+SET(ImageLibs ${FREEIMAGE_STATIC1_LIB} Core2 Engine2 )
 #ENABLE_EXPORTS()
 #DEFINE_SYMBOL(BUILD_DLL_IMAGE)
 #IF(WIN32)

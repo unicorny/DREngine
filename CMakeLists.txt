@@ -6,6 +6,7 @@ PROJECT(scripts/Engine2 CXX)
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ../lib)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin)
 
+
 SUBDIRS(src test dependencies/Core2 dependencies/Network dependencies/Image)
 #ADD_SUBDIRECTORY(dependencies/Core2 dependencies/Network)
 INCLUDE_DIRECTORIES(include)

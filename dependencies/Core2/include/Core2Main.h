@@ -114,8 +114,8 @@ enum /*CORE_API*/ DRReturn
 	DR_RENDER = 4
 };
 
-#ifdef _WIN32
-enum CORE2_API DRReturn;
+#if (_MSC_VER >= 1200 && _MSC_VER < 1310)
+ enum CORE2_API DRReturn;
 #endif
 
 
