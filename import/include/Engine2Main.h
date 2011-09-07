@@ -25,22 +25,26 @@
 #define __DR_ENGINE2MAIN__
 
 //Export Makro
+//#if (_MSC_VER >= 1200 && _MSC_VER < 1310)
 #ifdef _WIN32
     #ifndef BUILD_ENGINE_DLL
         #define ENGINE_API __declspec(dllimport)
     #else
         #define ENGINE_API __declspec(dllexport)
     #endif
-#else
+#else //_WIN32
     #ifdef BUILD_ENGINE_DLL
         #define ENGINE_API
     #else
         #define ENGINE_API
     #endif
-#endif
+#endif //_WIN32
 
 #define XWIDTH g_v2WindowLength.x
 #define YHEIGHT g_v2WindowLength.y
+#define GRADTORAD 0.017453292f
+#define RADTOGRAD 57.29577951f
+const double PI = 3.1415926535;
 
 /*#define LOG_SOUND_INTERN(text, f, l, fu) DRLog.WriteToLog("<tr><td><font size=\"2\"><b><font color=\"#F8900\">OpenAL Fehler:</font></b> %s</font></td><td><font size=\"2\"> (<i>%s</i>, Zeile <i>%d</i>, Funktion <i>%s</i>)</font></td></tr>", text, f, l, fu)
 #define LOG_ERROR_SOUND(str, r) {if(DRSoundError(str, DRRemoveDir(__FILE__), __LINE__, DR_FUNCTION_)) return r;}
@@ -56,9 +60,6 @@
 #define LOG_ERROR_SDL_VOID() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2){ LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__); return;}}
 #define LOG_WARNING_SDL() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2) LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__);}
 
-#define GRADTORAD 0.017453292f
-#define RADTOGRAD 57.29577951f
-const double PI = 3.1415926535;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -78,6 +79,7 @@ const double PI = 3.1415926535;
 //einbinden von OpenGL
 //#include <GL/glu.h>   // Damit kann Glu32 genutzt werden.
 #include <sdl/SDL_opengl.h>
+#include <sdl/SDL_thread.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 //Eigene Header
@@ -95,6 +97,7 @@ const double PI = 3.1415926535;
 #include "DRTextur.h"
 #include "DRGeometrie.h"
 #include "DRGeometrieSphere.h"
+#include "DRGeometrieIcoSphere.h"
 #include "DRText.h"
 
 /*#include "FileFormats.h"
@@ -114,6 +117,7 @@ const double PI = 3.1415926535;
 ENGINE_API extern SDL_Surface* g_pSDLWindow;
 ENGINE_API extern DRVector2  g_v2WindowLength;
 ENGINE_API extern Uint8*    g_piPressed;
+ENGINE_API extern u16       g_CPUCount;
 
 /**	Engine Funktionen
 	Verschieden Init-Funktionen und anderes

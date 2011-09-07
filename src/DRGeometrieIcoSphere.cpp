@@ -27,14 +27,15 @@ DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::addNewFace(GLuint ind
 
 DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::addNewFace(GLuint index[3])
 {
-    
+    return NULL;
 }
 
 DRReturn DRGeometrieIcoSphere::addNewFacesAtBorder()
 {
-    
+    return DR_OK;
 }
 DRReturn DRGeometrieIcoSphere::grabIndicesFromFaces()
 {
-    
+    return DR_OK;
 }
+ //*/
