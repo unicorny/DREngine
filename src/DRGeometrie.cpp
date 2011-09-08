@@ -55,7 +55,7 @@ DRReturn DRGeometrie::init(u32 vertexCount, u32 indexCount/* = 0*/, u32 textureC
         mIndices = new GLuint[indexCount];
         mIndexCount = indexCount;
         memset(mIndices, 0, sizeof(GLuint)*indexCount);
-        if(!mIndices) LOG_ERROR("kein Speicher fuer indices erhalten", DR_ERROR);
+        if(!mIndices) LOG_ERROR("get no memory for indices array", DR_ERROR);
     }
     return DR_OK;    
 }
