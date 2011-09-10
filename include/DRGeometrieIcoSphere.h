@@ -12,30 +12,44 @@
 class ENGINE_API DRGeometrieIcoSphere : public DRGeometrieSphere
 {
 public:
-    DRGeometrieIcoSphere();
+    //! \param maxFaceBuffer count of keeping free memory for IceSphereFace
+    DRGeometrieIcoSphere(GLuint maxFaceBuffer = 100);
     virtual ~DRGeometrieIcoSphere();
     
-    DRReturn initIcoSphere(GLuint subdivide = 0);
+    /*! \param maxEbene höchste zu erstellende Ebene <br> \
+     *  (z.B. VY Canis Majoris = 51, Erde = 23)
+     * 
+     */
+    DRReturn initIcoSphere(u8 maxEbene = 0);
     
 private:
     DRGeometrieIcoSphere(const DRGeometrieIcoSphere& orig) {LOG_WARNING("Not exist");}
     
     struct IcoSphereFace
     {
+        IcoSphereFace();
+        void reset();
+        
         IcoSphereFace* mNeighbors[3];
+        IcoSphereFace* mChilds[4];
+        IcoSphereFace* mParent;
         GLuint         mIndices[3];
     };
     
     IcoSphereFace* addNewFace(GLuint index1, GLuint index2, GLuint index3); 
     IcoSphereFace* addNewFace(GLuint index[3]); 
+    IcoSphereFace* newFace();
+    void deleteFace(IcoSphereFace* face);
+    
     DRReturn addNewFacesAtBorder();
     DRReturn grabIndicesFromFaces();
+    void reset();
     
     
-    // neue Faces (Rand) stehen am Anfang der Liste (start bei top, bzw freeCount)
-    DRMemoryList<IcoSphereFace>* mFaceMemoryList;
-    //
-    std::list<IcoSphereFace*>           mBorderFaces;
+    std::list<IcoSphereFace*>           mFreeIcoFaceMemory;
+    IcoSphereFace                       mRootSphereFaces[20];
+    u8                                  mMaxEbene;
+    GLuint                              mMaxFaceBuffer;
 
 };
 //*/

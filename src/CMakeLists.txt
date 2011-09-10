@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.6)
 
 SET(Engine2Src Engine2Main DRInterface DRINetwork DRIvlc DRVideoConfig DRIImage DRTextur
-               DRText DRGeometrie DRGeometrieSphere DRGeometrieIcoSphere)
+               DRText DRGeometrie DRGeometrieSphere DRGeometrieIcoSphere glExtensions)
 SET(PA ../dependencies/bin ../dependencies/lib ../dependencies/Core2/lib)
 find_library(SDL_LIB SDL PATHS ${PA})
 
