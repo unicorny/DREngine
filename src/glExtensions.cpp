@@ -73,8 +73,8 @@ void DRWriteExtensionsToLog(const char* pcExtensions, FILE* pFile /* = NULL*/)
 	if(!pcExtensions) return;
         if(!pFile) return;
         
-	const unsigned int uiStringSize = strlen(pcExtensions);
-        char buffer[uiStringSize+2];
+	unsigned int uiStringSize = strlen(pcExtensions);
+    char* buffer = (char*)malloc(uiStringSize+2);
 	for (unsigned int i = 0; i < uiStringSize; i++)
 	{
             if(pcExtensions[i] == ' ')
@@ -85,6 +85,7 @@ void DRWriteExtensionsToLog(const char* pcExtensions, FILE* pFile /* = NULL*/)
         buffer[uiStringSize] = '\n';
         buffer[uiStringSize+1] = '\0';
         fprintf(pFile, buffer);
+		free(buffer);
 
 }
 

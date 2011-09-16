@@ -59,6 +59,7 @@ private:
     static float                        mVektorLength;          
     unsigned int                        mVertexCursor;      
     unsigned int                        mEbeneNeighborCount;
+    uint                                mFacesSphereCount;
 
 };
 //*/

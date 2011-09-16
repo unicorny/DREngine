@@ -20,6 +20,8 @@ DRReturn DRGeometrie::init(u32 vertexCount, u32 indexCount/* = 0*/, u32 textureC
 {
     clearData();
     releaseVertexBuffer();
+
+	DRLog.writeToLog("[DRGeometrie::init] vertexCount: %d, indexCount: %d summe mBytes: %f", vertexCount, indexCount, (vertexCount*sizeof(DRReal)*3+indexCount*sizeof(GLuint))/(1024.0f*1024.0f));
     
     if(vertexCount)
     {
@@ -145,6 +147,7 @@ DRReturn DRGeometrie::updateIndexDataIntoVertexBuffer(int from, int to, GLenum u
         glBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, from, sizeof(GLuint)*(from-to), mIndices);
     
     glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0); 
+	return DR_OK;
 }
 
 void DRGeometrie::releaseVertexBuffer()

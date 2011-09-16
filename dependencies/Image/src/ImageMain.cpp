@@ -87,7 +87,9 @@ DRIImage* getInstances(int count)
 
 void releaseInstance(DRInterface* data)
 {
-    DRInterface* temp = (DRInterface*)mImageList.findByHash((DHASH)data);
+	DHASH hash = (DHASH)(DRImage*)data;
+    DRInterface* temp = (DRInterface*)mImageList.findByHash(hash);
+
     if(temp)
     {
         DR_SAVE_DELETE_ARRAY(data);
@@ -97,7 +99,7 @@ void releaseInstance(DRInterface* data)
         DR_SAVE_DELETE(data);
     }
 
-    mImageList.removeByHash((DHASH)data);
+    mImageList.removeByHash(hash);
 }
 
 void releaseInstances(DRInterface* datas)
