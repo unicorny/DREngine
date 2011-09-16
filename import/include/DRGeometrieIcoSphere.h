@@ -28,7 +28,10 @@ private:
     struct IcoSphereFace
     {
         IcoSphereFace();
-        void reset();
+        ~IcoSphereFace() {reset();}
+        void reset(DRGeometrieIcoSphere* sphere = NULL);
+        bool   hasChilds();
+        IcoSphereFace* getChildAtBorder(GLuint borderIndices[2], IcoSphereFace* caller = NULL);
         
         IcoSphereFace* mNeighbors[3];
         IcoSphereFace* mChilds[4];
@@ -36,13 +39,15 @@ private:
         GLuint         mIndices[3];
     };
     
-    IcoSphereFace* addNewFace(GLuint index1, GLuint index2, GLuint index3); 
-    IcoSphereFace* addNewFace(GLuint index[3]); 
     IcoSphereFace* newFace();
+    IcoSphereFace* newChildFace(IcoSphereFace* parent, int childCursor);
     void deleteFace(IcoSphereFace* face);
     
-    DRReturn addNewFacesAtBorder();
-    DRReturn grabIndicesFromFaces();
+    //achtung! rekursive funktion!
+    void subdivide(IcoSphereFace* current = NULL);
+    
+    //achtung! rekursive funktion!  
+    DRReturn grabIndicesFromFaces(IcoSphereFace* current = NULL);
     void reset();
     
     
@@ -50,6 +55,10 @@ private:
     IcoSphereFace                       mRootSphereFaces[20];
     u8                                  mMaxEbene;
     GLuint                              mMaxFaceBuffer;
+    
+    static float                        mVektorLength;          
+    unsigned int                        mVertexCursor;      
+    unsigned int                        mEbeneNeighborCount;
 
 };
 //*/

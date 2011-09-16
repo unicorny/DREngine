@@ -144,6 +144,87 @@ DRReturn EnInit(DRReal fVersion /* = 1.0f */, bool initSound/* = false*/)
 	return DR_OK;
 }
 
+DRReturn EnInit_INI(const char* iniFileName)
+{
+	DRIni ini(iniFileName);
+	if(!ini.isValid())
+	{
+            fprintf(stderr, "given ini file isn't valid\n");
+            return DR_ERROR;
+	}
+	DRReal version = ini.getReal("Base", "Version");
+	if(version == 0.0f) version = 1.0f;
+	//int initSound = ini.getInt("Base", "Sound");
+	const char* tempString = ini.getStr("Base", "Mode")->data();
+	if(!strcmp("OpenGL", tempString))
+	//|| !strcmp("SDL", tempString))
+	{
+		// Titel
+		char* titel = NULL;
+		tempString = ini.getStr("Base", "Titel")->data();
+		if(tempString)
+		{
+			if(strlen(tempString) > 5)
+			{
+				titel = new char[strlen(tempString)+1];
+				strcpy(titel, tempString);
+			}
+		}
+		// BMP Icon
+		char* icon = NULL;
+		tempString = ini.getStr("Base", "Icon")->data();
+		if(tempString)
+		{
+			if(strlen(tempString) > 5)
+			{
+				icon = new char[strlen(tempString)+1];
+				strcpy(icon, tempString);	
+			}
+		}
+		// Video Config
+		DRVideoConfig config;
+		config.setFullscreen(ini.getInt("OpenGL", "Vollbild"));
+#ifdef _DEBUG
+		config.setFullscreen(0);
+#endif
+		if(ini.getInt("OpenGL", "Breite"))
+                    config.setWidth(ini.getInt("OpenGL", "Breite"));
+                if(ini.getInt("OpenGL", "Hoehe"))
+                        config.setHeight(ini.getInt("OpenGL", "Hoehe"));
+                if(ini.getInt("OpenGL", "MultiSample"))
+                        config.setMultiSampling(ini.getInt("OpenGL", "MultiSample"));
+                if(ini.getInt("OpenGL", "ZBuffer"))
+                        config.setZBuffer(ini.getInt("OpenGL", "ZBuffer"));
+		
+		tempString = ini.getStr("Base", "Mode")->data();
+		DRReturn returnValue;
+		//if(!strcmp("OpenGL", tempString))
+			returnValue = EnInit_OpenGL(version, config, titel, icon);
+		//else 
+		//	returnValue = EnInit_SDL(version, config, titel, icon);
+		DR_SAVE_DELETE_ARRAY(titel);
+		DR_SAVE_DELETE_ARRAY(icon);
+
+
+		return returnValue;
+	}
+	else if(!strcmp("Core", tempString))
+	{
+		return Core2_init();
+	}
+	else
+	{
+		if(strcmp("Simple", tempString))
+			fprintf(stderr, "Mode in ini File isn't give, using Simple\n");
+
+		//return EnInit_Simple(version, (bool)initSound);
+                return EnInit_Simple(version);
+                
+	}
+	return DR_OK;
+	//*/
+}
+
 DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVideoConfig()*/, const char* pcTitel/* = "OpenGL Render Fenster"*/, const char* pcBMPIcon /* = */, bool bInitSound /* = true*/)
 {
 	if(!g_bEnInit)
@@ -220,7 +301,8 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 	//OpenGL einrichten f�r Ohrtogonale Projection
 	glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
-
+        DRActivateVBExtension();
+        
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, g_pSDLWindow->w, g_pSDLWindow->h, 0, -1.0, 1.0);
@@ -231,7 +313,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 	//----------------------------------------------------------------------------------------------------------------------
 	//ein Paar Infos zu OpenGL ausgeben
-	FILE* pFile = fopen("ComputerInfo.txt", "a");
+	FILE* pFile = fopen("ComputerInfo.txt", "wt");
 	if(pFile)
 	{
 	/*	DRLog.WriteToLog("------------------OpenGL Daten------------------------");
@@ -247,7 +329,8 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 		fprintf(pFile, "Version: %s\n", glGetString(GL_VERSION));
 		fprintf(pFile, "Unterst�tzte Erweiterungen:\n");
 
-		//DRWriteExtensionsToLog((const char*)glGetString(GL_EXTENSIONS), pFile);
+		DRWriteExtensionsToLog((const char*)glGetString(GL_EXTENSIONS), pFile);
+                //fprintf(pFile, "%s", (const char*)glGetString(GL_EXTENSIONS));
 
 	//	DRLog.WriteToLog("------------------OpenGL Daten Ende ------------------------");
 		fprintf(pFile, "------------------OpenGL Daten Ende ------------------------\n");
@@ -256,6 +339,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 	else
 		LOG_WARNING("Fehler beim erstellen der OpenGL Infos Datei");
 
+        printf("vor cursor hide\n");
 	//Cursor im Release Modus verstecken
 #ifndef _DEBUG
 	SDL_ShowCursor(SDL_DISABLE);

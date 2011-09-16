@@ -9,6 +9,10 @@ DRVideoConfig::~DRVideoConfig()
 {
 }
 
+DRVideoConfig::DRVideoConfig(const DRVideoConfig& cfg)
+{
+    memcpy(this, &cfg, sizeof(DRVideoConfig));
+}
 
 void DRVideoConfig::print()
 {

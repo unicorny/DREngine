@@ -1,13 +1,16 @@
 #include "Engine2Main.h"
 
+float DRGeometrieIcoSphere::mVektorLength = 0.0f;
+
 DRGeometrieIcoSphere::DRGeometrieIcoSphere(GLuint maxFaceBuffer)
-: DRGeometrieSphere(), mMaxEbene(0), mMaxFaceBuffer(maxFaceBuffer)
+: DRGeometrieSphere(), mMaxEbene(0), mMaxFaceBuffer(maxFaceBuffer),mVertexCursor(0), mEbeneNeighborCount(0)
 {
     
 }
 
 DRGeometrieIcoSphere::~DRGeometrieIcoSphere()
 {
+    reset();
     for(std::list<IcoSphereFace*>::iterator it = mFreeIcoFaceMemory.begin(); it != mFreeIcoFaceMemory.end(); it++)
     {
         DR_SAVE_DELETE(*it);
@@ -33,27 +36,32 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene)
     
     const GLuint indexCount = 60;
     
-    if(init(12, indexCount, 0, true))
+    if(init(12*4, indexCount*4, 0, true))
         LOG_ERROR("Fehler bei init Geometrie", DR_ERROR);
-    memcpy(mIndices, indices, sizeof(GLuint)*indexCount);
+    if(initVertexBuffer())
+        LOG_ERROR("Fehler bei init VertexBuffer", DR_ERROR);
+    //memcpy(mIndices, indices, sizeof(GLuint)*indexCount);
             
-    mVertices[0] = DRVector3(-1.0f, 0.0f, tao);
-    mVertices[1] = DRVector3(1.0f, 0.0f, tao);
-    mVertices[2] = DRVector3(-1.0f, 0.0f, -tao);
-    mVertices[3] = DRVector3(1.0f, 0.0f, -tao);
+    mVertices[mVertexCursor++] = DRVector3(-1.0f, 0.0f, tao);
+    mVertices[mVertexCursor++] = DRVector3(1.0f, 0.0f, tao);
+    mVertices[mVertexCursor++] = DRVector3(-1.0f, 0.0f, -tao);
+    mVertices[mVertexCursor++] = DRVector3(1.0f, 0.0f, -tao);
     
-    mVertices[4] = DRVector3(0.0f, tao, 1.0f);
-    mVertices[5] = DRVector3(0.0f, tao, -1.0f);
-    mVertices[6] = DRVector3(0.0f, -tao, 1.0f);
-    mVertices[7] = DRVector3(0.0f, -tao, -1.0f);
+    mVertices[mVertexCursor++] = DRVector3(0.0f, tao, 1.0f);
+    mVertices[mVertexCursor++] = DRVector3(0.0f, tao, -1.0f);
+    mVertices[mVertexCursor++] = DRVector3(0.0f, -tao, 1.0f);
+    mVertices[mVertexCursor++] = DRVector3(0.0f, -tao, -1.0f);
     
-    mVertices[8] = DRVector3(tao, 1.0f, 0.0f);
-    mVertices[9] = DRVector3(-tao, 1.0f, 0.0f);
-    mVertices[10] = DRVector3(tao, -1.0f, 0.0f);
-    mVertices[11] = DRVector3(-tao, -1.0f, 0.0f);
+    mVertices[mVertexCursor++] = DRVector3(tao, 1.0f, 0.0f);
+    mVertices[mVertexCursor++] = DRVector3(-tao, 1.0f, 0.0f);
+    mVertices[mVertexCursor++] = DRVector3(tao, -1.0f, 0.0f);
+    mVertices[mVertexCursor++] = DRVector3(-tao, -1.0f, 0.0f);
+    
+    mVektorLength = mVertices[mVertexCursor-1].length();
+    DRLog.writeToLog("VektorLength: %f", mVektorLength);
     
     //einfärben der Start Vertices
-    for(int i = 0; i < 12; i++)
+    for(int i = 0; i < mVertexCursor; i++)
     {
         float percent = (float)i*(1.0f/12.0f);
         printf("percent: %f\n", percent);
@@ -70,9 +78,15 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene)
             mRootSphereFaces[iFace].mNeighbors[i] = &mRootSphereFaces[neighbors[iFace*3+i]];
         }
     }
-    
+    subdivide();    
+    printf("sub 1 ende\n");
+
     
     mRenderMode = GL_TRIANGLES;
+    copyDataToVertexBuffer();
+    
+    grabIndicesFromFaces();
+    updateIndexDataIntoVertexBuffer();
     
     //IcoSphereFace Konstruktor Test (nicht notwendig)
     IcoSphereFace f;
@@ -84,50 +98,163 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene)
 
 void DRGeometrieIcoSphere::reset()
 {
+     for(int i = 0; i < 20; i++)
+         mRootSphereFaces[i].reset();
+}
+
+void DRGeometrieIcoSphere::subdivide(DRGeometrieIcoSphere::IcoSphereFace* current/* = NULL*/)
+{
+    if(!current)   
+    {
+        mEbeneNeighborCount = 0;
+        for(int i = 0; i < 20; i++)
+        {
+            subdivide(&mRootSphereFaces[i]);
+        }
+        DRLog.writeToLog("added %d Neighbors", mEbeneNeighborCount);
+    }
+    else
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            if(current->mChilds[i]) subdivide(current->mChilds[i]);
+            else current->mChilds[i] = newChildFace(current, i);            
+        }
+    }
+}
+
+DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::newChildFace(DRGeometrieIcoSphere::IcoSphereFace* parent, int childCount)
+{
+    printf("new child: %d\n", childCount);
+    IcoSphereFace* newFace = this->newFace();
+    if(!newFace) LOG_ERROR("no memory for new Face available", NULL);
+    if(!parent) LOG_ERROR("no parent given", NULL);
+    newFace->mParent = parent;
     
-}
-
-DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::addNewFace(GLuint index1, GLuint index2, GLuint index3)
-{
-    GLuint index[3];
-    index[0] = index1;
-    index[1] = index2;
-    index[2] = index3;
+    DRVector3* parentPoints[3];
+    for(int i = 0; i < 3; i++)
+        parentPoints[i] = &mVertices[parent->mIndices[i]];   
     
-    return addNewFace(index);
+    //child 0 berechnet und erstellt die 3 neuen Punkte
+    if(childCount == 0)
+    {
+        if(mVertexCursor + 3 > mVertexCount)
+        {
+            this->deleteFace(newFace);
+            LOG_ERROR("no memory left for new vertices", NULL);
+        }
+        // i1 is index for newVertex
+        for(int i1 = 0; i1 < 3; i1++)
+        {
+            IcoSphereFace* neighborChild = NULL;
+            // i2 is the index for the second vertex which will used to calculate a new vertex
+            // i1 = i2: 0 = 1, 1 = 2, 2 = 0          
+            int i2 = i1+1;
+            if(i1 == 2) i2 = 0;
+            DRLog.writeToLog("i1: %d, i2: %d", i1, i2);
+            DRVector3 temp = (*parentPoints[i2] - *parentPoints[i1])/2.0f + *parentPoints[i1];
+            if(parent->mNeighbors[i1]) neighborChild = parent->mNeighbors[i1]->mChilds[0];
+            
+            if(neighborChild)
+            {
+                float diffs[4];
+                diffs[3] = 10000.0f;
+                // i is the index for the indices from parent
+                for(int i = 0; i < 3; i++)
+                {
+                    diffs[i] = DRVector3(mVertices[neighborChild->mIndices[i]]-temp).lengthSq();
+                    if(diffs[i] < diffs[3])
+                    {
+                        diffs[3] = diffs[i];
+                        newFace->mIndices[i1] = neighborChild->mIndices[i];
+                    }
+                }       
+                DRVector3 c = temp.normalize() * mVektorLength;
+                DRLog.writeVector3ToLog(c, "temp0");
+                DRLog.writeVector3ToLog(mVertices[newFace->mIndices[i1]], "old0");
+            }
+            else
+            {
+                mVertices[mVertexCursor] = temp.normalize() * mVektorLength;
+                mColors[mVertexCursor] = DRColor(0.0f, 1.0f, 0.0f);
+                newFace->mIndices[i1] = mVertexCursor;
+                DRLog.writeVector3ToLog(mVertices[mVertexCursor], "0");
+                mVertexCursor++;
+            }
+        }        
+    }
+    else //if(childCount == 1)
+    {
+        IcoSphereFace* centerChild = parent->mChilds[0];
+        if(!centerChild) LOG_ERROR("[critical]", NULL);                
+        
+        if(childCount == 1)
+        {
+            centerChild->mNeighbors[2] = newFace;
+            newFace->mIndices[0] = parent->mIndices[0];
+            newFace->mIndices[1] = centerChild->mIndices[0];
+            newFace->mIndices[2] = centerChild->mIndices[2];        
+            newFace->mNeighbors[1] = centerChild;
+            //[TODO] count number valid neighbors and return error, if number isn't calculated
+            newFace->mNeighbors[0] = parent->mNeighbors[0]->getChildAtBorder(&newFace->mIndices[0], newFace);
+            if(newFace->mNeighbors[0]) mEbeneNeighborCount++;
+            //DRLog.writeToLog("new neighbor: %d", newFace->mNeighbors[0]);
+        }
+        else if(childCount == 2)
+        {
+            newFace->mNeighbors[2] = centerChild;
+            centerChild->mNeighbors[0] = newFace;
+            newFace->mIndices[0] = centerChild->mIndices[0];
+            newFace->mIndices[1] = parent->mIndices[1];
+            newFace->mIndices[2] = centerChild->mIndices[1]; 
+        }
+        else if(childCount == 3)
+        {
+            newFace->mNeighbors[0] = centerChild;
+            centerChild->mNeighbors[1] = newFace;
+            newFace->mIndices[0] = centerChild->mIndices[2];
+            newFace->mIndices[1] = centerChild->mIndices[1];        
+            newFace->mIndices[2] = parent->mIndices[2];
+        }
+    }
+    printf("return: %d\n", newFace);
+    return newFace;
 }
 
-DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::addNewFace(GLuint index[3])
+DRReturn DRGeometrieIcoSphere::grabIndicesFromFaces(DRGeometrieIcoSphere::IcoSphereFace* current/* = NULL*/)
 {
-    return NULL;
-}
-
-DRReturn DRGeometrieIcoSphere::addNewFacesAtBorder()
-{
-    return DR_OK;
-}
-DRReturn DRGeometrieIcoSphere::grabIndicesFromFaces()
-{
-    return DR_OK;
+    static GLuint indexCurser = 0;
+    if(!current)   
+    {
+        indexCurser = 0;
+        for(int i = 0; i < 20; i++)
+        {
+            grabIndicesFromFaces(&mRootSphereFaces[i]);
+        }
+    }
+    else
+    {
+        if(current->hasChilds())
+        {
+                for(int i = 0; i < 4; i++)
+                {
+                        grabIndicesFromFaces(current->mChilds[i]);
+                }
+        }
+        else
+        {
+            for(int i = 0; i < 3; i++)
+            {
+               mIndices[indexCurser++] = current->mIndices[i];
+               DRLog.writeToLog("indexCurser: %d, i: %d, index: %d", indexCurser, i, current->mIndices[i]);
+               DRLog.writeVector3ToLog(mVertices[current->mIndices[i]]);
+            }       
+        }
+    }
+     
+   
 }
  //*/
-// ------------------------- IcoSphereFace ---------------------------------------------
-//
-
-DRGeometrieIcoSphere::IcoSphereFace::IcoSphereFace()
-: mParent(NULL)
-{
-    reset();
-}
-
-void DRGeometrieIcoSphere::IcoSphereFace::reset()
-{
-    mParent = NULL;
-    memset(mNeighbors, 0, sizeof(IcoSphereFace*)*3);
-    memset(mChilds, 0, sizeof(IcoSphereFace*)*4);
-    memset(mIndices, 0, sizeof(GLuint)*3);
-}
-
 DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::newFace()
 {
     if(mFreeIcoFaceMemory.size())
@@ -145,6 +272,7 @@ DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::newFace()
 
 void DRGeometrieIcoSphere::deleteFace(DRGeometrieIcoSphere::IcoSphereFace* face)
 {
+    if(!face) LOG_ERROR_VOID("face is a Zero-Pointer");
     if(mFreeIcoFaceMemory.size() >= mMaxFaceBuffer)
     {
         DR_SAVE_DELETE(face);
@@ -153,4 +281,94 @@ void DRGeometrieIcoSphere::deleteFace(DRGeometrieIcoSphere::IcoSphereFace* face)
     {
         mFreeIcoFaceMemory.push_back(face);
     }
+}
+// ------------------------- IcoSphereFace ---------------------------------------------
+//
+
+DRGeometrieIcoSphere::IcoSphereFace::IcoSphereFace()
+: mParent(NULL)
+{
+    for(int i = 0; i < 4; i++)
+        mChilds[i] = NULL;
+    reset();
+}
+
+void DRGeometrieIcoSphere::IcoSphereFace::reset(DRGeometrieIcoSphere* sphere)
+{
+    for(u8 i = 0; i < 4; i++)
+    {
+        if(mChilds[i]) mChilds[i]->reset(sphere);
+        if(sphere) sphere->deleteFace(mChilds[i]);
+        else DR_SAVE_DELETE(mChilds[i]);            
+        if(mParent && mParent->mChilds[i] == this)
+            mParent->mChilds[i] = NULL;
+    }
+    mParent = NULL;
+    memset(mNeighbors, 0, sizeof(IcoSphereFace*)*3);
+    memset(mChilds, 0, sizeof(IcoSphereFace*)*4);
+    memset(mIndices, 0, sizeof(GLuint)*3);
+}
+
+
+
+bool DRGeometrieIcoSphere::IcoSphereFace::hasChilds()
+{
+    if(mChilds[0] && mChilds[1] && mChilds[2] && mChilds[3])
+        return true;
+    if(mChilds[0] || mChilds[1] || mChilds[2] || mChilds[3])
+        LOG_WARNING("not all childs a true, but some!");
+    return false;
+}
+
+DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::IcoSphereFace::getChildAtBorder(GLuint borderIndices[2], DRGeometrieIcoSphere::IcoSphereFace::IcoSphereFace* caller /* = NULL*/)
+{
+    if(!hasChilds()) return NULL;
+    IcoSphereFace* returnValue = NULL;
+    for(int iChild = 1; iChild < 4; iChild++)
+    {
+        for(int iIndex = 0; iIndex < 3; iIndex++)
+        {
+                if(mChilds[iChild]->mIndices[iIndex] == borderIndices[0])
+                {
+                    u8 low = iIndex-1;
+                    if(low < 0) low = 2;
+                    u8 high = iIndex+1;
+                    if(high > 2) high = 0;
+                    if(mChilds[iChild]->mIndices[low] == borderIndices[1])
+                    {
+                        returnValue = mChilds[iChild];
+                        if(caller)
+                        {
+                            if(iIndex == 0 && low == 2)
+                                mChilds[iChild]->mNeighbors[2] = caller;
+                            else if(iIndex == 1 && low == 0)
+                                mChilds[iChild]->mNeighbors[0] = caller;
+                            else if(iIndex == 2 && low == 1)
+                                mChilds[iChild]->mNeighbors[1] = caller;
+                            else
+                                LOG_ERROR("[critical] low ist ungueltig!", returnValue);
+                        }
+                        return returnValue;
+                    }
+                    if(mChilds[iChild]->mIndices[high] == borderIndices[1])
+                    {
+                        returnValue = mChilds[iChild];
+                        if(caller)
+                        {
+                            if(iIndex == 0 && high == 1)
+                                mChilds[iChild]->mNeighbors[0] = caller;
+                            else if(iIndex == 1 && high == 2)
+                                mChilds[iChild]->mNeighbors[1] = caller;
+                            else if(iIndex == 2 && high == 0)
+                                mChilds[iChild]->mNeighbors[2] = caller;
+                            else
+                                LOG_ERROR("[critical] high ist ungueltig!", returnValue);
+                        }
+                        return returnValue;
+                    }
+                    
+                }
+        }
+    }
+    return NULL;
 }
