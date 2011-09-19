@@ -18,11 +18,13 @@ DRGeometrieIcoSphere::~DRGeometrieIcoSphere()
     mFreeIcoFaceMemory.clear();
 }
 
-DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene)
+DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene, int seed /*= 0*/)
 {
     reset();
     float tao = 1.61803399f;
     mMaxEbene = maxEbene;
+    if(maxEbene > 8)
+        LOG_ERROR("a value greater than 8 for maxEbene required more then 1 GB RAM (need 1,6 GB)", DR_ERROR);
     
     GLuint indices[] =     {1,4,0,   4,9,0,    4,5,9,    8,5,4,    1,8,4,
                             1,10,8,  10,3,8,   8,3,5,    3,2,5,    3,7,2,
@@ -67,7 +69,7 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene)
         printf("percent: %f\n", percent);
         mColors[i] = DRColor(percent, 0.0f, 0.0f);//1.0f-percent, (percent+0.0001f)/2.0f);
     }
-    
+    srand(seed);
     // Initial Faces erstellen
     for(int iFace = 0; iFace < 20; iFace++)
     {
@@ -77,6 +79,7 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene)
             mRootSphereFaces[iFace].mIndices[i] = indices[iFace*3+i];
             mRootSphereFaces[iFace].mNeighbors[i] = &mRootSphereFaces[neighbors[iFace*3+i]];
         }
+        mRootSphereFaces[iFace].mSeed = rand();
     }
 	for(u8 i = 0; i < maxEbene; i++)
 	{
@@ -118,25 +121,28 @@ void DRGeometrieIcoSphere::subdivide(DRGeometrieIcoSphere::IcoSphereFace* curren
     }
     else
     {
+        srand(current->mSeed);
         for(int i = 0; i < 4; i++)
         {
+            int seed = rand();
             if(current->mChilds[i])
             {
                 subdivide(current->mChilds[i]);
             }
             else
             {
-                current->mChilds[i] = newChildFace(current, i);            
+                current->mChilds[i] = newChildFace(current, i, seed);            
                 mFacesSphereCount++;
             }
         }
     }
 }
 
-DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::newChildFace(DRGeometrieIcoSphere::IcoSphereFace* parent, int childCount)
+DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::newChildFace(DRGeometrieIcoSphere::IcoSphereFace* parent, int childCount, int seed)
 {
     //printf("new child: %d\n", childCount);
     IcoSphereFace* newFace = this->newFace();
+    newFace->mSeed = seed;
     if(!newFace) LOG_ERROR("no memory for new Face available", NULL);
     if(!parent) LOG_ERROR("no parent given", NULL);
     newFace->mParent = parent;
@@ -324,8 +330,8 @@ void DRGeometrieIcoSphere::deleteFace(DRGeometrieIcoSphere::IcoSphereFace* face)
 // ------------------------- IcoSphereFace ---------------------------------------------
 //
 
-DRGeometrieIcoSphere::IcoSphereFace::IcoSphereFace()
-: mParent(NULL)
+DRGeometrieIcoSphere::IcoSphereFace::IcoSphereFace(int seed /* = 0*/)
+: mParent(NULL), mSeed(seed)
 {
     for(int i = 0; i < 4; i++)
         mChilds[i] = NULL;
