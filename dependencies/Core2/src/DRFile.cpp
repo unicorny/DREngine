@@ -44,15 +44,15 @@ DRFile::~DRFile()
 
 //***************************************************************************
 
-//Öffnen einer Datei
+//ï¿½ffnen einer Datei
 #ifdef _WIN32
 DRFileErrorCodes DRFile::open(const wchar_t* pstFilename, const wchar_t* pstMode/*= "a+b"*/)
 {
 
-	//erstmal schließen, da mit wir nicht 2mal öffnen
+	//erstmal schlieï¿½en, da mit wir nicht 2mal ï¿½ffnen
 	close();
 
-	//öffnen wenn schon vorhanden, sonst neu erstellen
+	//ï¿½ffnen wenn schon vorhanden, sonst neu erstellen
 	//							Filename	lesen und schreiben, teilrecht, datensicherheit, verhalten, erstellungsoptionen (verstckt, etc), Zeiger auf T setzen
 //	if ((m_pFile = CreateFileW(stFilename.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALIDR_HANDLE_VALUE)
   //      return File_OK;
@@ -72,11 +72,11 @@ DRFileErrorCodes DRFile::open(const wchar_t* pstFilename, const wchar_t* pstMode
 
 DRFileErrorCodes DRFile::open(const char* pcFilename, bool bForceNew, const char* pcMode)
 {
-	//erstmal schließen, da mit wir nicht 2mal öffnen
+	//erstmal schlieï¿½en, da mit wir nicht 2mal ï¿½ffnen
 	close();
 	if(!pcFilename) return File_error_NullPointer;
 
-	//öffnen wenn schon vorhanden, sonst neu erstellen
+	//ï¿½ffnen wenn schon vorhanden, sonst neu erstellen
 	//							Filename	lesen und schreiben, teilrecht, datensicherheit, verhalten, erstellungsoptionen (verstckt, etc), Zeiger auf T setzen
 	if(!bForceNew)
 	{
@@ -112,12 +112,13 @@ DRFileErrorCodes DRFile::open(const char* pcFilename, bool bForceNew, const char
 
 //*******************************************************************************************
 
-//Und scließen derselben
+//Und sclieï¿½en derselben
 void DRFile::close()
 {
-	//handle auf die Datei schließen
+	//handle auf die Datei schlieï¿½en
 	//dclose_handle(&m_pFile);
 	if(!mFile) return;
+        fflush(mFile);
 	fclose(mFile);
 	mFile = NULL;
 	mFileSize = 0;
@@ -132,10 +133,10 @@ bool DRFile::isOpen()
 }
 
 //************************************************************************************************
-//Größe der Datei bestimmen
+//Grï¿½ï¿½e der Datei bestimmen
 unsigned long DRFile::getSize()
 {
-	//Wenn die Datei nicht geöffnet ist, ist schluss
+	//Wenn die Datei nicht geï¿½ffnet ist, ist schluss
 	if(!isOpen()) return 0;
 	if(mFileSize > 0) return mFileSize;
 
@@ -165,17 +166,17 @@ DRFileErrorCodes DRFile::write(const void* pDatenIn, unsigned long ulSize, unsig
 	//zwischen speicherung
 	unsigned long ulWrittenBytesTemp;
 
-	// Daten schreiben und prüfen, dass auch alle Daten vollständig in die Datei geschrieben wurde.
+	// Daten schreiben und prï¿½fen, dass auch alle Daten vollstï¿½ndig in die Datei geschrieben wurde.
   //  const bool bResult = WriteFile(m_pFile, pDatenIn, lSize, &ulWrittenBytesTemp, NULL) && ulWrittenBytesTemp == lSize;
 	ulWrittenBytesTemp = fwrite(pDatenIn, ulSize, ulCount, mFile);
 
-	// Wenn die tatsächlich geschriebenen Bytes angefordert werden, werden diese auch übergeben.
+	// Wenn die tatsï¿½chlich geschriebenen Bytes angefordert werden, werden diese auch ï¿½bergeben.
     if(plWrittenBytesOut != NULL)
         (*plWrittenBytesOut) = ulWrittenBytesTemp;
 
 	mFileSize = 0;
 
-    // Funktion mit richtigem Fehlercode beenden, gab es einen Fehler muß dies bekannt werden.
+    // Funktion mit richtigem Fehlercode beenden, gab es einen Fehler muï¿½ dies bekannt werden.
 	return File_OK;
 }
 
@@ -195,11 +196,11 @@ DRFileErrorCodes DRFile::read(void* pDatenOut, unsigned long ulSize, unsigned lo
 //	const bool bResult = ReadFile(m_pFile, pDatenOut, lSize, &ulReadedBytesTemp, NULL) && ulReadedBytesTemp == lSize;
 	ulReadedBytesTemp = fread(pDatenOut, ulSize, ulCount, mFile);
 
-	// Wenn die tatsächlich gelesenen Bytes angefordert werden, werden diese auch übergeben.
+	// Wenn die tatsï¿½chlich gelesenen Bytes angefordert werden, werden diese auch ï¿½bergeben.
     if (plReadedBytesOut != NULL)
         (*plReadedBytesOut) = ulReadedBytesTemp;
 
-    // Funktion mit richtigem Fehlercode beenden, gab es einen Fehler muß dies bekannt werden.
+    // Funktion mit richtigem Fehlercode beenden, gab es einen Fehler muï¿½ dies bekannt werden.
 	return File_OK;
 
 }
@@ -212,7 +213,7 @@ unsigned long DRFile::getFilePointer()
 	//Datei muss offen sein
 	if(!isOpen()) return 0;
 
-	// 64 Bit Integer für die Zwischenspeicherung der Position des File-Pointers.
+	// 64 Bit Integer fï¿½r die Zwischenspeicherung der Position des File-Pointers.
     long lPosition;
 
      // 64 Bit Integer initialisieren.
@@ -241,13 +242,13 @@ DRFileErrorCodes DRFile::setFilePointer(unsigned long ulDistance, unsigned long 
 	//Ist die Datei offen?
 	if(!isOpen()) return File_error_file_is_not_open;
 
-	//Ist die Distanz größer als die Dateigröße?
+	//Ist die Distanz grï¿½ï¿½er als die Dateigrï¿½ï¿½e?
 	if(ulDistance > getSize()) return File_error_pointer_distance_to_great;
 
 	//Ist die Start Position die aktuelle Position?
 	if(ulStartPoint == SEEK_CUR)
 	{
-		//Wenn die Distanz von der aktuellen Position größer als die
+		//Wenn die Distanz von der aktuellen Position grï¿½ï¿½er als die
 		//Datei ist, dann Abbruch
 		if(ulDistance + getFilePointer() > getSize())
 			return File_error_pointer_distance_to_great;

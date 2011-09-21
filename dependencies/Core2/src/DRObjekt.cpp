@@ -1,15 +1,15 @@
 #include "Core2Main.h"
 
 
-DRObjekt::DRObjekt(const DRVector3& position, const DRVector3& rotation)
-: mPosition(position), mRotation(rotation),
+DRObjekt::DRObjekt(const DRVector3& position)
+: mPosition(position),
  mXAxis(1.0f, 0.0f, 0.0f), mYAxis(0.0f, 1.0f, 0.0f), mZAxis(0.0f, 0.0f, 1.0f)
 {
     update();
 }
 
 DRObjekt::DRObjekt()
-: mPosition(DRVector3(0.0f)), mRotation(DRVector3(0.0f)),
+: mPosition(DRVector3(0.0f)), 
  mXAxis(1.0f, 0.0f, 0.0f), mYAxis(0.0f, 1.0f, 0.0f), mZAxis(0.0f, 0.0f, 1.0f)
  {
      update();

@@ -68,7 +68,7 @@ void DRGeometrieSphere::makeSphericalLandscape(GLuint numIterations, GLuint rand
     if(!mVertexCount) LOG_ERROR_VOID("keine Vertices zum manipulieren!");
     DRRandom::seed(randomSeed);
     
-    const int threadCount = 4;   
+    const int threadCount = 6;   
     PlaneData planes(numIterations);
     LandscapeGenerateMultithreadData workingData[threadCount];
     SDL_Thread* threads[threadCount];

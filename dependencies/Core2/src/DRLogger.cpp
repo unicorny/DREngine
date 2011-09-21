@@ -72,7 +72,7 @@ void DRLogger::exit()
 
 // *****************************************************************
 // Einen 2D-Vektor in die Logbuchdatei schreiben
-DRReturn DRLogger::writeVector2ToLog(DRVector2& v, const char* name)
+DRReturn DRLogger::writeVector2ToLog(const DRVector2& v, const char* name)
 {
 	// 2D-Vektor in die Logbuchdatei schreiben
     if(name)
@@ -83,7 +83,7 @@ DRReturn DRLogger::writeVector2ToLog(DRVector2& v, const char* name)
 
 // *****************************************************************
 // Einen 3D-Vektor in die Logbuchdatei schreiben
-DRReturn DRLogger::writeVector3ToLog(DRVector3& v, const char* pcName /* = NULL */)
+DRReturn DRLogger::writeVector3ToLog(const DRVector3& v, const char* pcName /* = NULL */)
 {
 	// 3D-Vektor in die Logbuchdatei schreiben
 	char acName[64];
@@ -97,7 +97,7 @@ DRReturn DRLogger::writeVector3ToLog(DRVector3& v, const char* pcName /* = NULL 
 
 // ******************************************************************
 // Eine Matrix in die Logbuchdatei schreiben
-DRReturn DRLogger::writeMatrixToLog(DRMatrix& m, const char* name)
+DRReturn DRLogger::writeMatrixToLog(const DRMatrix& m, const char* name)
 {
 	// Matrix in die Logbuchdatei schreiben
     if(name)
@@ -132,7 +132,7 @@ DRReturn DRLogger::writeMatrixToLog(DRMatrix& m, const char* name)
 // ******************************************************************
 // Eine Farbe in die Logbuchdatei schreiben
 
-DRReturn DRLogger::writeColorToLog(DRColor& c)
+DRReturn DRLogger::writeColorToLog(const DRColor& c)
 {
 	char acHexColor[9];
 

@@ -59,15 +59,14 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene, int seed /*= 0*/)
     mVertices[mVertexCursor++] = DRVector3(tao, -1.0f, 0.0f);
     mVertices[mVertexCursor++] = DRVector3(-tao, -1.0f, 0.0f);
     
-    mVektorLength = mVertices[mVertexCursor-1].length();
-    DRLog.writeToLog("VektorLength: %f", mVektorLength);
+    mVektorLength = 1.0f;//mVertices[mVertexCursor-1].length();    
     
     //einfärben der Start Vertices
     for(uint i = 0; i < mVertexCursor; i++)
     {
         float percent = (float)i*(1.0f/12.0f);
-        printf("percent: %f\n", percent);
         mColors[i] = DRColor(percent, 0.0f, 0.0f);//1.0f-percent, (percent+0.0001f)/2.0f);
+        mVertices[i] = mVertices[i].normalize();
     }
     srand(seed);
     // Initial Faces erstellen
@@ -81,11 +80,10 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene, int seed /*= 0*/)
         }
         mRootSphereFaces[iFace].mSeed = rand();
     }
-	for(u8 i = 0; i < maxEbene; i++)
-	{
-		subdivide();    
-		printf("sub %d ende\n", i);
-	}
+    for(u8 i = 0; i < maxEbene; i++)
+    {
+            subdivide();   
+    }
 
     
     mRenderMode = GL_TRIANGLES;
@@ -117,7 +115,7 @@ void DRGeometrieIcoSphere::subdivide(DRGeometrieIcoSphere::IcoSphereFace* curren
         {
             subdivide(&mRootSphereFaces[i]);
         }
-        DRLog.writeToLog("added %d Neighbors, %d faces used (summe) (%f MByte)", mEbeneNeighborCount, mFacesSphereCount, (float)(mFacesSphereCount*sizeof(IcoSphereFace))/1024.0f/1024.0f);
+        DRLog.writeToLog("[DRGeometrieIcoSphere::subdivide] added %d Neighbors, %d faces used (summe) (%f MByte)", mEbeneNeighborCount, mFacesSphereCount, (float)(mFacesSphereCount*sizeof(IcoSphereFace))/1024.0f/1024.0f);
     }
     else
     {
@@ -274,7 +272,7 @@ DRReturn DRGeometrieIcoSphere::grabIndicesFromFaces(DRGeometrieIcoSphere::IcoSph
         {
             grabIndicesFromFaces(&mRootSphereFaces[i]);
         }
-		DRLog.writeToLog("%d indices used", indexCurser);
+        //DRLog.writeToLog("[DRGeometrieIcoSphere::grabIndicesFromFaces] %d indices used", indexCurser);
     }
     else
     {
