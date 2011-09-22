@@ -69,7 +69,7 @@ void DRGeometrieSphere::makeSphericalLandscape(GLuint numIterations, GLuint rand
     DRRandom::seed(randomSeed);
     
     const int threadCount = 6;   
-    PlaneData planes(numIterations);
+    PlaneData planes(numIterations, randomSeed);
     LandscapeGenerateMultithreadData workingData[threadCount];
     SDL_Thread* threads[threadCount];
     
@@ -90,8 +90,7 @@ void DRGeometrieSphere::makeSphericalLandscape(GLuint numIterations, GLuint rand
             LOG_WARNING("Fehler in Thread occured");
             DRLog.writeToLog("Thread %d return with error: %d", i, returnValue);            
         }
-    }
-    
+    }    
 }
 
 int DRGeometrieSphere::makeLandscapeThread(void* data)
@@ -109,7 +108,9 @@ int DRGeometrieSphere::makeLandscapeThread(void* data)
         //plane gibts noch nicht? dann machen wir eine neue
         if(planes->planeCount < i)
         {
+           DRRandom::seed(planes->seed);
            DRVector3 n = DRRandom::rVector3(1.0f);
+           planes->seed = rand();
            pl = DRPlane(n, n.length());
            planes->planes[i] = pl;
            planes->planeCount++;

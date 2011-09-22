@@ -76,3 +76,10 @@ void DRObjekt::update()
    // mMatrix.print();
 }
 
+void DRObjekt::lookAt(DRVector3 targetPosition, DRVector3 upVector/* = DRVector3(0.0f, 1.0f, 0.0f)*/)
+{
+    mZAxis = DRVector3(mPosition - targetPosition).normalzeEx();
+    mXAxis = upVector.cross(mZAxis).normalzeEx();
+    mYAxis = mZAxis.cross(mXAxis).normalzeEx();
+    update();
+}

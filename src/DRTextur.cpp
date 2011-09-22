@@ -83,8 +83,8 @@ DRReturn DRTextur::load(GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* =
             0, format, GL_UNSIGNED_BYTE, mParent->getPixel());
 
     if(DRGrafikError("Fehler beim erstellen einer Textur!")) return DR_ERROR;
-        DRLog.writeToLog("Textur, format: %d, components: %d, rgb: %d, rgba: %d, width: %d, height: %d",
-                        format, numComponents, GL_RGB, GL_RGBA, mParent->getWidth(), mParent->getHeight());
+   // DRLog.writeToLog("Textur, format: %d, components: %d, rgb: %d, rgba: %d, width: %d, height: %d",
+     //                   format, numComponents, GL_RGB, GL_RGBA, mParent->getWidth(), mParent->getHeight());
         
     return DR_OK;
 }
