@@ -289,7 +289,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 #ifndef _DEBUG
 	g_pSDLWindow = SDL_SetVideoMode(XWIDTH, YHEIGHT, 32, flags);
 #else
-	g_pSDLWindow = SDL_SetVideoMode(XWIDTH, YHEIGHT, 32, SDL_OPENGL);
+	g_pSDLWindow = SDL_SetVideoMode((int)XWIDTH, (int)YHEIGHT, 32, SDL_OPENGL);
 #endif //_DEBUG
 	if(!g_pSDLWindow)
 	{
@@ -519,7 +519,7 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
 		if(cCounter > 5) cCounter = 0;
 		fTime = 0.0f;
 		for (i = 0; i < 5; i++)
-			fTime += dTimes[i];
+			fTime += (float)dTimes[i];
 		fTime /= 5.0f;
 		dGesTime2 += fTime;
 		lNumWerte++;

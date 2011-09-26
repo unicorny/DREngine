@@ -2,8 +2,11 @@
 
 DRGeometrie::DRGeometrie()
 : mVertices(NULL), mIndices(NULL), mColors(NULL), mTextureCoords(NULL),
-  mVertexCount(0), mIndexCount(0), mNumTextureCoords(0), mRenderVertexBuffer(false), mRenderMode(0)
+  mVertexCount(0), mIndexCount(0), mMaxVertexCount(0), mMaxIndexCount(0),
+  mNumTextureCoords(0), mRenderVertexBuffer(false), mBufferMutex(NULL), mRenderMode(0)
 {
+	mBufferMutex = SDL_CreateMutex();
+	if(!mBufferMutex) LOG_WARNING("didn't create mutex");
     memset(mVertexBufferObjects, 0, sizeof(int)*4);
 }
 
@@ -14,19 +17,21 @@ DRGeometrie::~DRGeometrie()
     mIndexCount = 0;
     
     clearData();
+	SDL_DestroyMutex(mBufferMutex);
 }
 
 DRReturn DRGeometrie::init(u32 vertexCount, u32 indexCount/* = 0*/, u32 textureCount/* = 0*/, bool color /*= false*/)
 {
     clearData();
-    releaseVertexBuffer();
+    //releaseVertexBuffer();
 
-	DRLog.writeToLog("[DRGeometrie::init] vertexCount: %d, indexCount: %d summe mBytes: %f", vertexCount, indexCount, (vertexCount*sizeof(DRReal)*3+indexCount*sizeof(GLuint))/(1024.0f*1024.0f));
+    DRLog.writeToLog("[DRGeometrie::init] vertexCount: %d, indexCount: %d summe mBytes: %f", vertexCount, indexCount, (vertexCount*sizeof(DRReal)*3+indexCount*sizeof(GLuint))/(1024.0f*1024.0f));
     
     if(vertexCount)
     {
         mVertices = new DRVector3[vertexCount];
-        mVertexCount = vertexCount;
+        mVertexCount = 0;
+		mMaxVertexCount = vertexCount;
         if(!mVertices) LOG_ERROR("get no memory for vertices array", DR_ERROR);
         
         if(color)
@@ -39,7 +44,7 @@ DRReturn DRGeometrie::init(u32 vertexCount, u32 indexCount/* = 0*/, u32 textureC
             mTextureCoords = new DRVector2*[textureCount];
             mNumTextureCoords = textureCount;
             if(!mTextureCoords) LOG_ERROR("get no memory for texture coords pointer array", DR_ERROR);
-            for(int i = 0; i < textureCount; i++)
+            for(uint i = 0; i < textureCount; i++)
             {
                 mTextureCoords[i] = new DRVector2[vertexCount];
                 if(!mTextureCoords[i]) LOG_ERROR("get no memory for texture coords array", DR_ERROR);
@@ -49,10 +54,14 @@ DRReturn DRGeometrie::init(u32 vertexCount, u32 indexCount/* = 0*/, u32 textureC
     if(indexCount)
     {
         mIndices = new GLuint[indexCount];
-        mIndexCount = indexCount;
+        mIndexCount = 0;
+		mMaxIndexCount = indexCount;
         memset(mIndices, 0, sizeof(GLuint)*indexCount);
         if(!mIndices) LOG_ERROR("get no memory for indices array", DR_ERROR);
     }
+
+	if(initVertexBuffer()) LOG_WARNING("Fehler bei init VertexBuffer!");
+
     return DR_OK;    
 }
 
@@ -64,7 +73,7 @@ void DRGeometrie::clearData()
     
     if(mNumTextureCoords)
     {
-        for(int i = 0; i < mNumTextureCoords; i++)
+        for(uint i = 0; i < mNumTextureCoords; i++)
         {
             DR_SAVE_DELETE_ARRAY(mTextureCoords[i]);
         }
@@ -75,15 +84,18 @@ void DRGeometrie::clearData()
 DRReturn DRGeometrie::initVertexBuffer()
 {
     if(!glGenBuffersARB) LOG_ERROR("no VBO Extension?", DR_ZERO_POINTER);
-    releaseVertexBuffer();
+    //releaseVertexBuffer();
     
-    if(mVertexCount)
+    if(mMaxVertexCount && !mVertexBufferObjects[0])
         glGenBuffersARB(1, &mVertexBufferObjects[0]);
-    if(mColors)
+
+    if(mColors && !mVertexBufferObjects[1])
         glGenBuffersARB(1, &mVertexBufferObjects[1]);
-    if(mIndexCount)
+
+    if(mMaxIndexCount && !mVertexBufferObjects[2])
         glGenBuffersARB(1, &mVertexBufferObjects[2]);
-    if(mNumTextureCoords)
+
+    if(mNumTextureCoords && !mVertexBufferObjects[3])
     {
         if(sizeof(GLuint) != sizeof(int)) LOG_ERROR("[critical] Datatyp error..!", DR_ERROR);
         mVertexBufferObjects[3] = (GLuint)new GLuint[mNumTextureCoords];
@@ -94,6 +106,7 @@ DRReturn DRGeometrie::initVertexBuffer()
 DRReturn DRGeometrie::copyDataToVertexBuffer(GLenum usage /*= GL_STATIC_DRAW_ARB*/, bool clearData/* = false*/)
 {
     if(!glBindBufferARB) LOG_ERROR("glBindBufferARB ist nicht verfügbar", DR_ZERO_POINTER);
+	lock();
     
     if(mVertices && mVertexCount && mVertexBufferObjects[0])
     {
@@ -113,7 +126,7 @@ DRReturn DRGeometrie::copyDataToVertexBuffer(GLenum usage /*= GL_STATIC_DRAW_ARB
     if(mNumTextureCoords && mTextureCoords && mVertexBufferObjects[3] && mVertexCount)
     {
         GLuint* buffers = (GLuint*)mVertexBufferObjects[3];
-        for(int i = 0; i < mNumTextureCoords; i++)
+        for(uint i = 0; i < mNumTextureCoords; i++)
         {
             if(!mTextureCoords[i])
             {
@@ -132,27 +145,33 @@ DRReturn DRGeometrie::copyDataToVertexBuffer(GLenum usage /*= GL_STATIC_DRAW_ARB
     mRenderVertexBuffer = true;
     if(clearData)
         this->clearData();
+	unlock();
     return DR_OK;
 }
 
 DRReturn DRGeometrie::updateIndexDataIntoVertexBuffer(int from, int to, GLenum usage)
 {
-    if(!mVertexBufferObjects[2] || !mIndexCount || !mIndices ||
+    if(!mVertexBufferObjects[2] || !mMaxIndexCount || !mIndices ||
         !glBufferDataARB || !glBufferSubDataARB)
         LOG_ERROR("Zero-Pointer", DR_ZERO_POINTER);
+	lock();
     glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, mVertexBufferObjects[2]); 
-    if(!from && !to || to == mVertexCount)
-        glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER_ARB, sizeof(GLuint)*mIndexCount, mIndices, usage);
-    else
+    if(!from && !to || to == mMaxIndexCount)
+        glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER_ARB, sizeof(GLuint)*mMaxIndexCount, mIndices, usage);
+    else	
         glBufferSubDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, from, sizeof(GLuint)*(from-to), mIndices);
+
+	mIndexCount = to;
     
     glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0); 
+	unlock();
 	return DR_OK;
 }
 
 void DRGeometrie::releaseVertexBuffer()
 {
     if(!glDeleteBuffersARB) LOG_ERROR_VOID("glDeleteBuffersARB didn't exist");
+	lock();
     
     for(int i = 0; i < 3; i++)
     {
@@ -169,15 +188,17 @@ void DRGeometrie::releaseVertexBuffer()
         mVertexBufferObjects[3] = 0;
     }
     mRenderVertexBuffer = false;
+	unlock();
 }
 
 DRReturn DRGeometrie::render()
 {
-    if(!mVertexCount) LOG_ERROR("Nichts zum rendern", DR_ERROR);
-    if(!mRenderMode)  LOG_ERROR("kein render mode set", DR_ERROR);
+    if(!mVertexCount) LOG_ERROR("nothing to render", DR_ERROR);
+    if(!mRenderMode)  LOG_ERROR("no render mode set", DR_ERROR);
     
+	lock();
     glEnableClientState(GL_VERTEX_ARRAY);
-    if(mRenderVertexBuffer)
+    if(mRenderVertexBuffer && mVertexBufferObjects[0])
     {
         glBindBufferARB( GL_ARRAY_BUFFER_ARB, mVertexBufferObjects[0]); 
         glVertexPointer(3, GL_FLOAT, 0, (char*)NULL);
@@ -185,14 +206,14 @@ DRReturn DRGeometrie::render()
     else
     {
         if(mVertices) glVertexPointer(3, GL_FLOAT, 0, mVertices);
-        else LOG_ERROR("keine vertices...", DR_ZERO_POINTER);
+        else LOG_ERROR("no vertices...", DR_ZERO_POINTER);
     }
     
     
     if(mColors || (mVertexBufferObjects[1] && mRenderVertexBuffer))
     {
         glEnableClientState(GL_COLOR_ARRAY);
-        if(mRenderVertexBuffer)
+        if(mRenderVertexBuffer && mVertexBufferObjects[1])
         {
             glBindBufferARB(GL_ARRAY_BUFFER_ARB, mVertexBufferObjects[1]);
             glColorPointer(4, GL_FLOAT, 0, (char*)NULL);
@@ -203,20 +224,20 @@ DRReturn DRGeometrie::render()
         }
     }     
     
-    if(mIndices || (mVertexBufferObjects[2] && mRenderVertexBuffer))
+    if((mIndices || (mVertexBufferObjects[2] && mRenderVertexBuffer)) && mIndexCount)
     {
-        if(!mRenderVertexBuffer)
+        if(mRenderVertexBuffer && mVertexBufferObjects[2])
         {
-            glDrawElements(mRenderMode, mIndexCount, GL_UNSIGNED_INT, mIndices);
+			glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mVertexBufferObjects[2]);             
+            glDrawElements(mRenderMode, mIndexCount, GL_UNSIGNED_INT, 0);
+            //glDrawArrays( mRenderMode, 0, mVertexCount );             
         }
         else
         {
-            glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mVertexBufferObjects[2]);             
-            glDrawElements(mRenderMode, mIndexCount, GL_UNSIGNED_INT, 0);
-            //glDrawArrays( mRenderMode, 0, mVertexCount ); 
+           glDrawElements(mRenderMode, mIndexCount, GL_UNSIGNED_INT, mIndices);
         }            
     }
-    else
+    else if(mVertexCount)
     {
         glDrawArrays(mRenderMode, 0, mVertexCount);    
     }
@@ -230,7 +251,9 @@ DRReturn DRGeometrie::render()
         glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
         glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
     }
+
     if(DRGrafikError("Geometrie::render")) LOG_ERROR("Fehler beim rendern!", DR_ERROR);
+	unlock();
     
     return DR_OK;
 }

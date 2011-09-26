@@ -32,12 +32,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
             // attach to proces
             // return FALSE to fail DLL load
             g_ProzessCount++;
-            DRLog.writeToLog("Prozess Attach, current: %d", g_ProzessCount);
+            //DRLog.writeToLog("Prozess Attach, current: %d", g_ProzessCount);
             break;
 
         case DLL_PROCESS_DETACH:
             g_ProzessCount--;
-            DRLog.writeToLog("Prozess Attach, current: %d", g_ProzessCount);
+            //DRLog.writeToLog("Prozess Attach, current: %d", g_ProzessCount);
             // detach from process
             if(!g_ProzessCount && !g_ThreadCount)
             {
@@ -49,13 +49,13 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
         case DLL_THREAD_ATTACH:
             // attach to thread
             g_ThreadCount++;
-            DRLog.writeToLog("Thread Attach, current: %d", g_ThreadCount);
+           // DRLog.writeToLog("Thread Attach, current: %d", g_ThreadCount);
             break;
 
         case DLL_THREAD_DETACH:
             // detach from thread
             g_ThreadCount--;
-            DRLog.writeToLog("Thread Detach, current: %d", g_ThreadCount);
+            //DRLog.writeToLog("Thread Detach, current: %d", g_ThreadCount);
             if(!g_ProzessCount && !g_ThreadCount)
             {
                 clearImageList();
