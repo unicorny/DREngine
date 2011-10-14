@@ -21,8 +21,8 @@ public:
      * 
      */
     DRReturn initIcoSphere(u8 maxEbene = 0, int seed = 0);
-	DRReturn changeGeometrieTo(u8 ebene = 0, bool waitToComplete = false);
-	DRReturn update();
+    DRReturn changeGeometrieTo(u8 ebene = 0, bool waitToComplete = false);
+    DRReturn update();
     
 private:
     DRGeometrieIcoSphere(const DRGeometrieIcoSphere& orig) {LOG_WARNING("Not exist");}
@@ -33,7 +33,7 @@ private:
         IcoSphereFace(int seed = 0);
         ~IcoSphereFace() {reset();}
         void reset(DRGeometrieIcoSphere* sphere = NULL);
-        bool   hasChilds();
+        bool hasChilds();
         IcoSphereFace* getChildAtBorder(GLuint borderIndices[2], IcoSphereFace* caller = NULL);
         
         IcoSphereFace* mNeighbors[3];
@@ -49,21 +49,22 @@ private:
     
     //achtung! rekursive funktion!
     void subdivide(IcoSphereFace* current = NULL);
-	int removeLeafs(IcoSphereFace* current = NULL);
+    int removeLeafs(IcoSphereFace* current = NULL);
     
     //achtung! rekursive funktion!  
     DRReturn grabIndicesFromFaces(IcoSphereFace* current = NULL);
     void reset(bool full = true);
     
+    DRReturn calculateNormals(uint oldVertexCount);    
     
     std::list<IcoSphereFace*>           mFreeIcoFaceMemory;
     IcoSphereFace                       mRootSphereFaces[20];
     u8                                  mMaxEbene;
-	u8									mCurrentEbene;
-	u8									mNewEbene;
+    u8									mCurrentEbene;
+    u8									mNewEbene;
     GLuint                              mMaxFaceBuffer;
-	SDL_Thread*							mUpdateThread;
-	SDL_sem *							mUpdateThreadSemaphore;
+    SDL_Thread*							mUpdateThread;
+    SDL_sem *							mUpdateThreadSemaphore;
     
     static float                        mVektorLength;          
     unsigned int                        mVertexCursor;      
