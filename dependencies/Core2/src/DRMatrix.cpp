@@ -2,6 +2,11 @@
 
 DRMatrix DRMatrix::translation(const DRVector3& v)
 {
+	return DRMatrix(1.0f, 0.0f, 0.0f, v.x,
+		            0.0f, 1.0f, 0.0f, v.y,
+					0.0f, 0.0f, 1.0f, v.z,
+					0.0f, 0.0f, 0.0f, 1.0f);
+
     DRMatrix m = identity();
     m(0,3) = v.x;
     m(1,3) = v.y;
@@ -11,6 +16,11 @@ DRMatrix DRMatrix::translation(const DRVector3& v)
 }
 DRMatrix DRMatrix::rotationX(const float f)
 {
+	return DRMatrix(1.0f, 0.0f,     0.0f,    0.0f,
+					0.0f, cosf(f), -sinf(f), 0.0f,
+					0.0f, sinf(f),  cosf(f), 0.0f,
+					0.0f, 0.0f,     0.0f,    1.0f);
+
     DRMatrix m = identity();
     m(1,1) =   cosf(f); m(1,2) = sinf(f);
     m(2,1) =  -sinf(f); m(2,2) = cosf(f);
@@ -18,6 +28,11 @@ DRMatrix DRMatrix::rotationX(const float f)
 }
 DRMatrix DRMatrix::rotationY(const float f)
 {
+	return DRMatrix(cosf(f), 0.0f, sinf(f), 0.0f,
+					0.0f,    1.0f, 0.0f,    0.0f,
+				   -sinf(f), 0.0f, cosf(f), 0.0f,
+					0.0f,    0.0f, 0.0f,    1.0f);
+
     DRMatrix m = identity();
     m(0,0) =  cosf(f); m(0,2) = -sinf(f);
     m(2,0) =  sinf(f); m(2,2) =  cosf(f);
@@ -25,6 +40,10 @@ DRMatrix DRMatrix::rotationY(const float f)
 }
 DRMatrix DRMatrix::rotationZ(const float f)
 {
+	return DRMatrix(cosf(f), -sinf(f), 0.0f, 0.0f,
+					sinf(f),  cosf(f), 0.0f, 0.0f, 
+					0.0f,     0.0f,    1.0f, 0.0f,
+					0.0f,     0.0f,    0.0f, 1.0f);
     DRMatrix m = identity();
     m(0,0) =  cosf(f);  m(0,1) = sinf(f);
     m(1,0) = -sinf(f);  m(1,1) = cosf(f);
@@ -32,13 +51,38 @@ DRMatrix DRMatrix::rotationZ(const float f)
 }
 DRMatrix DRMatrix::rotationAxis(const DRVector3& v, const float f)
 {
+	DRVector3 axis = v;
+	if(v.lengthSq() != 1.0)
+	{
+		axis = v.normalize();
+		//LOG_WARNING("parameter v isn't normalized!");
+		printf("\r [DRMatrix::rotationAxis] parameter v isn't normalized!");
+	}
+	const float _cos = cosf(f);
+	const float _sin = sinf(f);
+    const float oneMinusCos = 1.0f - _cos;
+
+	return DRMatrix(axis.x*axis.x * oneMinusCos + _cos,
+					axis.x*axis.y * oneMinusCos - axis.z * _sin,
+					axis.x*axis.z * oneMinusCos + axis.y * _sin, 
+					0.0f,
+					axis.y*axis.x * oneMinusCos + axis.z * _sin,
+					axis.y*axis.y * oneMinusCos + _cos,
+					axis.y*axis.z * oneMinusCos - axis.x * _sin,
+					0.0f,
+					axis.x*axis.z * oneMinusCos - axis.y * _sin,
+					axis.y*axis.z * oneMinusCos + axis.x * _sin,
+					axis.z*axis.z * oneMinusCos + _cos,
+					0.0f,
+					0.0f, 0.0f, 0.0f, 1.0f);
+
 	// Sinus und Kosinus berechnen
 	const float fSin = sinf(-f);
 	const float fCos = cosf(-f);
 	const float fOneMinusCos = 1.0f - fCos;
 
 	// Achsenvektor normalisieren
-	const DRVector3 axis(v.normalize() );
+//	const DRVector3 axis(v.normalize() );
 
 	// DRMatrix erstellen
 	DRMatrix m = identity();
@@ -58,15 +102,15 @@ DRMatrix DRMatrix::rotationAxis(const DRVector3& v, const float f)
 }
 DRMatrix DRMatrix::rotation(const DRVector3& v)
 {
-    return rotationZ(v.z) * rotationY(v.y) * rotationX(v.x);
+    //return rotationZ(v.z) * rotationY(v.y) * rotationX(v.x);
+	return rotationX(v.x) * rotationY(v.y) * rotationZ(v.z);
 }
 DRMatrix DRMatrix::scaling(const DRVector3& v)
 {
-    DRMatrix m = identity();
-    m.m[0][0] = v.x;
-    m.m[1][1] = v.y;
-    m.m[2][2] = v.z;
-    return m;
+	return DRMatrix(v.x, 0.0f, 0.0f, 0.0f,
+					0.0f, v.y, 0.0f, 0.0f,
+					0.0f, 0.0f, v.z, 0.0f, 
+					0.0f, 0.0f, 0.0f, 1.0f);
 }
 DRMatrix DRMatrix::transpose() const
 {
@@ -112,8 +156,8 @@ float DRMatrix::det() const
 {
 // Determinante der linken oberen 3x3-Teilmatrix berechnen
 	return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
-               m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
-               m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+           m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
+           m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
 }
 
 DRMatrix DRMatrix::axis(const DRVector3& x_axis, const DRVector3& y_axis, const DRVector3& z_axis)
@@ -122,4 +166,25 @@ DRMatrix DRMatrix::axis(const DRVector3& x_axis, const DRVector3& y_axis, const 
                     y_axis.x, y_axis.y, y_axis.z, 0.0f,
                     z_axis.x, z_axis.y, z_axis.z, 0.0f,
                     0.0f,     0.0,      0.0f,     1.0f);
+}
+
+DRMatrix DRMatrix::view_frustum(const float angle_of_view, const float aspect_ratio,
+								const float z_near, const float z_far)
+{
+	float focalLength = 1 / tanf(angle_of_view/2.0f);
+
+	return DRMatrix(focalLength/aspect_ratio, 0.0f,		   0.0f,					      0.0f,
+					0.0f,					  focalLength, 0.0f,						  0.0f,
+					0.0f,					  0.0f,		   (z_far+z_near)/(z_near-z_far), (2*z_far*z_near)/(z_near-z_far),
+					0.0f,					  0.0f,		   -1.0f,						  0.0f);
+
+	DRMatrix mat(DRMatrix::identity());	
+	mat(0,0) = focalLength/aspect_ratio;
+	mat(1,1) = focalLength;
+	mat(2,2) = (z_far+z_near)/(z_near-z_far);
+	mat(3,2) = (2*z_far*z_near)/(z_near-z_far);
+	mat(2,3) = -1.0f;
+	mat(3,3) = 0.0f;
+	return mat;
+	
 }
