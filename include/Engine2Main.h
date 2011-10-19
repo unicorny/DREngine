@@ -78,6 +78,9 @@ const float PI = 3.1415926535f;
 
 //einbinden von OpenGL
 //#include <GL/glu.h>   // Damit kann Glu32 genutzt werden.
+#define GLEW_STATIC
+#include "glew.h"
+#define NO_SDL_GLEXT
 #include <sdl/SDL_opengl.h>
 #include <sdl/SDL_thread.h>
 
@@ -88,7 +91,7 @@ const float PI = 3.1415926535f;
 
 //----------------------------------------------------------------------------------------------------------------------
 //Interne Header
-#include "glExtensions.h"
+//#include "glExtensions.h"
 #include "DRInterface.h"
 #include "DRINetwork.h"
 #include "DRIvlc.h"

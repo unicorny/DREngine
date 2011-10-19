@@ -301,7 +301,15 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 	//OpenGL einrichten f�r Ohrtogonale Projection
 	glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
-        DRActivateVBExtension();
+        //DRActivateVBExtension();
+        GLenum err = glewInit();
+        if (GLEW_OK != err)
+        {
+                /* Problem: glewInit failed, something is seriously wrong. */
+                DRLog.writeToLog("Error: %s\n", glewGetErrorString(err));
+                LOG_ERROR("Fehler bei Glew Init", DR_ERROR);
+        }
+        DRLog.writeToLog("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
         
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -309,7 +317,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-	if(video.getMultiSampling()) glEnable(GL_MULTISAMPLE_ARB);
+    if(video.getMultiSampling()) glEnable(GL_MULTISAMPLE_ARB);
 
 	//----------------------------------------------------------------------------------------------------------------------
 	//ein Paar Infos zu OpenGL ausgeben
@@ -329,8 +337,8 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 		fprintf(pFile, "Version: %s\n", glGetString(GL_VERSION));
 		fprintf(pFile, "Unterst�tzte Erweiterungen:\n");
 
-		DRWriteExtensionsToLog((const char*)glGetString(GL_EXTENSIONS), pFile);
-                //fprintf(pFile, "%s", (const char*)glGetString(GL_EXTENSIONS));
+		//DRWriteExtensionsToLog((const char*)glGetString(GL_EXTENSIONS), pFile);
+                fprintf(pFile, "%s", (const char*)glGetString(GL_EXTENSIONS));
 
 	//	DRLog.WriteToLog("------------------OpenGL Daten Ende ------------------------");
 		fprintf(pFile, "------------------OpenGL Daten Ende ------------------------\n");
