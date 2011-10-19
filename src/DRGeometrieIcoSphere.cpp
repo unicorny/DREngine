@@ -138,8 +138,11 @@ DRReturn DRGeometrieIcoSphere::changeGeometrieTo(u8 ebene/* = 0*/, bool waitToCo
 		SDL_ThreadPriority(SDL_THREAD_PRIORITY_LOW);
 		*/
 	mNewEbene = ebene;
-
+#if SDL_VERSION_ATLEAST(1,3,0)
+	mUpdateThread = SDL_CreateThread(updateGeometrieThread, "DRGeoUpd", this);
+#else
 	mUpdateThread = SDL_CreateThread(updateGeometrieThread, this);
+#endif
 
 	if(waitToComplete)
 	{
@@ -519,7 +522,7 @@ DRReturn DRGeometrieIcoSphere::calculateNormals(uint oldVertexCount)
 {
     //DRLog.writeToLog("vertexCount: %d", mVertexCount);
     if(oldVertexCount > mVertexCount) return DR_OK;
-    for(int i = 0; i < mVertexCount; i++)
+    for(uint i = 0; i < mVertexCount; i++)
     {
         mNormals[i] = mVertices[i].normalize();
         mColors[i] = DRColor(1.0f, 1.0f, 1.0f);
@@ -533,11 +536,7 @@ DRReturn DRGeometrieIcoSphere::calculateNormals(uint oldVertexCount)
                                          asinf(mNormals[i].y)/PI+0.5f);
         //mTextureCoords[0][i] = DRVector2(mNormals[i].x, mNormals[i].z);
      //   DRLog.writeToLog("tex: %d= u:%f, v:%f, normal: x:%f, y:%f", i, mTextureCoords[0][i].u, mTextureCoords[0][i].v, mNormals[i].x, mNormals[i].y);
-        if(i >= 42)
-        {
-            mTextureCoords[0][i] = DRVector2(0.5f);
-            mColors[i] = DRColor(0.0f, 0.0f, 1.0f);
-        }
+     
     }
     return DR_OK;
 }

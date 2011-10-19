@@ -24,6 +24,7 @@ std::string Request::makeToString(map<string, string>* parameter)
         if(it != parameter->end())
             text += string("&");
     }
+	return text;
 }
 
 DRNet_Status Request::send(const void* data, int length)

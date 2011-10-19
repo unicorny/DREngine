@@ -118,7 +118,7 @@ const float PI = 3.1415926535f;
 ENGINE_API extern SDL_Surface* g_pSDLWindow;
 ENGINE_API extern DRVector2  g_v2WindowLength;
 ENGINE_API extern Uint8*    g_piPressed;
-ENGINE_API extern u16       g_CPUCount;
+ENGINE_API extern u16       g_CPU_Count;
 
 /**	Engine Funktionen
 	Verschieden Init-Funktionen und anderes

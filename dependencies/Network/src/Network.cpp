@@ -36,9 +36,13 @@ DRReturn Network::init()
     mConnectionWorkingMutex = SDL_CreateMutex(); LOG_WARNING_SDL();
     mNetCallbackMutex       = SDL_CreateMutex(); LOG_WARNING_SDL();
     mServerWorkingMutex     = SDL_CreateMutex(); LOG_WARNING_SDL();
-
+#if SDL_VERSION_ATLEAST(1,3,0)
+	mConnectionThread = SDL_CreateThread(ConnectThread, "DRNetcon", this);
+	mServerThread     = SDL_CreateThread(ServerThread, "DRNetServ", this);
+#else
     mConnectionThread = SDL_CreateThread(ConnectThread, this);
     mServerThread     = SDL_CreateThread(ServerThread, this);
+#endif
 
     LOG_INFO("Network Init");
     mInitalized = true;

@@ -6,7 +6,7 @@ DRHashList mImageList;
 
 void clearImageList()
 {
-    for(int i = 0; i < mImageList.getNItems(); i++)
+    for(uint i = 0; i < mImageList.getNItems(); i++)
     {
         DRImage* img = (DRImage*)mImageList.findHashByIndex(i);
         DRImage* last = (DRImage*)mImageList.findByIndex(i);

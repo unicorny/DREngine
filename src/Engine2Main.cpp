@@ -13,7 +13,7 @@ bool		g_bEnInit = false;
 bool		g_bGL = false;
 
 Uint8*		g_piPressed = NULL;
-u16             g_CPUCount = 0;
+u16             g_CPU_Count = 0;
 
 //********************************************************************************************************************++
 
@@ -89,7 +89,7 @@ DRReturn EnInit_Simple(DRReal fVersion /* = 0.0f*/, bool initSound/* = false*/)
 			return DR_ERROR;
 		}
 
-	if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_CDROM | SDL_INIT_EVENTTHREAD) < 0)
+	if(SDL_Init(SDL_INIT_TIMER) < 0)
 	{
 		DRLog.writeToLog("SDL konnte nicht initalisiert werden! Fehler: %s\n", SDL_GetError());
 		LOG_ERROR("Fehler bei SDL Init", DR_ERROR);
@@ -253,7 +253,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 	DRLog.mUnlockMutex = &UnlockLoggerMutex;
         
 #if SDL_VERSION_ATLEAST(1,3,0)
-        g_CPU_Count = SDL_GetCPUCount();
+    g_CPU_Count = SDL_GetCPUCount();
 #endif
 
 	//Not Exit Funktion festlegen
@@ -438,7 +438,11 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
 {
     bool bRun = true;
 	int iNumKeys = 0;
+#if SDL_VERSION_ATLEAST(1,3,0)
+	SDL_GetKeyboardState(&iNumKeys);
+#else
 	SDL_GetKeyState(&iNumKeys);
+#endif
 	g_piPressed = new Uint8[iNumKeys];
 
 	//Time Variablen (Frames Per Seecond gegl�ttet)
@@ -455,7 +459,11 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
     while(bRun)
 	{
 		uiStartTime = SDL_GetTicks();
+#if SDL_VERSION_ATLEAST(1,3,0)
+		Uint8* pKeys = SDL_GetKeyboardState(NULL);
+#else
 		Uint8* pKeys = SDL_GetKeyState(NULL);
+#endif		
 		int i = 0;
 		for (i = 0; i < iNumKeys; i++)
 		{
