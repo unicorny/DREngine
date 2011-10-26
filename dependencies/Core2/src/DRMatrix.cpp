@@ -56,7 +56,7 @@ DRMatrix DRMatrix::rotationAxis(const DRVector3& v, const float f)
 	{
 		axis = v.normalize();
 		//LOG_WARNING("parameter v isn't normalized!");
-		printf("\r [DRMatrix::rotationAxis] parameter v isn't normalized!");
+		//printf("\r [DRMatrix::rotationAxis] parameter v isn't normalized!");
 	}
 	const float _cos = cosf(f);
 	const float _sin = sinf(f);

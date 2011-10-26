@@ -50,7 +50,7 @@ public:
     //! \param m andere DRMatrix von der die Werte genommen werden
 	DRMatrix(const DRMatrix& m) {memcpy(n, m.n, sizeof(float)*16);}
 
-	// Spalte ist groﬂ bei opengl...
+	// Spalte ist gro√ü bei opengl...
 	//! \brief Konstruktor, der jeden einzelnen DRMatrix Wert erwartet
 	//! \param _m00 = x Achse x Koordinate
 	//! \param _m01 = x Achse y Koordinate

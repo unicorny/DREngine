@@ -75,7 +75,7 @@ void DRObjekt::update()
     DRMatrix m1 = DRMatrix::axis(mXAxis, mYAxis, mZAxis);
     DRMatrix m2 = DRMatrix::translation(mPosition);
     //mMatrix = DRMatrix(m1) * DRMatrix(m2);
-	mMatrix = DRMatrix(m2) * DRMatrix(m1);
+    mMatrix = DRMatrix(m2) * DRMatrix(m1);
    // mMatrix.print();
 }
 
