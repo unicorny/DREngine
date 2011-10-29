@@ -27,12 +27,13 @@ public:
     // Camera Matrix wird automatisch geupdatet, wenn camera gesetzt wurde, wenn nicht, return DR_ERROR
     DRReturn updateMatritzen(DRReal fovAngle, DRReal aspectRatio, DRReal zNearPlane, DRReal zFarPlane);
     
+    
     DRFrustumPosition isPointInFrustum(const DRVector3& point);
     DRFrustumPosition isSphereInFrustum(const DRVector3& middlePoint, DRReal radius);
     DRFrustumPosition isBoxInFrustum(const DRVector3& boxMin, const DRVector3& boxMax, const DRMatrix& transform = DRMatrix::identity());
 private:
     
-    DRFrustumPosition classifyBox(const DRVector3& boxMin, const DRVector3& boxMax, const DRMatrix& invTransform, int planeIndex);
+    DRFrustumPosition classifyBox(const DRVector3& boxMin, DRVector3& boxMax, const DRMatrix& invTransform, int planeIndex);
     
     DRPlane   mViewPlanes[6];
     DRObjekt* mCamera;    

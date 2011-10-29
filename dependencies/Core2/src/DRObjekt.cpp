@@ -36,7 +36,7 @@ void DRObjekt::rotateRel(const DRVector3& rotation)
 	mYAxis = mYAxis.transformNormal(mRot);
 
 	// Rotation um die y-Achse des Objekts
-    mRot = DRMatrix::rotationAxis(mYAxis, rotation.y);
+        mRot = DRMatrix::rotationAxis(mYAxis, rotation.y);
 	mXAxis = mXAxis.transformNormal(mRot);
 	mZAxis = mXAxis.cross(mYAxis);
 
@@ -53,21 +53,21 @@ void DRObjekt::rotateAbs(const DRVector3& rotation)
 {
     // Rotation um die x-Achse
     DRMatrix mRotation(DRMatrix::rotationX(rotation.x));
-	mYAxis = mYAxis.transformNormal(mRotation);
-	mZAxis = mXAxis.cross(mYAxis);
+    mYAxis = mYAxis.transformNormal(mRotation);
+    mZAxis = mXAxis.cross(mYAxis);
 
-	// Rotation um die y-Achse
+    // Rotation um die y-Achse
     mRotation = DRMatrix::rotationY(rotation.y);
-	mXAxis = mXAxis.transformNormal(mRotation);
-	mZAxis = mXAxis.cross(mYAxis);
+    mXAxis = mXAxis.transformNormal(mRotation);
+    mZAxis = mXAxis.cross(mYAxis);
 
-	// Rotation um die z-Achse
+    // Rotation um die z-Achse
     mRotation = DRMatrix::rotationZ(rotation.z);
-	mXAxis = mXAxis.transformNormal(mRotation);
-	mYAxis = mYAxis.transformNormal(mRotation);
+    mXAxis = mXAxis.transformNormal(mRotation);
+    mYAxis = mYAxis.transformNormal(mRotation);
 
-	// Matrizen aktualisieren
-	update();
+    // Matrizen aktualisieren
+    update();
 }
 
 void DRObjekt::update()

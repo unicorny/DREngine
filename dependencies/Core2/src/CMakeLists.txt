@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.6)
 SET(CoreSrc 
 	Core2Main.cpp DRFile.cpp DRFileManager.cpp DRHashList.cpp
 	DRLogger.cpp DRUtils.cpp DRMatrix.cpp DRVector2.cpp DRDampingSpring.cpp DRIni.cpp
-        DRVector3.cpp DRObjekt.cpp DRFrustumCulling)
+        DRVector3.cpp DRObjekt.cpp DRFrustumCulling DRPlane)
 
 	
 #IF(WIN32)

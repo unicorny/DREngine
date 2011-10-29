@@ -183,7 +183,7 @@ DRReturn DRGeometrieIcoSphere::update()
 int DRGeometrieIcoSphere::updateGeometrieThread(void* data)
 {
 	DRGeometrieIcoSphere* t = (DRGeometrieIcoSphere*)data;
-        uint oldVertexCount = t->mVertexCount;
+    uint oldVertexCount = t->mVertexCount;
 	if(t->mCurrentEbene < t->mNewEbene)
 	{
             t->mFacesSphereCount = 0;

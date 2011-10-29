@@ -83,16 +83,16 @@ DRReturn EnInit_Simple(DRReal fVersion /* = 0.0f*/, bool initSound/* = false*/)
 	if(fVersionCheck(fVersion)) return DR_ERROR;
 
 	if(!g_bEnInit)
-		if(EnInit(fVersion, initSound))
-		{
-			printf("Fehler bei EnInit");
-			return DR_ERROR;
-		}
+            if(EnInit(fVersion, initSound))
+            {
+                    printf("Fehler bei EnInit");
+                    return DR_ERROR;
+            }
 
 	if(SDL_Init(SDL_INIT_TIMER) < 0)
 	{
-		DRLog.writeToLog("SDL konnte nicht initalisiert werden! Fehler: %s\n", SDL_GetError());
-		LOG_ERROR("Fehler bei SDL Init", DR_ERROR);
+            DRLog.writeToLog("SDL konnte nicht initalisiert werden! Fehler: %s\n", SDL_GetError());
+            LOG_ERROR("Fehler bei SDL Init", DR_ERROR);
 	}
 
 	//Logger mutex
@@ -159,66 +159,66 @@ DRReturn EnInit_INI(const char* iniFileName)
 	if(!strcmp("OpenGL", tempString))
 	//|| !strcmp("SDL", tempString))
 	{
-		// Titel
-		char* titel = NULL;
-		tempString = ini.getStr("Base", "Titel")->data();
-		if(tempString)
-		{
-			if(strlen(tempString) > 5)
-			{
-				titel = new char[strlen(tempString)+1];
-				strcpy(titel, tempString);
-			}
-		}
-		// BMP Icon
-		char* icon = NULL;
-		tempString = ini.getStr("Base", "Icon")->data();
-		if(tempString)
-		{
-			if(strlen(tempString) > 5)
-			{
-				icon = new char[strlen(tempString)+1];
-				strcpy(icon, tempString);	
-			}
-		}
-		// Video Config
-		DRVideoConfig config;
-		config.setFullscreen(ini.getInt("OpenGL", "Vollbild"));
+            // Titel
+            char* titel = NULL;
+            tempString = ini.getStr("Base", "Titel")->data();
+            if(tempString)
+            {
+                    if(strlen(tempString) > 5)
+                    {
+                            titel = new char[strlen(tempString)+1];
+                            strcpy(titel, tempString);
+                    }
+            }
+            // BMP Icon
+            char* icon = NULL;
+            tempString = ini.getStr("Base", "Icon")->data();
+            if(tempString)
+            {
+                    if(strlen(tempString) > 5)
+                    {
+                            icon = new char[strlen(tempString)+1];
+                            strcpy(icon, tempString);	
+                    }
+            }
+            // Video Config
+            DRVideoConfig config;
+            config.setFullscreen(ini.getInt("OpenGL", "Vollbild"));
 #ifdef _DEBUG
-		config.setFullscreen(0);
+            config.setFullscreen(0);
 #endif
-		if(ini.getInt("OpenGL", "Breite"))
-                    config.setWidth(ini.getInt("OpenGL", "Breite"));
-                if(ini.getInt("OpenGL", "Hoehe"))
-                        config.setHeight(ini.getInt("OpenGL", "Hoehe"));
-                if(ini.getInt("OpenGL", "MultiSample"))
-                        config.setMultiSampling(ini.getInt("OpenGL", "MultiSample"));
-                if(ini.getInt("OpenGL", "ZBuffer"))
-                        config.setZBuffer(ini.getInt("OpenGL", "ZBuffer"));
-		
-		tempString = ini.getStr("Base", "Mode")->data();
-		DRReturn returnValue;
-		//if(!strcmp("OpenGL", tempString))
-			returnValue = EnInit_OpenGL(version, config, titel, icon);
-		//else 
-		//	returnValue = EnInit_SDL(version, config, titel, icon);
-		DR_SAVE_DELETE_ARRAY(titel);
-		DR_SAVE_DELETE_ARRAY(icon);
+            if(ini.getInt("OpenGL", "Breite"))
+                config.setWidth(ini.getInt("OpenGL", "Breite"));
+            if(ini.getInt("OpenGL", "Hoehe"))
+                    config.setHeight(ini.getInt("OpenGL", "Hoehe"));
+            if(ini.getInt("OpenGL", "MultiSample"))
+                    config.setMultiSampling(ini.getInt("OpenGL", "MultiSample"));
+            if(ini.getInt("OpenGL", "ZBuffer"))
+                    config.setZBuffer(ini.getInt("OpenGL", "ZBuffer"));
+
+            tempString = ini.getStr("Base", "Mode")->data();
+            DRReturn returnValue;
+            //if(!strcmp("OpenGL", tempString))
+                returnValue = EnInit_OpenGL(version, config, titel, icon);
+            //else 
+            //	returnValue = EnInit_SDL(version, config, titel, icon);
+            DR_SAVE_DELETE_ARRAY(titel);
+            DR_SAVE_DELETE_ARRAY(icon);
 
 
-		return returnValue;
+            return returnValue;
 	}
 	else if(!strcmp("Core", tempString))
 	{
-		return Core2_init();
+            return Core2_init();
 	}
 	else
 	{
-		if(strcmp("Simple", tempString))
-			fprintf(stderr, "Mode in ini File isn't give, using Simple\n");
+            if(strcmp("Simple", tempString))
+                    fprintf(stderr, "Mode in ini File isn't give, using Simple\n");
 
-		//return EnInit_Simple(version, (bool)initSound);
-                return EnInit_Simple(version);
+            //return EnInit_Simple(version, (bool)initSound);
+            return EnInit_Simple(version);
                 
 	}
 	return DR_OK;
@@ -229,11 +229,11 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 {
 	if(!g_bEnInit)
 	{
-		if(EnInit(fVersion, bInitSound))
-		{
-			fprintf(stderr, "Fehler bei EnInit\n");
-			return DR_ERROR;
-		}
+            if(EnInit(fVersion, bInitSound))
+            {
+                    fprintf(stderr, "Fehler bei EnInit\n");
+                    return DR_ERROR;
+            }
 	}
 
 	if(fVersionCheck(fVersion))
@@ -244,8 +244,8 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 	if(SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
-		DRLog.writeToLog("SDL konnte nicht initalisiert werden! Fehler: %s\n", SDL_GetError());
-		LOG_ERROR("Fehler bei SDL Init", DR_ERROR);
+            DRLog.writeToLog("SDL konnte nicht initalisiert werden! Fehler: %s\n", SDL_GetError());
+            LOG_ERROR("Fehler bei SDL Init", DR_ERROR);
 	}
 	//Logger mutex
 	DRLog.mMutex = (void*)SDL_CreateMutex();
@@ -253,7 +253,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 	DRLog.mUnlockMutex = &UnlockLoggerMutex;
         
 #if SDL_VERSION_ATLEAST(1,3,0)
-    g_CPU_Count = SDL_GetCPUCount();
+        g_CPU_Count = SDL_GetCPUCount();
 #endif
 
 	//Not Exit Funktion festlegen
@@ -275,7 +275,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 	srand(SDL_GetTicks());
 #endif //_WIN32
 
-	//OpenGL Einstellungen t�tigen
+	//OpenGL Einstellungen tätigen
 	video.setGLParams();
 
 	Uint32 uiVorGLInit = SDL_GetTicks();
@@ -297,7 +297,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 		return DR_ERROR;
 	}
 	Uint32 uiNachGLInit = SDL_GetTicks();
-	DRLog.writeToLog("F�r OpenGL Init ben�tigte zeit: %f Sekunden", (float)(uiNachGLInit-uiVorGLInit)/1000.0f);
+	DRLog.writeToLog("Für OpenGL Init benötigte zeit: %f Sekunden", (float)(uiNachGLInit-uiVorGLInit)/1000.0f);
 
 	//OpenGL einrichten f�r Ohrtogonale Projection
 	glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
@@ -453,14 +453,14 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
 #endif
 	g_piPressed = new Uint8[iNumKeys];
 
-	//Time Variablen (Frames Per Seecond gegl�ttet)
+	//Time Variablen (Frames Per Seecond geglättet)
 	Uint32 uiStartTime = 0;
 	Uint32 uiEndTime = SDL_GetTicks();
 	DRReal fTime = 0.0f;
 	double dTimes[6]; memset(dTimes, 0, 5*sizeof(double));
 	char    cCounter = 0;
 
-	//Variablen f�r Time Statistik
+	//Variablen für Time Statistik
 	double dGesTime = 0.0, dGesTime2 = 0.0;
 	long   lNumWerte = 0;
 

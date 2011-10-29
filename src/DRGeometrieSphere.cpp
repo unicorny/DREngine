@@ -70,10 +70,10 @@ void DRGeometrieSphere::makeSphericalLandscape(GLuint numIterations, GLuint rand
     if(!mVertexCount) LOG_ERROR_VOID("keine Vertices zum manipulieren!");
     DRRandom::seed(randomSeed);
     
-    const int threadCount = 4;   
+    const int threadCount = g_CPU_Count;   
     PlaneData planes(numIterations, randomSeed);
-    LandscapeGenerateMultithreadData workingData[threadCount];
-    SDL_Thread* threads[threadCount];
+    LandscapeGenerateMultithreadData* workingData = new LandscapeGenerateMultithreadData[threadCount];
+    SDL_Thread** threads = new SDL_Thread*[threadCount];
     
     for(int i = 0; i < threadCount; i++)
     {
@@ -81,11 +81,11 @@ void DRGeometrieSphere::makeSphericalLandscape(GLuint numIterations, GLuint rand
         workingData[i].vertices = &mVertices[mVertexCount/threadCount*i];
         workingData[i].vertexCount = mVertexCount/threadCount;
 #if SDL_VERSION_ATLEAST(1,3,0)
-		threads[i] = SDL_CreateThread(makeLandscapeThread, "DRGeoLSC" ,&workingData[i]);
+        threads[i] = SDL_CreateThread(makeLandscapeThread, "DRGeoLSC" ,&workingData[i]);
 #else
-		threads[i] = SDL_CreateThread(makeLandscapeThread, &workingData[i]);
+        threads[i] = SDL_CreateThread(makeLandscapeThread, &workingData[i]);
 #endif
-		printf("thread: %d, vertexIndex: %d, vertexCount: %d, ges vertexCount: %d\n",i, mVertexCount/threadCount*i, mVertexCount/threadCount, mVertexCount);
+        printf("thread: %d, vertexIndex: %d, vertexCount: %d, ges vertexCount: %d\n",i, mVertexCount/threadCount*i, mVertexCount/threadCount, mVertexCount);
     }
     
     for(int i = 0; i < threadCount; i++)
@@ -98,6 +98,8 @@ void DRGeometrieSphere::makeSphericalLandscape(GLuint numIterations, GLuint rand
             DRLog.writeToLog("Thread %d return with error: %d", i, returnValue);            
         }
     }    
+    DR_SAVE_DELETE_ARRAY(threads);
+    DR_SAVE_DELETE_ARRAY(workingData);
 }
 
 int DRGeometrieSphere::makeLandscapeThread(void* data)

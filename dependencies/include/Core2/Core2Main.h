@@ -114,10 +114,14 @@ enum /*CORE_API*/ DRReturn
 	DR_RENDER = 4
 };
 
-#ifdef _WIN32
-//enum CORE2_API DRReturn;
+#if (_MSC_VER >= 1200 && _MSC_VER < 1310)
+ enum CORE2_API DRReturn;
 #endif
 
+//ä = \303\244
+//ü = \303\274
+//ö = \303\266
+//ß = \303\237
 
 // core includes (ohne log)
 #include "DRVector2.h"
@@ -126,6 +130,7 @@ enum /*CORE_API*/ DRReturn
 #include "DRPlane.h"
 #include "DRMatrix.h"
 #include "DRObjekt.h"
+#include "DRFrustumCulling.h"
 #include "DRIni.h"
 #include "DRDampingSpring.h"
 //#include "DRGeometrieGenerator.h"
