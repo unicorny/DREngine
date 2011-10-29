@@ -111,7 +111,7 @@ DRFrustumPosition DRFrustumCulling::classifyBox(const DRVector3& boxMin,
                                                 const DRMatrix& invTransform, 
                                                 int planeIndex)
 {
-    DRPlane transformedPlane = mViewPlanes[planeIndex];//.transform(invTransform);
+    DRPlane transformedPlane = mViewPlanes[planeIndex].transform(invTransform);
     
     // Nächsten und fernsten Punkt berechnen
     DRVector3 nearPoint(boxMax);
