@@ -23,6 +23,8 @@
 #ifndef __CORE_2_MAIN_H__
 #define __CORE_2_MAIN_H__
 
+#define _DEBUG
+
 #ifdef _WIN32
 #include <windows.h>
 #include <direct.h>
@@ -154,6 +156,7 @@ CORE2_API extern DRLogger DRLog;
 // core includes (mit log)
 #include "DRFileManager.h"
 #include "DRMemoryList.h"
+#include "DRIndexReferenzHolder.h"
 
 CORE2_API DRReturn Core2_init(const char* logFileName = "Logger.html");
 CORE2_API void      Core2_exit();

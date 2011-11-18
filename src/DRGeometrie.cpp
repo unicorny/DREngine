@@ -31,7 +31,7 @@ DRReturn DRGeometrie::init(u32 vertexCount, u32 indexCount/* = 0*/, u32 textureC
     {
         mVertices = new DRVector3[vertexCount];
         mVertexCount = 0;
-		mMaxVertexCount = vertexCount;
+        mMaxVertexCount = vertexCount;
         if(!mVertices) LOG_ERROR("get no memory for vertices array", DR_ERROR);
         
         if(color)
