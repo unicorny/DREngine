@@ -17,7 +17,7 @@ DRImage::~DRImage()
 }
 
 //**********************************************************************************************************************
-const char* DRImage::colorTypeName(FREE_IMAGE_COLOR_TYPE type)
+const char* DRImage::colorTypeName(FREE_IMAGE_COLOR_TYPE type) 
 {
     switch(type)
     {
@@ -163,7 +163,7 @@ DRReturn DRImage::saveIntoFile(const char* filename)
     return DR_OK;
 }
 
-GLenum DRImage::getImageFormat()
+GLenum DRImage::getImageFormat() const
 {
     if(!mLoadedSucessfully) LOG_ERROR("not loaded", 0);
     FREE_IMAGE_COLOR_TYPE colorType = FreeImage_GetColorType(mImage);
@@ -183,19 +183,19 @@ GLenum DRImage::getImageFormat()
     return imageFormat;
 }
 
-u32 DRImage::getWidth()
+u32 DRImage::getWidth() const
 {
     if(!mLoadedSucessfully) LOG_ERROR("not loaded", 0);
     return FreeImage_GetWidth(mImage);
 }
 
-u32 DRImage::getHeight()
+u32 DRImage::getHeight() const
 {
     if(!mLoadedSucessfully) LOG_ERROR("not loaded", 0);
     return FreeImage_GetHeight(mImage);
 }
 
-DRVector2 DRImage::getSize()
+DRVector2 DRImage::getSize() const
 {
     if(!mLoadedSucessfully) LOG_ERROR("not loaded", DRVector2(0.0f));
     return DRVector2((DRReal)FreeImage_GetWidth(mImage), (DRReal)FreeImage_GetHeight(mImage));

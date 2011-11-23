@@ -10,14 +10,14 @@ public:
     // Funktionen
     virtual DRReturn loadFromFile(const char* filename);
     virtual DRReturn saveIntoFile(const char* filename);
-    virtual GLenum getImageFormat();
+    virtual GLenum getImageFormat() const;
     virtual void setImageFormat(GLenum format);
     
-    virtual u32 getWidth();
+    virtual u32 getWidth() const;
     virtual void setWidth(u32 width);
-    virtual u32 getHeight();
+    virtual u32 getHeight() const;
     virtual void setHeight(u32 height);
-    virtual DRVector2 getSize();
+    virtual DRVector2 getSize() const;
     virtual void setSize(DRVector2 size);
     virtual u8* getPixel();
     virtual void getPixel(DRColor* buffer);
@@ -26,8 +26,8 @@ public:
 
 protected:
     //Hilfsfunktionen
-    const char* colorTypeName(FREE_IMAGE_COLOR_TYPE type);
-    const char* imageFormatName(FREE_IMAGE_FORMAT type);
+    static const char* colorTypeName(FREE_IMAGE_COLOR_TYPE type);
+    static const char* imageFormatName(FREE_IMAGE_FORMAT type);
 
 private:
     FIBITMAP* mImage;

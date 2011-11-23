@@ -58,9 +58,36 @@ DRReturn DRTextur::load(const char* filename, bool keepImage /* = false*/, GLint
     return DR_OK;
 }
 
+DRReturn DRTextur::loadFromMemory(DRColor* colors, DRVector2 size, GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* = GL_LINEAR*/)
+{
+    unload();
+    //generate an OpenGL texture ID for this texture
+    glGenTextures(1, &mTexturID);
+    //bind to the new texture ID
+    glBindTexture(GL_TEXTURE_2D, mTexturID);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glMinFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glMagFilter);
+
+    //store the texture data for OpenGL use
+/*	glTexImage2D(GL_TEXTURE_2D, 0, uiNumComponents, width, height,
+            0, imageFormat, GL_UNSIGNED_BYTE, bits);
+            */
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y,
+            0, GL_RGBA, GL_FLOAT, colors);
+
+    if(DRGrafikError("[DRTextur::loadFromMemory] Fehler beim erstellen einer Textur!")) return DR_ERROR;
+   // DRLog.writeToLog("Textur, format: %d, components: %d, rgb: %d, rgba: %d, width: %d, height: %d",
+     //                   format, numComponents, GL_RGB, GL_RGBA, mParent->getWidth(), mParent->getHeight());
+        
+    mSucessfullLoaded = true;
+    return DR_OK;
+}
+
 DRReturn DRTextur::load(GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* = GL_LINEAR*/)
 {
     if(!mParent) LOG_ERROR("Zero-Pointer", DR_ERROR);
+    unload(false);
     //generate an OpenGL texture ID for this texture
     glGenTextures(1, &mTexturID);
     //bind to the new texture ID
@@ -86,18 +113,20 @@ DRReturn DRTextur::load(GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* =
    // DRLog.writeToLog("Textur, format: %d, components: %d, rgb: %d, rgba: %d, width: %d, height: %d",
      //                   format, numComponents, GL_RGB, GL_RGBA, mParent->getWidth(), mParent->getHeight());
         
+    mSucessfullLoaded = true;
     return DR_OK;
 }
 
-void DRTextur::unload()
+void DRTextur::unload(bool full /* = true*/)
 {
     mSucessfullLoaded = false;
-    if(mParent)
+    if(mParent && full)
     {
         DRIImage::deleteImage(mParent);
         mParent = NULL;
     }
-    glDeleteTextures(1, &mTexturID);
+    if(mTexturID)
+        glDeleteTextures(1, &mTexturID);
     mTexturID = 0;
 }
 

@@ -23,7 +23,7 @@
 #ifndef __CORE_2_MAIN_H__
 #define __CORE_2_MAIN_H__
 
-#define _DEBUG
+//#define _DEBUG
 
 #ifdef _WIN32
 #include <windows.h>

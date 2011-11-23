@@ -109,9 +109,7 @@ DRReturn DRGeometrie::initVertexBuffer()
         if(sizeof(GLuint) != sizeof(int)) LOG_ERROR("[critical] Datatyp error..!", DR_ERROR);
         mVertexBufferObjects[4] = (GLuint)new GLuint[mNumTextureCoords];
         glGenBuffersARB(mNumTextureCoords, (GLuint*)mVertexBufferObjects[4]);
-    }
-    
-    
+    }    
     
     return DR_OK;
 }
