@@ -91,7 +91,7 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene, int seed /*= 0*/)
         if(mHeightValues)
         {
             float height = mHeightValues->getHeightValue(mVertices[i]);
-            mVertices[i] *= 1.0f + height;
+            //mVertices[i] *= 1.0f + height;
             mColors[i] = mHeightValues->getColorValue(height);
         }
     }
@@ -146,29 +146,30 @@ DRReturn DRGeometrieIcoSphere::changeGeometrieTo(u8 ebene/* = 0*/, bool waitToCo
         mHorizontAngle = 0.0f;
     }
 
-	int returnValue = 0;
-	if(mUpdateThread && waitToComplete)
-	{
-            SDL_WaitThread(mUpdateThread, &returnValue);
-            if(returnValue)
-            {
-                LOG_WARNING("Fehler in Thread occured");
-                DRLog.writeToLog("Thread return with error: %d", returnValue);            
-            }
-            mUpdateThread = NULL;
-	}
-	else if(mUpdateThread) return DR_OK;
+    int returnValue = 0;
+    if(mUpdateThread && waitToComplete)
+    {
+        SDL_WaitThread(mUpdateThread, &returnValue);
+        if(returnValue)
+        {
+            LOG_WARNING("Fehler in Thread occured");
+            DRLog.writeToLog("Thread return with error: %d", returnValue);            
+        }
+        mUpdateThread = NULL;
+    }
+    else if(mUpdateThread) return DR_OK;
 /*	if(waitToComplete)
-		SDL_ThreadPriority(SDL_THREAD_PRIORITY_NORMAL);
-	else
-		SDL_ThreadPriority(SDL_THREAD_PRIORITY_LOW);
-		*/
+            SDL_ThreadPriority(SDL_THREAD_PRIORITY_NORMAL);
+    else
+            SDL_ThreadPriority(SDL_THREAD_PRIORITY_LOW);
+            */
     if(ebene > mCurrentEbene)
         mNewEbene = mCurrentEbene +1;
     else if(ebene < mCurrentEbene)
         mNewEbene = mCurrentEbene -1;
     else
-        mNewEbene = mCurrentEbene;
+        return DR_OK;
+        //mNewEbene = mCurrentEbene;
 	//mNewEbene = mCurrentEbene-1;//ebene;
 #if SDL_VERSION_ATLEAST(1,3,0)
 	mUpdateThread = SDL_CreateThread(updateGeometrieThread, "DRGeoUpd", this);
@@ -176,8 +177,8 @@ DRReturn DRGeometrieIcoSphere::changeGeometrieTo(u8 ebene/* = 0*/, bool waitToCo
 	mUpdateThread = SDL_CreateThread(updateGeometrieThread, this);
 #endif
 
-	if(waitToComplete)
-	{
+    if(waitToComplete)
+    {
         SDL_WaitThread(mUpdateThread, &returnValue);
         if(returnValue)
         {
@@ -188,9 +189,9 @@ DRReturn DRGeometrieIcoSphere::changeGeometrieTo(u8 ebene/* = 0*/, bool waitToCo
         if(copyDataToVertexBuffer()) 
             LOG_ERROR("copyDataToVertexBuffer", DR_ERROR);
         mUpdateThread = NULL;
-	}
+    }
 		
-	return DR_OK;
+    return DR_OK;
 }
 
 DRReturn DRGeometrieIcoSphere::update()
@@ -203,6 +204,7 @@ DRReturn DRGeometrieIcoSphere::update()
                 if(copyDataToVertexBuffer()) 
                     LOG_ERROR("copyDataToVertexBuffer", DR_ERROR);
                 SDL_mutexV(mUpdateGeometrieMutex);
+                printf("update Change Geometrie update\n");
             }
             int returnValue = 0;
 
@@ -227,12 +229,13 @@ int DRGeometrieIcoSphere::updateGeometrieThread(void* data)
         
         for(int i = 0; i < 2; i++)
         {
-                t->removeLeafs();   
-                t->subdivide();   	
+            t->removeLeafs();   
+            t->subdivide();   	
         }
 	
         if(t->mUpdateChanged)
         {
+            printf("update Change Geometrie Thread\n");
             SDL_mutexP(t->mUpdateGeometrieMutex);
             if(t->grabIndicesFromFaces())
             LOG_ERROR("grabIndicesFromFaces", -2);
@@ -242,7 +245,7 @@ int DRGeometrieIcoSphere::updateGeometrieThread(void* data)
             LOG_ERROR("calculateNormals", -3);
             SDL_mutexV(t->mUpdateGeometrieMutex);                
         }
-		t->mCurrentEbene = t->mNewEbene;
+        t->mCurrentEbene = t->mNewEbene;
 //	if(t->copyDataToVertexBuffer()) 
 //		LOG_ERROR("copyDataToVertexBuffer", -1);
 
@@ -325,8 +328,8 @@ void DRGeometrieIcoSphere::subdivide(DRGeometrieIcoSphere::IcoSphereFace* curren
         if(mNewEbene <= 0) return;
         for(int i = 0; i < 20; i++)
         {
-            if(mRelCameraPos.lengthSq() > 0 && !isFaceVisible(&mRootSphereFaces[i]))
-                continue;
+           // if(mRelCameraPos.lengthSq() > 0 && !isFaceVisible(&mRootSphereFaces[i]))
+             //   continue;
             subdivide(&mRootSphereFaces[i], currentEbene+1);
         }
         mVertexCount = mVertexCursor;
@@ -416,7 +419,7 @@ DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::newChildFace(DRGeomet
                 if(mHeightValues)
                 {
                     float height = mHeightValues->getHeightValue(mVertices[newIndex]);
-                    mVertices[newIndex] *= 1.0f + height;
+                    //mVertices[newIndex] *= 1.0f + height;
                     mColors[newIndex] = mHeightValues->getColorValue(height);
                 }
 
