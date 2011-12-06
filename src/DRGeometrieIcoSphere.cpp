@@ -56,7 +56,7 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene, int seed /*= 0*/)
     
     const GLuint indexCount = 60;
     
-    if(init(12*(uint)powf(4.0f, (float)maxEbene), indexCount*(uint)powf(4.0f, (float)maxEbene), 1, true, true))
+    if(init(12*(uint)powf(4.0f, (float)maxEbene-1.0f), indexCount*(uint)powf(4.0f, (float)maxEbene-1.0f), 1, true, true))
         LOG_ERROR("Fehler bei init Geometrie", DR_ERROR);
     mIndexReferenzen = new DRIndexReferenzHolder(mMaxVertexCount);
  //   if(initVertexBuffer())

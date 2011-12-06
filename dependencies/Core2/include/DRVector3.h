@@ -92,6 +92,11 @@ public:
     //! \param v der Vektor mit dem addiert wird
     //! \return einen neuen Vektor
     DRVector3 operator +  (const DRVector3& v) const {return DRVector3(x+v.x, y+v.y, z+v.z);}
+    //!  subtrahiert vom aktuellen Vektor, die Koordinaten des &uuml;bergebenden Vektors
+    //! \brief subtraktions operator
+    //! \param v der Vektor der subtrahiert wird
+    //! \return referenz auf diesen Vektor
+    DRVector3 operator -= (const DRVector3& v) {x -= v.x; y -= v.y; z -= v.z; return *this;}
     //! subtrahiert den Vektor vom &uuml;bergebenden und liefert den neuen Vektor zur&uuml;ck
     //! \brief subtraktions operator
     //! \param v der Vektor der subtrahiert wird
