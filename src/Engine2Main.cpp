@@ -577,7 +577,7 @@ DRReturn DRGrafikError(const char* pcErrorMessage)
 	GLenum GLError = glGetError();
 	if(GLError)
 	{
-		DRLog.writeToLog("OpenGL Fehler: %s", DRGetGLErrorText(GLError));
+		DRLog.writeToLog("OpenGL Fehler: %s (%d)", DRGetGLErrorText(GLError), GLError);
 		LOG_ERROR(pcErrorMessage, DR_ERROR);
 	}
 	return DR_OK;
