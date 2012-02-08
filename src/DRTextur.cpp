@@ -136,7 +136,7 @@ DRReturn DRTextur::bind()
     //bind to the new texture ID
 	glBindTexture(GL_TEXTURE_2D, mTexturID);
 
-	if(DRGrafikError("bind texture")) return DR_ERROR;
+	if(DRGrafikError("DRTextur::bind texture")) return DR_ERROR;
 
     return DR_OK;
 }
