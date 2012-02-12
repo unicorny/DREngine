@@ -732,7 +732,7 @@ DRReturn DRFileManager::addFolderToFileSystem(const char* folderName)
 {
 #ifdef _WIN32
     int state = _mkdir(folderName);
-	if(state)
+	if(state && errno != 17)
 	{
 		DRLog.writeToLog("Fehler bei erstellen des Ordners: %s, fehlernr: %d", folderName, errno);
 	}

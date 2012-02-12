@@ -157,6 +157,11 @@ DRReturn DRImage::saveIntoFile(const char* filename)
         FreeImage_Unload(mImage);
         mImage = t;
     }
+    //FIBITMAP* t = FreeImage_Rotate(mImage, 0);
+    //FreeImage_Unload(mImage);
+    //mImage = t;
+    FreeImage_FlipVertical(mImage);
+    
     if(!FreeImage_Save(fif, mImage, filename, 0 ))
         LOG_ERROR("image couldn't be saved", DR_ERROR);
     

@@ -258,7 +258,7 @@ DRReturn DRLogger::writeToLog(DRString text)
 	//m_File.close();
 //	m_pFile = NULL;
 	// Zus�tzlich wird noch eine Debug-Ausgabe erzeugt.
-	OutputDebugString(acBuffer1);
+	OutputDebugString(text.data());
 
 #endif
 	if(mUnlockMutex) mUnlockMutex();

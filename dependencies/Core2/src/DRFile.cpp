@@ -281,7 +281,18 @@ DRFileErrorCodes DRFile::setFilePointer(s32 ulDistance, unsigned long ulStartPoi
 
 bool DRIsFileExist(const char* pcFilename)
 {
-	FILE* pFile = fopen(pcFilename, "rb");
+    const char* path = DRFileManager::Instance().getWholePfad(pcFilename);
+	FILE* pFile = NULL;//fopen(pcFilename, "rb");
+    
+	if(!path)
+	{
+        pFile = fopen(pcFilename, "rb");
+	}
+	else
+	{
+        pFile = fopen(DRString(DRString(path)+"/"+pcFilename).data(), "rb");
+	}
+    
 	if(pFile)
 	{
 		fclose(pFile);
