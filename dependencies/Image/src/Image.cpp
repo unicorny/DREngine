@@ -103,7 +103,10 @@ DRReturn DRImage::loadFromFile(const char* filename)
 		mImage = FreeImage_Load(fif, filename);
 	//if the image failed to load, return failure
 	if(!mImage)
-		LOG_ERROR("Image failed to Load, FIF Support failed?", DR_ERROR);
+    {
+        DRLog.writeToLog("Textur: %s", filename);
+		LOG_ERROR("Image failed to Load, FIF Support failed?", DR_ERROR);        
+    }
 
 	//retrieve the image data
 //	mImageData = FreeImage_GetBits(mImage);

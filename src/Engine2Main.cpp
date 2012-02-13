@@ -335,6 +335,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 		fprintf(pFile, "Grafikkarten Hersteller: %s\n", glGetString(GL_VENDOR));
 		fprintf(pFile, "Grafikkarte: %s\n", glGetString(GL_RENDERER));
 		fprintf(pFile, "Version: %s\n", glGetString(GL_VERSION));
+        fprintf(pFile, "Shader: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 		fprintf(pFile, "Unterst�tzte Erweiterungen:\n");
 
 		//DRWriteExtensionsToLog((const char*)glGetString(GL_EXTENSIONS), pFile);

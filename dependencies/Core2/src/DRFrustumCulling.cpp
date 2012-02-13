@@ -20,7 +20,7 @@ DRReturn DRFrustumCulling::updateMatritzen(DRReal fovAngle, DRReal aspectRatio, 
     double angleX = atan(this->mFovAngleTangent*this->mAspectRatio);
     this->mSphereFactorX = 1.0f/cos(angleX);
     
-    DRMatrix temp(mCamera->getMatrix() * DRMatrix::view_frustum(fovAngle, aspectRatio, zNearPlane, zFarPlane));
+    DRMatrix temp(mCamera->getMatrix() * DRMatrix::perspective_projection(fovAngle, aspectRatio, zNearPlane, zFarPlane));
     for(int j = 0; j < 4; j++)
     {
         // linke clipping ebene
