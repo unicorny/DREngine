@@ -184,7 +184,6 @@ typedef unsigned int uintptr_t;
 
 #endif /* _SDL_config_win32_h */
 
-
 #else
 
 
