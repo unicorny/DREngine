@@ -24,6 +24,9 @@
 #define MM (1L<<30)                 /* the modulus */
 #define mod_diff(x,y) (((x)-(y))&(MM-1)) /* subtraction mod MM */
 #define mod_sum(x,y) (((x)+(y))-(int)((x)+(y)))   /* (x+y) mod 1.0 */
+#ifndef __STDC__
+#define __STDC__
+#endif
 
 long ran_x[KK];                    /* the generator state */
 double ran_u[KK];           /* the generator state */
@@ -179,6 +182,34 @@ double ranf_arr_cycle()
 
 // **************************************************************************************************************
 // **************************************************************************************************************
+// XORshift Quelle: http://de.wikipedia.org/wiki/Xorshift
+u32 xorshift_x = 123456789;
+u32 xorshift_y = 362436069;
+u32 xorshift_z = 521288629;
+u32 xorshift_w = 88675123;
+u32 xorshift() 
+{
+    /* 32 Bit periodenlänge
+    xorshiftSeed ^= xorshiftSeed << 13;
+    xorshiftSeed ^= xorshiftSeed >> 17;
+    xorshiftSeed ^= xorshiftSeed << 5;
+    return xorshiftSeed;
+     * */
+    
+    u32 t = xorshift_x ^ (xorshift_x << 11);
+    xorshift_x = xorshift_y; xorshift_y = xorshift_z; xorshift_z = xorshift_w;
+    xorshift_w ^= (xorshift_w >> 19) ^ t ^ (t >> 8);
+ 
+    return xorshift_w;
+}
+void xorshift_seed(u32 seed)
+{
+    xorshift_x = seed;
+    xorshift();
+}
+
+// **************************************************************************************************************
+// **************************************************************************************************************
 
 // static vars
 long random_buffer[KK];
@@ -189,8 +220,9 @@ uint randf_buffer_cursor = KK;
 //***************************************************************************************************************
 void DRRandom::seed(long seed)
 {
-    DRLog.writeToLog("[DRRandom::seed] seed reinit: %d\n", seed);
+    //DRLog.writeToLog("[DRRandom::seed] seed reinit: %d\n", seed);
     ran_start(seed);
+    xorshift_seed(seed);
     rand_buffer_cursor = KK;
     seedf(seed);
 }
@@ -203,6 +235,7 @@ void DRRandom::seedf(long seed)
 
 long DRRandom::core2_rand()
 {
+    return xorshift();
     if(rand_buffer_cursor >= KK)
     {
         rand_buffer_cursor = 0;
@@ -232,7 +265,7 @@ u64 DRRandom::r64()
 double DRRandom::rDouble(double max, double min)
 {
     double value = core2_randf();
-    printf("rDouble: %f\n", value);
+    //printf("rDouble: %f\n", value);
     return min + (max - min) * value;     
 }
 
