@@ -124,7 +124,7 @@ DRMatrix DRMatrix::axis(const DRVector3& x_axis, const DRVector3& y_axis, const 
                     0.0f,     0.0,      0.0f,     1.0f);
 }
 
-DRMatrix DRMatrix::view_frustum(const float angle_of_view, const float aspect_ratio,
+DRMatrix DRMatrix::perspective_projection(const float angle_of_view, const float aspect_ratio,
 			        const float z_near, const float z_far)
 {
 	float focalLength = 1 / tanf(angle_of_view/2.0f);
@@ -133,4 +133,13 @@ DRMatrix DRMatrix::view_frustum(const float angle_of_view, const float aspect_ra
                         0.0f,			  focalLength, 0.0f,			      0.0f,
                         0.0f,                     0.0f,	      (z_far+z_near)/(z_near-z_far), (2*z_far*z_near)/(z_near-z_far),
                         0.0f,                     0.0f,       -1.0f,			      0.0f);	
+}
+
+DRMatrix DRMatrix::ortho_projection(const float left, const float right, const float bottom, const float top,
+                                    const float zNear, const float zFar)
+{
+    return DRMatrix(2.0f/(right-left), 0.0f, 0.0f, -((right+left)/(right-left)),
+                    0.0f, 2.0f/(top-bottom), 0.0f, -((top+bottom)/(top-bottom)),
+                    0.0f, 0.0f, -2.0f/(zFar-zNear),-((zFar+zNear)/(zFar-zNear)),
+                    0.0f, 0.0f, 0.0f, 1.0f);
 }

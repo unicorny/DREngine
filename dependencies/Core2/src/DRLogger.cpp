@@ -168,9 +168,9 @@ DRReturn DRLogger::writeToLog(const char* pcText, ...)
 	m_File.setFilePointer(0, SEEK_END);
 
 	//Buffer f�llen
-	va_start(Argumente, pcText);
- 	vsprintf(acBuffer, pcText, Argumente);
-	va_end(Argumente);
+        va_start(Argumente, pcText);
+        vsprintf(acBuffer, pcText, Argumente);
+        va_end(Argumente);
 
 	int iCursor = 0;
 	//ersetzen der \n durch <br>
@@ -218,11 +218,57 @@ DRReturn DRLogger::writeToLog(const char* pcText, ...)
 	return DR_OK;
 }
 
+DRReturn DRLogger::writeToLog(DRString text)
+{
+    if(mLockMutex) mLockMutex();
+
+	//Datei zum anh�ngen �ffnen (wenn sie es nicht schon ist)
+	if(!m_File.isOpen()) m_File.open(m_acFilename, false, "at");
+
+	//wenns nicht geht, Fehler
+	if(!m_File.isOpen()) return DR_ERROR;
+
+	m_File.setFilePointer(0, SEEK_END);
+
+	printf("%s\n", text.data());
+        
+	//ersetzen der \n durch <br>
+	text.replace(text.find('\n'),1,"<br>");
+
+        DRString final = DRString("<tr><td><font size=\"2\" color=\"#000080\">");
+        final += text;
+        final += DRString("</font></td></tr>");
+	//einf�gen eines Zeilenumbruchs und Formationen
+	if(m_File.getFile())
+            fprintf(m_File.getFile(), final.data());
+
+
+	//in die Datei schreiben
+//	fprintf(m_pFile, acBuffer);
+	//if(m_File.write(acBuffer2, sizeof(char), strlen(acBuffer2))) return DR_ERROR;
+
+	//DRRemoveHTMLTags(acBuffer2, acBuffer1, 1024);
+	
+
+
+	//und Datei schlie�en (nur im Debug Modus)
+#ifdef _DEBUG
+//	fclose(m_pFile);
+	fflush(m_File.getFile());
+	//m_File.close();
+//	m_pFile = NULL;
+	// Zus�tzlich wird noch eine Debug-Ausgabe erzeugt.
+	OutputDebugString(text.data());
+
+#endif
+	if(mUnlockMutex) mUnlockMutex();
+	return DR_OK;
+}
+
 //***************************************************************************
 
 DRReturn DRLogger::writeToLogDirect(const char* pcText, ...)
 {
-	FMARK;
 	if(mLockMutex) mLockMutex();
 	//Textbuffer zum schreiben
 	char acBuffer[1024];

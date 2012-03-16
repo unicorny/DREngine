@@ -28,6 +28,8 @@
 #endif _DEBUG
 */
 
+//#define _DEBUG
+
 #ifdef _WIN32
 #include <windows.h>
 #include <direct.h>
@@ -135,6 +137,7 @@ enum /*CORE_API*/ DRReturn
 #include "DRColor.h"
 #include "DRPlane.h"
 #include "DRMatrix.h"
+#include "DRRandom.h"
 #include "DRObjekt.h"
 #include "DRFrustumCulling.h"
 #include "DRIni.h"

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*/*************************************************************************
  *                                                                         *
  * Core, Core-Lib for my programs, Core doesn't need any libraries	   *
@@ -19,6 +20,8 @@
  *                                                                         *
  ***************************************************************************/
 
+=======
+>>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
 /* 
  * File:   DRIndexReferenzHolder.h
  * Author: Dario
@@ -26,8 +29,13 @@
  * Created on 8. November 2011, 11:56
  */
 
+<<<<<<< HEAD
 #ifndef __DR_CORE2_INDEX_REFERENZ_HOLDER__
 #define	__DR_CORE2_INDEX_REFERENZ_HOLDER__
+=======
+#ifndef __DR_INDEX_REFERENZ_HOLDER_H
+#define	__DR_INDEX_REFERENZ_HOLDER_H
+>>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
 
 class CORE2_API DRIndexReferenzHolder
 {
@@ -50,5 +58,9 @@ private:
     
 };
 
+<<<<<<< HEAD
 #endif	/* __DR_CORE2_INDEX_REFERENZ_HOLDER__ */
+=======
+#endif	/* __DR_INDEX_REFERENZ_HOLDER_H */
+>>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
 

@@ -4,12 +4,18 @@ cmake_minimum_required(VERSION 2.6)
 SET(Engine2Src Engine2Main DRInterface DRINetwork DRIvlc DRVideoConfig DRIImage DRTextur
                DRText DRGeometrie DRGeometrieSphere DRGeometrieIcoSphere glew)
 SET(PA ../dependencies/bin ../dependencies/lib ../dependencies/Core2/lib)
-find_library(SDL2_LIB libSDL PATHS ${PA})
+find_library(SDL_LIB libSDL PATHS ${PA})
 
 if(WIN32)
+<<<<<<< HEAD
 SET(Engine2Libs ${SDL2_LIB} opengl32 DRCore2 Winmm)
 elseif(UNIX)
 SET(Engine2Libs ${SDL2_LIB} GL DRCore2)
+=======
+SET(Engine2Libs ${SDL_LIB} opengl32 Core2 Winmm)
+elseif(UNIX)
+SET(Engine2Libs ${SDL_LIB} GL Core2)
+>>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
 endif(WIN32)
 #ENABLE_EXPORTS()
 #DEFINE_SYMBOL(BUILD_DLL)

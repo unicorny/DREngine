@@ -335,6 +335,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 		fprintf(pFile, "Grafikkarten Hersteller: %s\n", glGetString(GL_VENDOR));
 		fprintf(pFile, "Grafikkarte: %s\n", glGetString(GL_RENDERER));
 		fprintf(pFile, "Version: %s\n", glGetString(GL_VERSION));
+        fprintf(pFile, "Shader: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 		fprintf(pFile, "Unterst�tzte Erweiterungen:\n");
 
 		//DRWriteExtensionsToLog((const char*)glGetString(GL_EXTENSIONS), pFile);
@@ -565,7 +566,7 @@ const char* DRGetGLErrorText(GLenum eError)
 	case GL_STACK_OVERFLOW:		return "GL_STACK_OVERFLOW";
 	case GL_STACK_UNDERFLOW:	return "GL_STACK_UNDERFLOW";
 	case GL_OUT_OF_MEMORY:		return "GL_OUT_OF_MEMORY";
-	case GL_NO_ERROR:			return "GL_NO_ERROR";
+    case GL_NO_ERROR:			return "GL_NO_ERROR";
 	default: return "- gl Unknown error-";
 	}
 	return "- error -";
@@ -577,7 +578,7 @@ DRReturn DRGrafikError(const char* pcErrorMessage)
 	GLenum GLError = glGetError();
 	if(GLError)
 	{
-		DRLog.writeToLog("OpenGL Fehler: %s", DRGetGLErrorText(GLError));
+		DRLog.writeToLog("OpenGL Fehler: %s (%d)", DRGetGLErrorText(GLError), GLError);
 		LOG_ERROR(pcErrorMessage, DR_ERROR);
 	}
 	return DR_OK;

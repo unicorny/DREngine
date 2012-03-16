@@ -37,7 +37,7 @@ DRReturn DRIImage::saveIntoFile(const char* filename)
     return DR_OK;    
 }
 
-GLenum DRIImage::getImageFormat()
+GLenum DRIImage::getImageFormat() const
 {
     LOG_WARNING("Not implemented!");
     return 0;
@@ -48,7 +48,7 @@ void DRIImage::setImageFormat(GLenum format)
     LOG_WARNING("Not implemented!");
 }
 
-u32 DRIImage::getWidth()
+u32 DRIImage::getWidth() const
 {
     LOG_WARNING("Not implemented!");
     return 0;
@@ -59,7 +59,7 @@ void DRIImage::setWidth(u32 width)
     LOG_WARNING("Not implemented!");
 }
 
-u32 DRIImage::getHeight()
+u32 DRIImage::getHeight() const
 {
     LOG_WARNING("Not implemented!");
     return 0;
@@ -91,7 +91,7 @@ void DRIImage::setSize(DRVector2 size)
     LOG_WARNING("Not implemented!");
 }
 
-DRVector2 DRIImage::getSize()
+DRVector2 DRIImage::getSize() const
 {
     LOG_WARNING("Not implemented!");
     return DRVector2(0.0f);

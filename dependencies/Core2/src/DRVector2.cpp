@@ -30,7 +30,7 @@ DRVector2 DRVector2::transformNormal(const DRMatrix& m) const
 	//const DRMatrix mTransform(DRMatrixTranspose(DRMatrixInvert(m)));
 	const DRMatrix mTransform(m.invert().transpose());
 
-	// Vektor mit Matrix transformieren und urspr�ngliche L�nge wiederherstellen
+	// Vektor mit Matrix transformieren und ursprüngliche Länge wiederherstellen
 	return DRVector2(x * mTransform(0,0) + y * mTransform(1,0),
-                         x * mTransform(0,1) + y * mTransform(1,1)).normalize() * fLength;
+                     x * mTransform(0,1) + y * mTransform(1,1)).normalize() * fLength;
 }

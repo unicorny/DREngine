@@ -5,28 +5,31 @@
  * Created on 25. August 2011, 13:28
  */
 
-#ifndef DR_ENGINE_RANDOM_H
-#define	DR_ENGINE_RANDOM_H
+#ifndef DR_CORE2_RANDOM_H
+#define	DR_CORE2_RANDOM_H
 
 
-class ENGINE_API DRRandom
+class CORE2_API DRRandom
 {
 public:
     DRRandom() {/*srand(time(NULL));*/}
     
-    static u64 r64() { return rand();}// + ((long long)rand()) << 32;}
-    static double rDouble(double max, double min) 
-    {
-        return min + (max - min) * ((double)(rand() % 10001) / 10000.0);                
-    }
+    static long core2_rand();
+    static double core2_randf();
+    static u64 r64();// { return rand();}// + ((long long)rand()) << 32;}
+    static double rDouble(double max, double min); 
     static DRReal rReal(DRReal fMax, DRReal fMin)
     {
-            return fMin + (fMax - fMin) * ((DRReal)(rand() % 10001) / 10000.0f);
+         return static_cast<DRReal>(rDouble(fMax, fMin));
     }
+<<<<<<< HEAD
     static int rInt(int max, int min)
     {
         return min + (rand() % (max-min+1));
     }
+=======
+    static int rInt(int max, int min);
+>>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
     static DRVector3 rVector3(DRReal maxLengthSq)
     {
             DRVector3 ret;
@@ -42,10 +45,11 @@ public:
             ret.y = rReal(maxLengthSq - ret.x, -(maxLengthSq -ret.x));
             return ret;
     }    
-    static void seed(GLuint seed) {srand(seed);}
+    static void seed(long seed); 
+    static void seedf(long seed);
 private:
 };
 
 
-#endif	/* DRRANDOM_H */
+#endif	/* DR_CORE2_RANDOM_H */
 

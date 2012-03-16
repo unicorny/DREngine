@@ -25,7 +25,7 @@ DRReturn DRGeometrie::init(u32 vertexCount, u32 indexCount/* = 0*/, u32 textureC
     clearData();
     //releaseVertexBuffer();
 
-    DRLog.writeToLog("[DRGeometrie::init] vertexCount: %d, indexCount: %d summe mBytes: %f", vertexCount, indexCount, (vertexCount*sizeof(DRReal)*3+indexCount*sizeof(GLuint))/(1024.0f*1024.0f));
+    DRLog.writeToLog("[DRGeometrie::init] vertexCount: %d, indexCount: %d summe mBytes: %f", vertexCount, indexCount, ((vertexCount*sizeof(DRReal)*(3+3*(int)normals+4*(int)color+2*textureCount))+indexCount*sizeof(GLuint))/(1024.0f*1024.0f));
     
     if(vertexCount)
     {
@@ -109,9 +109,7 @@ DRReturn DRGeometrie::initVertexBuffer()
         if(sizeof(GLuint) != sizeof(int)) LOG_ERROR("[critical] Datatyp error..!", DR_ERROR);
         mVertexBufferObjects[4] = (GLuint)new GLuint[mNumTextureCoords];
         glGenBuffersARB(mNumTextureCoords, (GLuint*)mVertexBufferObjects[4]);
-    }
-    
-    
+    }    
     
     return DR_OK;
 }

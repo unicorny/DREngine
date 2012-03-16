@@ -6,16 +6,25 @@ cmake_minimum_required(VERSION 2.6)
 SET(CoreSrc 
 	Core2Main.cpp DRFile.cpp DRFileManager.cpp DRHashList.cpp
 	DRLogger.cpp DRUtils.cpp DRMatrix.cpp DRVector2.cpp DRDampingSpring.cpp DRIni.cpp
+<<<<<<< HEAD
     DRVector3.cpp DRObjekt.cpp DRFrustumCulling DRPlane DRIndexReferenzHolder
 	DRResourcePtr DRResourcePtrHolder)
+=======
+        DRVector3.cpp DRObjekt.cpp DRFrustumCulling DRPlane DRIndexReferenzHolder DRRandom)
+>>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
 
 	
 #IF(WIN32)
 SET(CoreSrc ${CoreSrc} ../include/Core2Main.h ../include/DRFile.h ../include/DRFileManager.h ../include/DRHash.hpp ../include/DRHashList.hpp
                        ../include/DRLogger.h ../include/DRUtils.h ../include/DRVector2.h ../include/DRVector3.h ../include/DRMatrix.h
 					   ../include/DRColor.h ../include/DRPlane.h ../include/DRDampingSpring.h ../include/DRIni.h
+<<<<<<< HEAD
                        ../include/DRObjekt.h ../include/DRFrustumCulling.h ../include/DRIndexReferenzHolder.h
 					   ../include/DRResourcePtr.h ../include/DRResourcePtrHolder.h ../include/DRIResource.h)
+=======
+                        ../include/DRObjekt.h ../include/DRFrustumCulling.h ../include/DRIndexReferenzHolder.h
+						../include/DRRandom.h)
+>>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
 #ENDIF(WIN32)
 ADD_LIBRARY(DRCore2 SHARED ${CoreSrc})
 

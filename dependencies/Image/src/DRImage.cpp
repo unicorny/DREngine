@@ -17,7 +17,7 @@ DRImage::~DRImage()
 }
 
 //**********************************************************************************************************************
-const char* DRImage::colorTypeName(FREE_IMAGE_COLOR_TYPE type)
+const char* DRImage::colorTypeName(FREE_IMAGE_COLOR_TYPE type) 
 {
     switch(type)
     {
@@ -103,7 +103,10 @@ DRReturn DRImage::loadFromFile(const char* filename)
 		mImage = FreeImage_Load(fif, filename);
 	//if the image failed to load, return failure
 	if(!mImage)
-		LOG_ERROR("Image failed to Load, FIF Support failed?", DR_ERROR);
+    {
+        DRLog.writeToLog("Textur: %s", filename);
+		LOG_ERROR("Image failed to Load, FIF Support failed?", DR_ERROR);        
+    }
 
 	//retrieve the image data
 //	mImageData = FreeImage_GetBits(mImage);
@@ -157,13 +160,18 @@ DRReturn DRImage::saveIntoFile(const char* filename)
         FreeImage_Unload(mImage);
         mImage = t;
     }
+    //FIBITMAP* t = FreeImage_Rotate(mImage, 0);
+    //FreeImage_Unload(mImage);
+    //mImage = t;
+    FreeImage_FlipVertical(mImage);
+    
     if(!FreeImage_Save(fif, mImage, filename, 0 ))
         LOG_ERROR("image couldn't be saved", DR_ERROR);
     
     return DR_OK;
 }
 
-GLenum DRImage::getImageFormat()
+GLenum DRImage::getImageFormat() const
 {
     if(!mLoadedSucessfully) LOG_ERROR("not loaded", 0);
     FREE_IMAGE_COLOR_TYPE colorType = FreeImage_GetColorType(mImage);
@@ -183,19 +191,19 @@ GLenum DRImage::getImageFormat()
     return imageFormat;
 }
 
-u32 DRImage::getWidth()
+u32 DRImage::getWidth() const
 {
     if(!mLoadedSucessfully) LOG_ERROR("not loaded", 0);
     return FreeImage_GetWidth(mImage);
 }
 
-u32 DRImage::getHeight()
+u32 DRImage::getHeight() const
 {
     if(!mLoadedSucessfully) LOG_ERROR("not loaded", 0);
     return FreeImage_GetHeight(mImage);
 }
 
-DRVector2 DRImage::getSize()
+DRVector2 DRImage::getSize() const
 {
     if(!mLoadedSucessfully) LOG_ERROR("not loaded", DRVector2(0.0f));
     return DRVector2((DRReal)FreeImage_GetWidth(mImage), (DRReal)FreeImage_GetHeight(mImage));

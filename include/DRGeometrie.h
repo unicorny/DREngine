@@ -29,7 +29,20 @@
 #ifndef __DR_ENGINE2_GEOMETRIE__
 #define	__DR_ENGINE2_GEOMETRIE__
 
+<<<<<<< HEAD
 class ENGINE2_API DRGeometrie
+=======
+
+class ENGINE_API DRHeightValueStorage
+{
+public:
+    virtual float getHeightValue(DRVector3& position) = 0;
+    virtual DRColor getColorValue(const float height) = 0;
+};
+
+
+class ENGINE_API DRGeometrie
+>>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
 {
 public:
     DRGeometrie();
