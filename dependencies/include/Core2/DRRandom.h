@@ -1,13 +1,13 @@
 /*/*************************************************************************
  *                                                                         *
- * EngineDLL, Engine for my programs, using SDL and OpenGL		   *
- * Copyright (C) 2012, 2013, 2014 Dario Rekowski.			   *
+ * Core, Core-Lib for my programs, Core doesn't need any libraries	   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski                           *
  * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
  *                                                                         *
  * This program is free software: you can redistribute it and/or modify    *
  * it under the terms of the GNU General Public License as published by    *
  * the Free Software Foundation, either version 3 of the License, or       *
- * any later version.							   *
+ * any later version.                                                      *
  *									   *
  * This program is distributed in the hope that it will be useful,	   *
  * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
  *                                                                         *
  ***************************************************************************/
+
 /* 
  * File:   DRRandom.h
  * Author: dario
@@ -25,19 +26,11 @@
  * Created on 25. August 2011, 13:28
  */
 
-<<<<<<< HEAD
-#ifndef __DR_ENGINE2_RANDOM__
-#define	__DR_ENGINE2_RANDOM__
-
-
-class ENGINE2_API DRRandom
-=======
-#ifndef DR_CORE2_RANDOM_H
-#define	DR_CORE2_RANDOM_H
+#ifndef __DR_CORE2_RANDOM__
+#define	__DR_CORE2_RANDOM__
 
 
 class CORE2_API DRRandom
->>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
 {
 public:
     DRRandom() {/*srand(time(NULL));*/}
@@ -50,14 +43,9 @@ public:
     {
          return static_cast<DRReal>(rDouble(fMax, fMin));
     }
-<<<<<<< HEAD
-    static int rInt(int max, int min)
-    {
-        return min + (rand() % (max-min+1));
-    }
-=======
+
     static int rInt(int max, int min);
->>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
+
     static DRVector3 rVector3(DRReal maxLengthSq)
     {
             DRVector3 ret;
@@ -79,9 +67,5 @@ private:
 };
 
 
-<<<<<<< HEAD
-#endif	/* __DR_ENGINE2_RANDOM__ */
-=======
-#endif	/* DR_CORE2_RANDOM_H */
->>>>>>> b703a51b0ff2311db3d2d2c5963f08d8693655b8
+#endif	/* __DR_CORE2_RANDOM__ */
 
