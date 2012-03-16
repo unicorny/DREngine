@@ -1,17 +1,16 @@
 /*/*************************************************************************
  *                                                                         *
- * Engine, Engine-Lib interface class for many things,                     *
- * implementierung in extern libs                               	   *
- * Copyright (C) 2012, 20013, 2014 Dario Rekowski.			   *
+ * Core, Core-Lib for my programs, Core doesn't need any libraries	   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski                           *
  * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
  *                                                                         *
  * This program is free software: you can redistribute it and/or modify    *
  * it under the terms of the GNU General Public License as published by    *
  * the Free Software Foundation, either version 3 of the License, or       *
- * any later version.							   *
+ * any later version.                                                      *
  *									   *
  * This program is distributed in the hope that it will be useful,	   *
- * but WITHOUT ANY WARRAN TY; without even the implied warranty of	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
  * GNU General Public License for more details.				   *
  *									   *
@@ -20,41 +19,36 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef __DR_ENGINE2_Ivlc__
-#define __DR_ENGINE2_Ivlc__
+/* 
+ * File:   DRIndexReferenzHolder.h
+ * Author: Dario
+ *
+ * Created on 8. November 2011, 11:56
+ */
 
-#define __vlc_DLL_NAME_ "libvlc.dll"
-/*
-Interface zum einfachen abspielen von Videos durch vlc
-TODO: auch sound abspielen
-Autor: Dario Rekowski
-Datum: 11.11.09
-*/
+#ifndef __DR_CORE2_INDEX_REFERENZ_HOLDER__
+#define	__DR_CORE2_INDEX_REFERENZ_HOLDER__
 
-class ENGINE2_API DRIvlc
+class CORE2_API DRIndexReferenzHolder
 {
 public:
-    ~DRIvlc() {if(mInitalized) exit();}
-
-    // Zugrifffunktionen
-    static DRIvlc& Instance();
-
-    static inline DRIvlc& getSingleton() {return Instance();}
-    static inline DRIvlc* getSingletonPtr() {return &Instance();}
-
-
-    void exit();
-    DRReturn init();
-
+    DRIndexReferenzHolder(uint maxIndexCount);
+    ~DRIndexReferenzHolder();
+    
+    void add(uint index);
+    
+    void remove(uint index);
+    
+    uint getFree();
+    
 private:
-    DRIvlc();
-#ifdef _WIN32
-    static HMODULE mDLL;
-#else
-    static void* mDLL;
-#endif
-
-    bool mInitalized;
+    
+    uint*       mReferenzCounter;
+    uint*       mFreePlaces;  
+    uint        mFreePlaceCursor;
+    uint        mMaxIndexCount;
+    
 };
 
-#endif //__DR_ENGINE2_Ivlc__
+#endif	/* __DR_CORE2_INDEX_REFERENZ_HOLDER__ */
+

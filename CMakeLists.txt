@@ -1,7 +1,7 @@
 # Engine2
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT(scripts/Engine2 CXX)
+PROJECT(scripts/DREngine2 CXX)
 
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ../lib)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../bin)

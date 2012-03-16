@@ -7,7 +7,7 @@ SET(PA2 ../bin ../lib)
 #find_library(CORE_LIB Core2 PATHS ${PA})
 #find_library(ENGINE_LIB Engine2 PATHS ${PA2})
 find_library(SDL_LIB SDL PATHS ${PA})
-SET(Engine2Libs Core2 Engine2 ${SDL_LIB})
+SET(Engine2Libs DRCore2 DREngine2 ${SDL_LIB})
 ADD_EXECUTABLE(Etest ${testSrc})
 TARGET_LINK_LIBRARIES(Etest ${Engine2Libs})
 

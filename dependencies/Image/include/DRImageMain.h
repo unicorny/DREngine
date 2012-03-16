@@ -18,7 +18,7 @@
 #endif
 
 #include "FreeImage.h"
-#include "Image.h"
+#include "DRImage.h"
 
 #ifdef __cplusplus
 extern "C"

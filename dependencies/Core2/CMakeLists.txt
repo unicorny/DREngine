@@ -1,7 +1,7 @@
-# Core
+# DRCore
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT(scripts/Core2 CXX)
+PROJECT(scripts/DRCore2 CXX)
 
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ../../lib)
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../../bin)

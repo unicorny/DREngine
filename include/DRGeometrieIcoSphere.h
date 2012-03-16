@@ -1,3 +1,24 @@
+/*/*************************************************************************
+ *                                                                         *
+ * EngineDLL, Engine for my programs, using SDL and OpenGL		   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski.			   *
+ * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ *                                                                         *
+ * This program is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation, either version 3 of the License, or       *
+ * any later version.							   *
+ *									   *
+ * This program is distributed in the hope that it will be useful,	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
+ * GNU General Public License for more details.				   *
+ *									   *
+ * You should have received a copy of the GNU General Public License	   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ *                                                                         *
+ ***************************************************************************/
+
 /* 
  * File:   DRGeometrieIcoSphere.h
  * Author: dario
@@ -5,11 +26,17 @@
  * Created on 26. August 2011, 08:59
  */
 
-#ifndef __DR_ENGINE_GEOMETRIE_ICO_SPHERE_H
-#define	__DR_ENGINE_GEOMETRIE_ICO_SPHERE_H
+#ifndef __DR_ENGINE2_GEOMETRIE_ICO_SPHERE__
+#define	__DR_ENGINE2_GEOMETRIE_ICO_SPHERE__
 
+class ENGINE2_API DRHeightValueStorage
+{
+public:
+    virtual float getHeightValue(DRVector3& position) = 0;
+    virtual DRColor getColorValue(const float height) = 0;
+};
 
-class ENGINE_API DRGeometrieIcoSphere : public DRGeometrieSphere
+class ENGINE2_API DRGeometrieIcoSphere : public DRGeometrieSphere
 {
 public:
     //! \param maxFaceBuffer count of keeping free memory for IceSphereFace
@@ -21,12 +48,15 @@ public:
      * 
      */
     DRReturn initIcoSphere(u8 maxEbene = 0, int seed = 0);
-    DRReturn changeGeometrieTo(u8 ebene = 0, bool waitToComplete = false);
+    /*! \param relCameraPos camera position relative zu IcoSphere */
+    DRReturn changeGeometrieTo(u8 ebene = 0, bool waitToComplete = false, DRVector3 relCameraPos = DRVector3(0.0f));
     DRReturn update();
+    
+    __inline__ void setHeightValueStorage(DRHeightValueStorage* heightValueStorage) {mHeightValues = heightValueStorage;}
     
 private:
     DRGeometrieIcoSphere(const DRGeometrieIcoSphere& orig) {LOG_WARNING("Not exist");}
-	static int updateGeometrieThread(void* data);
+        static int updateGeometrieThread(void* data);
     
     struct IcoSphereFace
     {
@@ -48,8 +78,11 @@ private:
     void deleteFace(IcoSphereFace* face);
     
     //achtung! rekursive funktion!
-    void subdivide(IcoSphereFace* current = NULL);
-    int removeLeafs(IcoSphereFace* current = NULL);
+    void subdivide(IcoSphereFace* current = NULL, u8 currentEbene = 0);
+    void removeLeafs(IcoSphereFace* current = NULL, u8 currentEbene = 0);
+    
+    //! \return true if face is visible (Horizont Culling)
+    bool isFaceVisible(IcoSphereFace* face);
     
     //achtung! rekursive funktion!  
     DRReturn grabIndicesFromFaces(IcoSphereFace* current = NULL);
@@ -59,19 +92,25 @@ private:
     
     std::list<IcoSphereFace*>           mFreeIcoFaceMemory;
     IcoSphereFace                       mRootSphereFaces[20];
+    DRIndexReferenzHolder*              mIndexReferenzen;
     u8                                  mMaxEbene;
-    u8									mCurrentEbene;
-    u8									mNewEbene;
+    u8					mCurrentEbene;
+    u8					mNewEbene;
     GLuint                              mMaxFaceBuffer;
-    SDL_Thread*							mUpdateThread;
-    SDL_sem *							mUpdateThreadSemaphore;
+    SDL_Thread*				mUpdateThread;
+    SDL_sem *				mUpdateThreadSemaphore;
+    SDL_mutex*                          mUpdateGeometrieMutex;
     
     static float                        mVektorLength;          
     unsigned int                        mVertexCursor;      
     unsigned int                        mEbeneNeighborCount;
     uint                                mFacesSphereCount;
+    DRHeightValueStorage*               mHeightValues;
+    DRVector3                           mRelCameraPos;
+    float                               mHorizontAngle;
+    bool                                mUpdateChanged;
 
 };
 //*/
-#endif	/* __DR_ENGINE_GEOMETRIE_ICO_SPHERE_H */
+#endif	/* __DR_ENGINE2_GEOMETRIE_ICO_SPHERE__ */
 

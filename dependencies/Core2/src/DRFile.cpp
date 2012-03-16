@@ -235,7 +235,7 @@ unsigned long DRFile::getFilePointer()
 //***********************************************************************************************************************+
 
 //File Pointer setzen
-DRFileErrorCodes DRFile::setFilePointer(unsigned long ulDistance, unsigned long ulStartPoint /* = SEEK_CUR*/)
+DRFileErrorCodes DRFile::setFilePointer(s32 ulDistance, unsigned long ulStartPoint /* = SEEK_CUR*/)
 {
 	//Erstmal Fehler abfragen/verhindern
 
@@ -243,7 +243,7 @@ DRFileErrorCodes DRFile::setFilePointer(unsigned long ulDistance, unsigned long 
 	if(!isOpen()) return File_error_file_is_not_open;
 
 	//Ist die Distanz gr��er als die Dateigr��e?
-	if(ulDistance > getSize()) return File_error_pointer_distance_to_great;
+	if(abs(ulDistance) > getSize()) return File_error_pointer_distance_to_great;
 
 	//Ist die Start Position die aktuelle Position?
 	if(ulStartPoint == SEEK_CUR)

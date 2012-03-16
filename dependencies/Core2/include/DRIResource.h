@@ -1,17 +1,16 @@
 /*/*************************************************************************
  *                                                                         *
- * Engine, Engine-Lib interface class for many things,                     *
- * implementierung in extern libs                               	   *
- * Copyright (C) 2012, 20013, 2014 Dario Rekowski.			   *
+ * Core, Core-Lib for my programs, Core doesn't need any libraries	   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski                           *
  * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
  *                                                                         *
  * This program is free software: you can redistribute it and/or modify    *
  * it under the terms of the GNU General Public License as published by    *
  * the Free Software Foundation, either version 3 of the License, or       *
- * any later version.							   *
+ * any later version.                                                      *
  *									   *
  * This program is distributed in the hope that it will be useful,	   *
- * but WITHOUT ANY WARRAN TY; without even the implied warranty of	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
  * GNU General Public License for more details.				   *
  *									   *
@@ -20,41 +19,28 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef __DR_ENGINE2_Ivlc__
-#define __DR_ENGINE2_Ivlc__
+/**!
+ * @Author: Dario Rekowski
+ * 
+ * @Date: 16.03.2012
+ * 
+ * this class is based on
+ * Noel Llopis,
+ * Day 1 Studios,
+ * llopis@convexhull.com
+ * article in Gems4 1.8, about Weak references and zero-objects
+ * 
+ * 
+ */
+#ifndef __DR_CORE2_IRESOURCE__
+#define __DR_CORE2_IRESOURCE__
 
-#define __vlc_DLL_NAME_ "libvlc.dll"
-/*
-Interface zum einfachen abspielen von Videos durch vlc
-TODO: auch sound abspielen
-Autor: Dario Rekowski
-Datum: 11.11.09
-*/
-
-class ENGINE2_API DRIvlc
+class CORE2_API DRIResource
 {
 public:
-    ~DRIvlc() {if(mInitalized) exit();}
-
-    // Zugrifffunktionen
-    static DRIvlc& Instance();
-
-    static inline DRIvlc& getSingleton() {return Instance();}
-    static inline DRIvlc* getSingletonPtr() {return &Instance();}
-
-
-    void exit();
-    DRReturn init();
-
-private:
-    DRIvlc();
-#ifdef _WIN32
-    static HMODULE mDLL;
-#else
-    static void* mDLL;
-#endif
-
-    bool mInitalized;
+    virtual ~DRIResource() {}
+    virtual const char* getResourceType() const = 0;
+protected:
 };
 
-#endif //__DR_ENGINE2_Ivlc__
+#endif //__DR_CORE2_IRESOURCE__

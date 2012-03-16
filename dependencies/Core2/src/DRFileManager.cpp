@@ -20,7 +20,7 @@ DRReturn DRFileManager::init()
 
 //***********************************************************************
 
-DRReturn DRFileManager::addFile(char* pcFilename)
+DRReturn DRFileManager::addFile(const char* pcFilename)
 {
 	if(!m_bInitialized) return DR_OK;
 	//return CheckFile(pcFilename);
@@ -34,18 +34,22 @@ DRReturn DRFileManager::addFile(char* pcFilename)
 	else
 		sprintf(acWPfad, pcFilename);
 		*/
-	DRFile File(pcFilename);
-	if(!File.isOpen()) LOG_ERROR("Datei konnt nicht ge�ffnet werden!", DR_ERROR);
+	DRFile File(pcFilename, "rb");
+	if(!File.isOpen()) LOG_ERROR("Datei konnt nicht geöffnet werden!", DR_ERROR);
 	if(!isFileOK(&File))
 	{
-		//Kein eigenes Format, trozdem �bernehmen
+		//Kein eigenes Format, trozdem übernehmen
 		DHASH ID = DRMakeDoubleHash("NULL", pcFilename);
 		SIndex* pTIndexx = new SIndex;
 		pTIndexx->ID = ID;
 		pTIndexx->strFilename = pcFilename;
 		pTIndexx->ulCursorInFilePos = 0;
 
-		m_IndexList.addByHash(ID, pTIndexx);
+		if(!m_IndexList.addByHash(ID, pTIndexx))
+        {
+            DR_SAVE_DELETE(pTIndexx);
+            LOG_ERROR("Hash-Kollision", DR_ERROR);
+        }
 
 		char pcInfo[256];
 		sprintf(pcInfo, "Datei %s wurde in FileIndexList vom FileManager eingetragen!\n-Keine DDatei", pcFilename);
@@ -70,8 +74,13 @@ DRReturn DRFileManager::addFile(char* pcFilename)
 		File.read(&TBlockHeader.ID, sizeof(DHASH), 1);
 		File.read(&TBlockHeader.iStrLength, sizeof(int), 1);
 
-		TBlockHeader.pcDateiname = new char[TBlockHeader.iStrLength];
-		memset(TBlockHeader.pcDateiname, 0, TBlockHeader.iStrLength);
+		if(TBlockHeader.iStrLength > 256)
+		{
+			DRLog.writeToLog("strLength: %d", TBlockHeader.iStrLength);
+			LOG_ERROR("strLength ist zu groß, Fehler in der Datei?", DR_ERROR);
+		}
+		TBlockHeader.pcDateiname = new char[TBlockHeader.iStrLength+1];
+		memset(TBlockHeader.pcDateiname, 0, TBlockHeader.iStrLength+1);
 
 		File.read(TBlockHeader.pcDateiname, sizeof(char), TBlockHeader.iStrLength);
 
@@ -87,20 +96,22 @@ DRReturn DRFileManager::addFile(char* pcFilename)
 		//Eine Kollision liegt vor
 		if(pCheckIndex)
 		{
-			//Block Kollision?
-			if(pCheckIndex->strFilename ==  pTIndex->strFilename && pCheckIndex->ulCursorInFilePos == pTIndex->ulCursorInFilePos)
-			{
-				LOG_WARNING("Block steht schon in der IndexList!");
-				DRLog.writeToLog("In Datei %s im Block %s", pcFilename, TBlockHeader.pcDateiname);
-			}//HASH Kollision?
-			else
-			{
-				LOG_WARNING("Es liegt eine HASH Kollision vor!");
-				DRLog.writeToLog("Bei HASH: %d in Datei: %s im Block: %s", TBlockHeader.ID, pcFilename, TBlockHeader.pcDateiname);
-			}
+#ifdef _DEBUG
+                //Block Kollision?
+                if(pCheckIndex->strFilename ==  pTIndex->strFilename && pCheckIndex->ulCursorInFilePos == pTIndex->ulCursorInFilePos)
+                {
+                    LOG_WARNING("Block steht schon in der IndexList!");
+                    DRLog.writeToLog("In Datei %s im Block %s", pcFilename, TBlockHeader.pcDateiname);
+                }//HASH Kollision?
+                else
+                {
+                    LOG_WARNING("Es liegt eine HASH Kollision vor!");
+                    DRLog.writeToLog("Bei HASH: %d in Datei: %s im Block: %s", TBlockHeader.ID, pcFilename, TBlockHeader.pcDateiname);
+                }
+#endif
 		}
 		else
-			m_IndexList.addByHash(pTIndex->ID, pTIndex);
+                m_IndexList.addByHash(pTIndex->ID, pTIndex);
 
 		File.setFilePointer(TBlockHeader.u32BlockLength, SEEK_CUR);
 		DR_SAVE_DELETE_ARRAY(TBlockHeader.pcDateiname);
@@ -118,7 +129,7 @@ DRReturn DRFileManager::addFile(char* pcFilename)
 
 //*****************************************************************
 
-DRReturn DRFileManager::newFile(char* pcFilename)
+DRReturn DRFileManager::newFile(const char* pcFilename)
 {
 	if(!m_bInitialized) return DR_OK;
 	//Check
@@ -128,8 +139,8 @@ DRReturn DRFileManager::newFile(char* pcFilename)
 	char acStart[8] = "DDatei";
 	if(!TempFile.isOpen())
 	{
-		sprintf(acError, "Neue Datei konnte nicht erstellt werden: %s!", pcFilename);
-		LOG_ERROR(acError, DR_ERROR);
+            sprintf(acError, "Neue Datei konnte nicht erstellt werden: %s!", pcFilename);
+            LOG_ERROR(acError, DR_ERROR);
 	}
 	//Hauptheader
 	DRSHauptHeader HauptHeader;
@@ -148,7 +159,7 @@ DRReturn DRFileManager::newFile(char* pcFilename)
 }
 
 //***************************************************************************************
-DRFile* DRFileManager::startWriting(char* pcPfadName, char* pcFilename, char* pcTyp, unsigned long ulBlockLength)
+DRFile* DRFileManager::startWriting(const char* pcPfadName, const char* pcFilename, const char* pcTyp, unsigned long ulBlockLength)
 {
 	if(!m_bInitialized) return NULL;
 	//Zero Pointer Check
@@ -156,51 +167,73 @@ DRFile* DRFileManager::startWriting(char* pcPfadName, char* pcFilename, char* pc
 	if(!pcFilename) return NULL;
 	if(!pcTyp) return NULL;
 
-	DRFile* pTempFile = new DRFile(pcPfadName, "r+b");
-	if(!pTempFile->isOpen() || !isFileOK(pTempFile))
+    DRFile* pTempFile = NULL;
+    pTempFile = getFileByName(pcTyp, pcFilename);
+    if(!pTempFile)
+    {
+        pTempFile = new DRFile(pcPfadName, "r+b");
+        if(!pTempFile->isOpen() || !isFileOK(pTempFile))
+        {
+            LOG_WARNING("Neue Datei muss erstellt werden!");
+            if(newFile(pcPfadName)) return NULL;
+
+            pTempFile->open(pcPfadName, false, "r+b");
+            if(!pTempFile->isOpen()) return NULL;
+        }
+        
+        if(!isFileOK(pTempFile)) return NULL;
+        pTempFile->setFilePointer(pTempFile->getSize()-8, SEEK_SET);
+
+        unsigned short u16HeaderLength = 2*sizeof(long) + sizeof(int) + sizeof(short) + strlen(pcFilename);
+        DHASH ID = DRMakeDoubleHash(pcTyp, pcFilename);
+
+        //BlockHeader schreiben
+        pTempFile->write(&u16HeaderLength, sizeof(unsigned short), 1);
+        pTempFile->write(&ulBlockLength, sizeof(unsigned long), 1);
+        pTempFile->write(&ID, sizeof(DHASH), 1);
+        //pstrFilename->Save(pTempFile);
+        int istrLength = strlen(pcFilename);
+        pTempFile->write(&istrLength, sizeof(int), 1);
+        pTempFile->write(pcFilename, sizeof(char), istrLength);
+
+        unsigned long ulCurrentPointerPos = pTempFile->getFilePointer();
+
+        //Hauptheader aktualisieren
+        //Dateigröße
+        pTempFile->setFilePointer(8, SEEK_SET);
+        unsigned long ulDateiGesLength;
+        pTempFile->read(&ulDateiGesLength, sizeof(unsigned long), 1);
+        ulDateiGesLength += u16HeaderLength + ulBlockLength;
+        pTempFile->setFilePointer(8, SEEK_SET);
+        pTempFile->write(&ulDateiGesLength, sizeof(unsigned long), 1);
+
+        //NumBlöcke
+        pTempFile->setFilePointer(8 + sizeof(long) + sizeof(DRReal), SEEK_SET);
+        unsigned long ulNumBloecke;
+        pTempFile->read(&ulNumBloecke, sizeof(unsigned long), 1);
+        ulNumBloecke++;
+        pTempFile->setFilePointer(8 + sizeof(long) + sizeof(DRReal), SEEK_SET);
+        pTempFile->write(&ulNumBloecke, sizeof(unsigned long), 1);
+
+        pTempFile->setFilePointer(ulCurrentPointerPos, SEEK_SET);
+    }
+	//prüfe ob neue dateigröße der alten entspricht
+	else
 	{
-		LOG_WARNING("Neue Datei muss erstellt werden!");
-		if(newFile(pcPfadName)) return NULL;
-
-		pTempFile->open(pcPfadName, false, "r+b");
-		if(!pTempFile->isOpen()) return NULL;
+		u32 filePointer = pTempFile->getFilePointer();
+		int iStrLen = strlen(pcFilename);
+		//filePointer -= iStrLen*sizeof(char) + sizeof(int) + sizeof(DHASH) + sizeof(u32);
+		u32 blockLength = 0;
+		pTempFile->setFilePointer(-(iStrLen*sizeof(char) + sizeof(int) + sizeof(DHASH) + sizeof(u32)), SEEK_CUR);
+		u32 now = pTempFile->getFilePointer();
+		pTempFile->read(&blockLength, sizeof(unsigned long), 1);
+		pTempFile->setFilePointer(filePointer, SEEK_SET);
+		if(ulBlockLength > blockLength)
+		{
+			closeFile(pTempFile);
+			LOG_ERROR("neuer Dateieintrag ist zu gross!", NULL);
+		}
 	}
-
-	if(!isFileOK(pTempFile)) return NULL;
-	pTempFile->setFilePointer(pTempFile->getSize()-8, SEEK_SET);
-
-	unsigned short u16HeaderLength = 2*sizeof(long) + sizeof(int) + sizeof(short) + strlen(pcFilename);
-	DHASH ID = DRMakeDoubleHash(pcTyp, pcFilename);
-
-	//BlockHeader schreiben
-	pTempFile->write(&u16HeaderLength, sizeof(unsigned short), 1);
-	pTempFile->write(&ulBlockLength, sizeof(unsigned long), 1);
-	pTempFile->write(&ID, sizeof(DHASH), 1);
-	//pstrFilename->Save(pTempFile);
-	int istrLength = strlen(pcFilename);
-	pTempFile->write(&istrLength, sizeof(int), 1);
-	pTempFile->write(pcFilename, sizeof(char), istrLength);
-
-	unsigned long ulCurrentPointerPos = pTempFile->getFilePointer();
-
-	//Hauptheader aktualisieren
-	//Dateigr��e
-	pTempFile->setFilePointer(8, SEEK_SET);
-	unsigned long ulDateiGesLength;
-	pTempFile->read(&ulDateiGesLength, sizeof(unsigned long), 1);
-	ulDateiGesLength += u16HeaderLength + ulBlockLength;
-	pTempFile->setFilePointer(8, SEEK_SET);
-	pTempFile->write(&ulDateiGesLength, sizeof(unsigned long), 1);
-
-	//NumBl�cke
-	pTempFile->setFilePointer(8 + sizeof(long) + sizeof(DRReal), SEEK_SET);
-	unsigned long ulNumBloecke;
-	pTempFile->read(&ulNumBloecke, sizeof(unsigned long), 1);
-	ulNumBloecke++;
-	pTempFile->setFilePointer(8 + sizeof(long) + sizeof(DRReal), SEEK_SET);
-	pTempFile->write(&ulNumBloecke, sizeof(unsigned long), 1);
-
-	pTempFile->setFilePointer(ulCurrentPointerPos, SEEK_SET);
 
 	return pTempFile;
 
@@ -213,28 +246,29 @@ DRReturn DRFileManager::endWriting(DRFile* pOpenFile)
 	//ParamterCheck
 	if(!pOpenFile) return DR_ZERO_POINTER;
 	if(!pOpenFile->isOpen()) return DR_ERROR;
-
+	
 	//Hauptheader Size updaten
 	pOpenFile->setFilePointer(8, SEEK_SET);
 	unsigned long ulDateiGesLength;
 	pOpenFile->read(&ulDateiGesLength, sizeof(unsigned long), 1);
-	if(ulDateiGesLength != pOpenFile->getSize())
+	if(ulDateiGesLength+8 != pOpenFile->getSize())
 	{
-		LOG_WARNING("Werte f�r Datei Length stimmen nicht �berein!")
-		DRLog.writeToLog("Berechnet: %d, �ber GetSize(): %d", ulDateiGesLength, pOpenFile->getSize());
-		pOpenFile->setFilePointer(7, SEEK_SET);
-		ulDateiGesLength = pOpenFile->getSize();
-		pOpenFile->write(&ulDateiGesLength, sizeof(unsigned long), 1);
-	}
+#ifdef _DEBUG
+        LOG_WARNING("Werte für Datei Length stimmen nicht überein!")
+        DRLog.writeToLog("Berechnet: %d, über GetSize(): %d", ulDateiGesLength+8, pOpenFile->getSize());
+#endif 
+        pOpenFile->setFilePointer(8, SEEK_SET);
+        ulDateiGesLength = pOpenFile->getSize();
+        pOpenFile->write(&ulDateiGesLength, sizeof(unsigned long), 1);
 
-	//End schreiben
-	pOpenFile->setFilePointer(0, SEEK_END);
-	char acEnde[8] = "DEnde";
-	pOpenFile->write(acEnde, sizeof(char), 8);
+        //End schreiben
+        pOpenFile->setFilePointer(0, SEEK_END);
+        char acEnde[8] = "DEnde";
+        pOpenFile->write(acEnde, sizeof(char), 8);
+	}        
 
 	pOpenFile->close();
 	DR_SAVE_DELETE(pOpenFile);
-
 
 	return DR_OK;
 }
@@ -279,9 +313,9 @@ bool DRFileManager::isFileOK(DRFile* pOpenFile, bool bPointerOnEnd /* = true */)
 	if(strcmp(acEnd, "DEnde")) LOG_ERROR("DEnde fehlt!", false);
 
 	if(!bPointerOnEnd)
-		pOpenFile->setFilePointer(ulCurrentFilePointerPos, SEEK_SET);
+            pOpenFile->setFilePointer(ulCurrentFilePointerPos, SEEK_SET);
 	else
-		pOpenFile->setFilePointer(ulGesLength, SEEK_SET);
+            pOpenFile->setFilePointer(ulGesLength, SEEK_SET);
 	return true;
 
 }
@@ -412,7 +446,7 @@ DRReturn DRFileManager::FillIndexFromOrdner(DRString* pstrOrdner)
 */
 //***************************************************************************************************++
 
-DRReturn DRFileManager::checkFile(char* pcFilename)
+DRReturn DRFileManager::checkFile(const char* pcFilename) const
 {
 	if(!m_bInitialized) return DR_OK;
 	//NullPointer check
@@ -478,11 +512,11 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 	DRFile* pTempFile = new DRFile(pcFilename);
 	if(!pTempFile->isOpen())
 	{
-		DRLog.writeToLog("%s konnte nicht ge�ffnet werden!", pcFilename);
-		#ifdef _DEBUG
-		LOG_ERROR("Fehler beim �ffnen von pstrFile", DR_ERROR);
+#ifdef _DEBUG
+            DRLog.writeToLog("%s konnte nicht ge�ffnet werden!", pcFilename);
+            LOG_ERROR("Fehler beim �ffnen von pstrFile", DR_ERROR);
 #endif
-		return DR_ERROR;
+            return DR_ERROR;
 	}
 
 	//Hauptheader einlesen
@@ -499,19 +533,18 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 	SIndex*  pTempIn = NULL;
 	if(strcmp(acTemp, "DDatei"))
 	{
-		//nicht identisch, "Fremd" Datei
-		pTempIn = new SIndex;
-		pTempIn->ID = DRMakeDoubleHash("NULL", DRRemoveDir(pcFilename));
-		pTempIn->strFilename = pcFilename;
-		pTempIn->ulCursorInFilePos = 0;
+            //nicht identisch, "Fremd" Datei
+        /*    pTempIn = new SIndex;
+            pTempIn->ID = DRMakeDoubleHash("NULL", DRRemoveDir(pcFilename));
+            pTempIn->strFilename = pcFilename;
+            pTempIn->ulCursorInFilePos = 0;
 
-		//eintragen
-		m_IndexList.addByHash(pTempIn->ID, pTempIn);
-		pTempFile->close();
-	//	DR_SAVE_DELETE(pstrFile);
-		DR_SAVE_DELETE(pTempFile);
-		return DR_OK;
-
+            //eintragen
+            m_IndexList.addByHash(pTempIn->ID, pTempIn); */
+            pTempFile->close();
+    //	DR_SAVE_DELETE(pstrFile);
+            DR_SAVE_DELETE(pTempFile);
+            return DR_OK;
 	}
 
 	//es ist eine eigene Datei, Header einlesen
@@ -525,15 +558,15 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 	pTempFile->read(&dwNumBloecke, sizeof(unsigned long), 1);
 	if(fDateiManagerVersion != FILEMANAGEREVRSION)
 	{
-		DRLog.writeToLog("Falscher Version in der Datei: %f, Klasse: %f", fDateiManagerVersion, FILEMANAGEREVRSION);
-		pTempFile->close();
-		DR_SAVE_DELETE(pTempFile);
+            DRLog.writeToLog("Falscher Version in der Datei: %f, Klasse: %f", fDateiManagerVersion, FILEMANAGEREVRSION);
+            pTempFile->close();
+            DR_SAVE_DELETE(pTempFile);
 
-		LOG_ERROR("Versionskontrolle", DR_ERROR);
+            LOG_ERROR("Versionskontrolle", DR_ERROR);
 	}
 	//Ckecken ob Ende in Ordnung
 	if(pTempFile->setFilePointer(pTempFile->getSize() - 6, SEEK_SET))
-		LOG_WARNING("FilePointer konnte nicht gesetzt werden!");
+		LOG_ERROR("FilePointer konnte nicht gesetzt werden!", DR_ERROR);
 
 //	if(!pTempFile->GetSize() <= dwDateiGesLength + 10)
 //		pstrTemp->Load(pTempFile);
@@ -555,7 +588,11 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 		LOG_ERROR("Fehlerhafte Datei", DR_ERROR);
 
 	}
+        pTempFile->close();
+	DR_SAVE_DELETE(pTempFile);
 
+	return DR_OK;
+        
 	//lesen und eintragen aller Bl�cke
 	pTempFile->setFilePointer(18, SEEK_SET);
 //	pstrTemp->Load(pTempFile);
@@ -565,28 +602,29 @@ DRReturn DRFileManager::checkFile(char* pcFilename)
 	//Alle Bl�cke durchgehen und eintragen
 	for (u32 i = 0; i < dwNumBloecke; i++)
 	{
-		pTempIn = new SIndex;
+            pTempIn = new SIndex;
 
-		//BlockHeader einlesen
-		unsigned short    wHeaderLength;
-		unsigned long   dwBlockLength;
-		pTempIn->ulCursorInFilePos = pTempFile->getFilePointer();
-		pTempFile->read(&wHeaderLength, 2, 1);
-		pTempFile->read(&dwBlockLength, 4, 1);
-		pTempFile->read(&pTempIn->ID, sizeof(DHASH), 1);
+            //BlockHeader einlesen
+            unsigned short    wHeaderLength;
+            unsigned long   dwBlockLength;
+            pTempIn->ulCursorInFilePos = pTempFile->getFilePointer();
+            pTempFile->read(&wHeaderLength, 2, 1);
+            pTempFile->read(&dwBlockLength, 4, 1);
+            pTempFile->read(&pTempIn->ID, sizeof(DHASH), 1);
 
-        char tempB[256]; memset(tempB, 0, sizeof(char)*256);
-        int size = 0;
-        pTempFile->read(&size, sizeof(int), 1);
-        if(size < 256)
-            pTempFile->read(tempB, sizeof(char), size);
-        else
-            LOG_WARNING("string ist zu lang, oder ungueltig");
+            char tempB[256]; memset(tempB, 0, sizeof(char)*256);
+            int size = 0;
+            pTempFile->read(&size, sizeof(int), 1);
+            if(size < 256)
+                pTempFile->read(tempB, sizeof(char), size);
+            else
+                LOG_WARNING("string ist zu lang, oder ungueltig");
 
-		pTempIn->strFilename = tempB;
-		//eintragen
-		m_IndexList.addByHash(pTempIn->ID, &pTempIn);
-		pTempFile->setFilePointer(dwBlockLength, SEEK_CUR);
+            pTempIn->strFilename = tempB;
+            //eintragen
+         //   if(!m_IndexList.addByHash(pTempIn->ID, &pTempIn))
+           //     LOG_WARNING("Double HASH");
+            pTempFile->setFilePointer(dwBlockLength, SEEK_CUR);
 	}
 //	DR_SAVE_DELETE(pstrFile);
 	pTempFile->close();
@@ -608,11 +646,10 @@ void DRFileManager::exit()
 	//IndexList leeren
 	for (int i = 0; i < (int)m_IndexList.getNItems(); i++)
 	{
-		SIndex* pTempIn = (SIndex*)m_IndexList.findByIndex((u32)i);
-		m_IndexList.removeByHash(pTempIn->ID);
-		DRLog.writeToLog("Inhalt von Datiename: %s", pTempIn->strFilename.data());
-		DR_SAVE_DELETE(pTempIn);
-
+            SIndex* pTempIn = (SIndex*)m_IndexList.findByIndex((u32)i);
+            m_IndexList.removeByHash(pTempIn->ID);
+            DRLog.writeToLog("Inhalt von Datiename: %s", pTempIn->strFilename.data());
+            DR_SAVE_DELETE(pTempIn);
 	}
 	m_IndexList.clear(true);
 	m_bInitialized = false;
@@ -622,7 +659,7 @@ void DRFileManager::exit()
 
 //********************************************************************************************************************
 
-DRFile* DRFileManager::getFileByHASH(DHASH ID)
+DRFile* DRFileManager::getFileByHASH(DHASH ID) const
 {
 	if(!m_bInitialized) return NULL;
 	SIndex* pTemp = (SIndex*)m_IndexList.findByHash(ID);
@@ -630,17 +667,24 @@ DRFile* DRFileManager::getFileByHASH(DHASH ID)
 	//Nicht vorhanden
 	if(!pTemp)
 	{
-		LOG_WARNING("ID nicht in Liste vorhanden!");
-		return NULL;
+#ifdef _DEBUG
+            LOG_WARNING("ID nicht in Liste vorhanden!");
+#endif
+            return NULL;
 	}
 	DRFile* pFile = new DRFile(pTemp->strFilename.data(), "r+b");
 
-	//datei kann nicht ge�ffnet werden
+	//datei kann nicht geöffnet werden
 	if(!pFile->isOpen())
 	{
-		DRLog.writeToLog("pFile: %s konnte nicht ge�ffnet werden!", pTemp->strFilename.data());
+#ifdef _DEBUG
+        DRLog.writeToLog("pFile: %s konnte nicht geöffnet werden!", pTemp->strFilename.data());
+        DR_SAVE_DELETE(pFile);
+        LOG_ERROR("Datei konnte nicht geöffnet werden!", NULL);
+#else
 		DR_SAVE_DELETE(pFile);
-		LOG_ERROR("Datei konnte nicht ge�ffnet werden!", NULL);
+		return NULL;
+#endif
 	}
 
 	pFile->setFilePointer(pTemp->ulCursorInFilePos, SEEK_SET);
@@ -650,10 +694,10 @@ DRFile* DRFileManager::getFileByHASH(DHASH ID)
 
 //--------------------------------------------------------------------------------------------------------------------
 
-DRFile* DRFileManager::getFileByName(char* pcTyp, char* pcFilename)
+DRFile* DRFileManager::getFileByName(const char* pcTyp, const char* pcFilename) const
 {
-	if(!m_bInitialized) return NULL;
-	return getFileByHASH(DRMakeDoubleHash(pcTyp, pcFilename));
+    if(!m_bInitialized) return NULL;
+    return getFileByHASH(DRMakeDoubleHash(pcTyp, pcFilename));
 }
 
 //-----------------------------------------------------------------------------------------------------------------------
@@ -666,9 +710,9 @@ DRFile* DRFileManager::GetFileByName(DRString* pstrTyp, DRString* pstrFilename)
 
 void DRFileManager::closeFile(DRFile* pFile)
 {
-	if(!m_bInitialized) return;
-	if(pFile && pFile->isOpen()) pFile->close();
-	DR_SAVE_DELETE(pFile);
+    if(!m_bInitialized) return;
+    if(pFile && pFile->isOpen()) pFile->close();
+    DR_SAVE_DELETE(pFile);
 }
 
 
