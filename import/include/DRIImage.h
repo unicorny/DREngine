@@ -31,12 +31,12 @@
 #define __DR_ENGINE2_IIMAGE__
 #ifdef _WIN32
 	#ifdef _MSC_VER
-		#define __IMAGE_DLL_NAME__ "Image.dll"
+		#define __IMAGE_DLL_NAME__ "DRImage.dll"
 	#else
-		#define __IMAGE_DLL_NAME__ "libImage.dll"
+		#define __IMAGE_DLL_NAME__ "libDRImage.dll"
 	#endif
 #else
-	#define __IMAGE_DLL_NAME__ "./libImage.so"
+	#define __IMAGE_DLL_NAME__ "./libDRImage.so"
 #endif
 
 class ENGINE2_API DRIImage : public DRInterface

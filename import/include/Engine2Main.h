@@ -26,16 +26,16 @@
 //Export Makro
 //#if (_MSC_VER >= 1200 && _MSC_VER < 1310)
 #ifdef _WIN32
-    #ifndef BUILD_ENGINE_DLL
-        #define ENGINE_API __declspec(dllimport)
+    #ifndef BUILD_ENGINE2_DLL
+        #define ENGINE2_API __declspec(dllimport)
     #else
-        #define ENGINE_API __declspec(dllexport)
+        #define ENGINE2_API __declspec(dllexport)
     #endif
 #else //_WIN32
-    #ifdef BUILD_ENGINE_DLL
-        #define ENGINE_API
+    #ifdef BUILD_ENGINE2_DLL
+        #define ENGINE2_API
     #else
-        #define ENGINE_API
+        #define ENGINE2_API
     #endif
 #endif //_WIN32
 
@@ -143,10 +143,10 @@ const float PI = 3.1415926535f;
 #include "Engine_Lua.h"
 */
 //----------------------------------------------------------------------------------------------------------------------
-ENGINE_API extern SDL_Surface* g_pSDLWindow;
-ENGINE_API extern DRVector2  g_v2WindowLength;
-ENGINE_API extern Uint8*    g_piPressed;
-ENGINE_API extern u16       g_CPU_Count;
+ENGINE2_API extern SDL_Surface* g_pSDLWindow;
+ENGINE2_API extern DRVector2  g_v2WindowLength;
+ENGINE2_API extern Uint8*    g_piPressed;
+ENGINE2_API extern u16       g_CPU_Count;
 
 /**	Engine Funktionen
 	Verschieden Init-Funktionen und anderes
@@ -154,20 +154,20 @@ ENGINE_API extern u16       g_CPU_Count;
 	für SDL und OpenGL
 	für SDL und Ogre3D
 */
-ENGINE_API DRReturn EnInit_Simple(DRReal fVersion = 1.0f, bool initSound = false);
-ENGINE_API DRReturn EnInit(DRReal fVersion = 1.0f, bool initSound = false);
-ENGINE_API DRReturn EnInit_INI(const char* iniFileName);
-ENGINE_API DRReturn EnInit_OpenGL(DRReal fVersion = 1.0f, DRVideoConfig video = DRVideoConfig(), const char* pcTitel = "OpenGL Render Fenster", const char* pcBMPIcon = NULL, bool bInitSound = true);
-ENGINE_API DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRReal), bool bExitByEsc = true);
-ENGINE_API void     EnExit();
+ENGINE2_API DRReturn EnInit_Simple(DRReal fVersion = 1.0f, bool initSound = false);
+ENGINE2_API DRReturn EnInit(DRReal fVersion = 1.0f, bool initSound = false);
+ENGINE2_API DRReturn EnInit_INI(const char* iniFileName);
+ENGINE2_API DRReturn EnInit_OpenGL(DRReal fVersion = 1.0f, DRVideoConfig video = DRVideoConfig(), const char* pcTitel = "OpenGL Render Fenster", const char* pcBMPIcon = NULL, bool bInitSound = true);
+ENGINE2_API DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRReal), bool bExitByEsc = true);
+ENGINE2_API void     EnExit();
 
-ENGINE_API void		EnPostExitMessageToSDL();
-ENGINE_API DRReal	EnSDL_Loop();
-ENGINE_API bool		EnIsButtonPressed(SDLKey button);
+ENGINE2_API void		EnPostExitMessageToSDL();
+ENGINE2_API DRReal	EnSDL_Loop();
+ENGINE2_API bool		EnIsButtonPressed(SDLKey button);
 
 //----------------------------------------------------------------------------------------------------------------------
 // Ein paar Helferfunktionen
 //! Fragt nach einem Fehler in OpenGL
-ENGINE_API DRReturn DRGrafikError(const char* pcErrorMessage);
+ENGINE2_API DRReturn DRGrafikError(const char* pcErrorMessage);
 
 #endif //__DR_ENGINE2_MAIN__
