@@ -55,7 +55,8 @@ public:
     bool operator==(DRResourcePtr<ResourceType> res) const;
     bool operator!=(DRResourcePtr<ResourceType> res) const { return !operator==(res); }
     bool operator< (DRResourcePtr<ResourceType> res) const;
-
+    
+    void release();
 
     DRResourcePtrHolder * getResourcePtrHolder() const { return mResourceHolder; }
     typedef ResourceType * PointerType;
@@ -93,10 +94,16 @@ DRResourcePtr<ResourceType>::DRResourcePtr(DRResourcePtrHolder * pHolder) :
 template <class ResourceType>
 DRResourcePtr<ResourceType>::~DRResourcePtr()
 {
-    if (mResourceHolder != NULL)
-        mResourceHolder->release(); 
+    release();
 }
 
+template <class ResourceType>
+void DRResourcePtr<ResourceType>::release()
+{
+    if (mResourceHolder != NULL)
+        mResourceHolder->release(); 
+    mResourceHolder = NULL;
+}
 
 template <class ResourceType>
 DRResourcePtr<ResourceType> & DRResourcePtr<ResourceType>::operator= (const DRResourcePtr<ResourceType> & resPtr)
@@ -110,6 +117,32 @@ DRResourcePtr<ResourceType> & DRResourcePtr<ResourceType>::operator= (const DRRe
             mResourceHolder->addRef();    
     }
     return *this;
+}
+
+template <class ResourceType>
+bool DRResourcePtr<ResourceType>::operator==(DRResourcePtr<ResourceType> res) const
+{
+    if (mResourceHolder == res.mResourceHolder)
+        return true;
+    // At this point, both holders cannot be NULL
+    if (res.mResourceHolder == NULL && mResourceHolder->mResource == NULL)
+        return true;
+    if (mResourceHolder == NULL && res.mResourceHolder->mResource == NULL)
+        return true;
+    if (mResourceHolder != NULL && res.mResourceHolder != NULL &&
+        mResourceHolder->mResource == res.mResourceHolder->mResource)
+        return true;
+    return false;
+}
+
+template <class ResourceType>
+bool DRResourcePtr<ResourceType>::operator< (DRResourcePtr<ResourceType> res) const
+{
+    if (res.mResourceHolder == NULL)
+        return false;
+    if (mResourceHolder == NULL)
+        return true;
+    return (mResourceHolder->mResource->less_than(*res.mResourceHolder->mResource));
 }
 
 

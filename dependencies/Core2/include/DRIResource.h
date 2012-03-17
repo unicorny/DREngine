@@ -40,6 +40,7 @@ class CORE2_API DRIResource
 public:
     virtual ~DRIResource() {}
     virtual const char* getResourceType() const = 0;
+    virtual bool less_than(DRIResource& b) const = 0;
 protected:
 };
 
