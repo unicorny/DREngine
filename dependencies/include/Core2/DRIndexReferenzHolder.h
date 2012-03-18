@@ -18,54 +18,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
  *                                                                         *
  ***************************************************************************/
-
 /* 
- * File:   DRRandom.h
- * Author: dario
+ * File:   DRIndexReferenzHolder.h
+ * Author: Dario
  *
- * Created on 25. August 2011, 13:28
+ * Created on 8. November 2011, 11:56
  */
 
-#ifndef __DR_CORE2_RANDOM__
-#define	__DR_CORE2_RANDOM__
+#ifndef __DR_CORE2_INDEX_REFERENZ_HOLDER__
+#define	__DR_CORE2_INDEX_REFERENZ_HOLDER__
 
 
-class CORE2_API DRRandom
+class CORE2_API DRIndexReferenzHolder
 {
 public:
-    DRRandom() {/*srand(time(NULL));*/}
+    DRIndexReferenzHolder(uint maxIndexCount);
+    ~DRIndexReferenzHolder();
     
-    static long core2_rand();
-    static double core2_randf();
-    static u64 r64();// { return rand();}// + ((long long)rand()) << 32;}
-    static double rDouble(double max, double min); 
-    static DRReal rReal(DRReal fMax, DRReal fMin)
-    {
-         return static_cast<DRReal>(rDouble(fMax, fMin));
-    }
-
-    static int rInt(int max, int min);
-
-    static DRVector3 rVector3(DRReal maxLengthSq)
-    {
-            DRVector3 ret;
-            ret.x = rReal(maxLengthSq/2.0f, -maxLengthSq/2.0f);
-            ret.y = rReal((maxLengthSq - ret.x)/1.5f, -((maxLengthSq - ret.x)/1.5f));
-            ret.z = rReal(maxLengthSq - ret.x - ret.y, -(maxLengthSq -ret.x - ret.y));
-            return ret;
-    }
-    static DRVector2 rVector2(DRReal maxLengthSq)
-    {
-            DRVector2 ret;
-            ret.x = rReal(maxLengthSq/2.0f, -maxLengthSq/2.0f);
-            ret.y = rReal(maxLengthSq - ret.x, -(maxLengthSq -ret.x));
-            return ret;
-    }    
-    static void seed(long seed); 
-    static void seedf(long seed);
+    void add(uint index);
+    
+    void remove(uint index);
+    
+    uint getFree();
+    
 private:
+    
+    uint*       mReferenzCounter;
+    uint*       mFreePlaces;  
+    uint        mFreePlaceCursor;
+    uint        mMaxIndexCount;
+    
 };
 
 
-#endif	/* __DR_CORE2_RANDOM__ */
+#endif	/* __DR_CORE2_INDEX_REFERENZ_HOLDER__ */
 

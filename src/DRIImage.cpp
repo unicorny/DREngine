@@ -86,15 +86,15 @@ void DRIImage::setPixel(u8* pixel)
     LOG_WARNING("Not implemented!");
 }
 
-void DRIImage::setSize(DRVector2 size)
+void DRIImage::setSize(DRVector2i size)
 {
     LOG_WARNING("Not implemented!");
 }
 
-DRVector2 DRIImage::getSize() const
+DRVector2i DRIImage::getSize() const
 {
     LOG_WARNING("Not implemented!");
-    return DRVector2(0.0f);
+    return DRVector2i(0);
 }
 
 void DRIImage::setPixel(DRColor* pixel)

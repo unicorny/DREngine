@@ -203,13 +203,13 @@ u32 DRImage::getHeight() const
     return FreeImage_GetHeight(mImage);
 }
 
-DRVector2 DRImage::getSize() const
+DRVector2i DRImage::getSize() const
 {
-    if(!mLoadedSucessfully) LOG_ERROR("not loaded", DRVector2(0.0f));
-    return DRVector2((DRReal)FreeImage_GetWidth(mImage), (DRReal)FreeImage_GetHeight(mImage));
+    if(!mLoadedSucessfully) LOG_ERROR("not loaded", DRVector2i(0));
+    return DRVector2i(FreeImage_GetWidth(mImage), FreeImage_GetHeight(mImage));
 }
 
-void DRImage::setSize(DRVector2 size)
+void DRImage::setSize(DRVector2i size)
 {
     mSize = size;
 }

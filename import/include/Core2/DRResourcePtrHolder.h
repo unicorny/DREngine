@@ -18,51 +18,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
  *                                                                         *
  ***************************************************************************/
+/**!
+ * @Author: Dario Rekowski
+ * 
+ * @Date: 16.03.2012
+ * 
+ * this class is based on
+ * Noel Llopis,
+ * Day 1 Studios,
+ * llopis@convexhull.com
+ * article in Gems4 1.8, about Weak references and zero-objects
+ * 
+ * 
+ */
 
-#ifndef __DR_CORE2_INI__
-#define __DR_CORE2_INI__
+#ifndef __DR_CORE2_RESOURCE_PTR_HOLDER__
+#define __DR_CORE2_RESOURCE_PTR_HOLDER__
 
-/*
-class to read from ini Files
-(without speziell windows functiones)
-working without core init
-
-  Dario Rekowski
-  */
-
-#include <map>
-#include <string>
-
-
-class CORE_API DRIni
+class CORE2_API DRResourcePtrHolder
 {
 public:
-	explicit DRIni(const char* fileName);
-	~DRIni();
+    DRResourcePtrHolder (DRIResource* resource);
+    ~DRResourcePtrHolder();
+    
+    virtual int getRefCount () const;
+    virtual int addRef ();
+    virtual int release ();
+    
+    DRIResource *mResource;
 
-	DRVector3 getVector3(const char* section, const char* key);
-	DRVector2 getVector2(const char* section, const char* key);
-	DRColor   getColor(const char* section, const char* key);
-	int getInt(const char* section, const char* key);
-	DRReal getReal(const char* section, const char* key);
-	std::string* getStr(const char* section, const char* key);
-
-	inline bool isValid() {return mValid;}
-private:
-	FILE* mFilePointer;
-	bool  mValid;
-	std::string mTemp;
-	typedef std::map<std::string, std::string> EntryMap;
-	typedef std::pair<std::string, std::string> STRINGENTRY;
-	typedef std::pair<std::string, EntryMap> MAPENTRY;
-	std::map<std::string, EntryMap> mKeyMap;
-
-
-	void readEntry();
-	void readParameters(std::string _name, std::string line);
-
+protected:
+    int mRefCount;
 };
 
 
-#endif //__DR_CORE2_INI__
 
+#endif //__DR_CORE2_RESOURCE_PTR_HOLDER__
