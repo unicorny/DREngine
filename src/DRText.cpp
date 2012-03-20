@@ -82,8 +82,7 @@ void DRText::resetText()
 //********************************************************************************************************************++
 //********************************************************************************************************************++
 DRFont::DRFont()
-: mTexture(NULL),
-  m_vScreenSize(g_v2WindowLength.x, g_v2WindowLength.y),
+: mTexture(), m_vScreenSize(g_v2WindowLength.x, g_v2WindowLength.y),
   m_pCamera(NULL)
 
 {
@@ -97,10 +96,7 @@ DRFont::DRFont(const DRFont* font)
 //---------------------------------------------------------------------------
 DRFont::~DRFont()
 {
-    if(mTexture)
-    {
-        DR_SAVE_DELETE(mTexture);
-    }
+    
 }
 //*********************************************************************************
 DRReturn DRFont::init(const char* pcTGAFilename, const char* pcTBFFilename)
@@ -110,12 +106,12 @@ DRReturn DRFont::init(const char* pcTGAFilename, const char* pcTBFFilename)
 	if(!pcTGAFilename) LOG_ERROR("kein Filename f�r TGA File �bergeben!", DR_ZERO_POINTER);
 
 	//Textur laden
-        mTexture = new DRTextur(pcTGAFilename);
+    mTexture = DRTextureManager::Instance().getTexture(pcTGAFilename); //new DRTextur(pcTGAFilename);
 	//m_uiTextureID = LoadTexture(pcTGAFilename, true);
-	if(!mTexture->isLoaded())
+	if(mTexture->isLoadingError())
 	{
-            printf("TGA Texture: %s konnte nicht geladen werden\n", pcTGAFilename);
-            LOG_ERROR("Fehler beim laden der TGA Textur!", DR_ERROR);
+        printf("TGA Texture: %s konnte nicht geladen werden\n", pcTGAFilename);
+        LOG_ERROR("Fehler beim laden der TGA Textur!", DR_ERROR);
 	}
 
 	//Info File laden

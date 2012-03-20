@@ -5,7 +5,7 @@
 
 using namespace std;
 
-DRTextur* tex = NULL;
+DRTexturePtr tex;
 
 DRReturn render(float ftime)
 {
@@ -61,12 +61,11 @@ int main()
 
     //DRINetwork::getSingleton().exit();
 
-    tex = new DRTextur("test.jpg");
+    tex = DRTextureManager::Instance().getTexture("test.jpg");
 
     if(EnGameLoop(move, render, true))
         LOG_WARNING("Fehler in der GameLoop");
 
-    DR_SAVE_DELETE(tex);
     EnExit();
   //  */
     return 0;

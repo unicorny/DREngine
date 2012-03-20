@@ -229,11 +229,11 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 {
 	if(!g_bEnInit)
 	{
-            if(EnInit(fVersion, bInitSound))
-            {
-                    fprintf(stderr, "Fehler bei EnInit\n");
-                    return DR_ERROR;
-            }
+        if(EnInit(fVersion, bInitSound))
+        {
+            fprintf(stderr, "Fehler bei EnInit\n");
+            return DR_ERROR;
+        }
 	}
 
 	if(fVersionCheck(fVersion))
@@ -270,9 +270,9 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 	//Zufalllsgenerator starten
 #ifdef _WIN32
-	srand(timeGetTime());
+	DRRandom::seed(timeGetTime());
 #else
-	srand(SDL_GetTicks());
+	DRRandom::seed(SDL_GetTicks());
 #endif //_WIN32
 
 	//OpenGL Einstellungen tätigen
@@ -301,15 +301,15 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 	//OpenGL einrichten f�r Ohrtogonale Projection
 	glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
-        //DRActivateVBExtension();
-        GLenum err = glewInit();
-        if (GLEW_OK != err)
-        {
-                /* Problem: glewInit failed, something is seriously wrong. */
-                DRLog.writeToLog("Error: %s\n", glewGetErrorString(err));
-                LOG_ERROR("Fehler bei Glew Init", DR_ERROR);
-        }
-        DRLog.writeToLog("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+    //DRActivateVBExtension();
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+        /* Problem: glewInit failed, something is seriously wrong. */
+        DRLog.writeToLog("Error: %s\n", glewGetErrorString(err));
+        LOG_ERROR("Fehler bei Glew Init", DR_ERROR);
+    }
+    DRLog.writeToLog("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
         
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -353,7 +353,8 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 #ifndef _DEBUG
 	SDL_ShowCursor(SDL_DISABLE);
 #endif
-
+    DRTextureManager::Instance().init();
+    
 	g_bGL = true;
 	LOG_INFO("Engine OpenGL Initalisiert!");
 	return DR_OK;
@@ -362,8 +363,13 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 void EnExit()
 {
+    if(g_bGL)
+    {
+        DRTextureManager::Instance().exit();
+    }
 	if(g_bEnInit)
 	{
+        
 		/*DRLoadFromLua::getSingleton().exit();
 		if(g_pLuaState) try
 		{lua_close(g_pLuaState); g_pLuaState = NULL; LOG_INFO("LUA erfolgreich beendet");}
@@ -371,7 +377,7 @@ void EnExit()
 		DRLog.WriteToLog("Letzte SDL Error Message:\n%s", SDL_GetError());
 		DRTextManager::Instance().Exit();
 		DRSpriteM::Instance().Exit();
-		DRTextureManager::Instance().Exit();
+		
 #if defined(FREEIMAGE_LIB) || !defined(WIN32)
 		FreeImage_DeInitialise();
 #endif
@@ -385,6 +391,7 @@ void EnExit()
 		DRLog.mUnlockMutex = NULL;
 		SDL_Quit();
 	}
+    
 	Core2_exit();
 }
 
@@ -511,6 +518,7 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
             default: break;
             }
         }
+        DRTextureManager::Instance().move(fTime);
 		//Render und Move aufrufen
 		if(pMoveProc(fTime)) LOG_ERROR("Fehler beim Bewegen des Spiels", DR_ERROR);
 		if(pRenderProc(fTime)) LOG_ERROR("Fehler beim Rendern des Spiels", DR_ERROR);
