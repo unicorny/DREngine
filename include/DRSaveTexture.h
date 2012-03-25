@@ -22,11 +22,15 @@
 #ifndef __DR_ENGINE2_SAVE_TEXTURE__
 #define __DR_ENGINE2_SAVE_TEXTURE__
 
+/**!
+ * class for saving texture to filesystem
+ */
 
 class ENGINE2_API DRSaveTexture
 {
 public:
     DRSaveTexture(const char* savingPath, GLuint stepSize = 16384);
+    // no openGL funtion called
     ~DRSaveTexture();
     // create a pbo buffer with currently bind texture
     DRReturn getPixelsToSave();
