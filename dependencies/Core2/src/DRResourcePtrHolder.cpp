@@ -31,9 +31,9 @@ int DRResourcePtrHolder::release ()
 	mRefCount--;
 	tmpRefCount = mRefCount;
 
-	if ( mRefCount <= 0 )
+	if ( mRefCount == 0 )
 		delete this;
 
-	return mRefCount;
+	return tmpRefCount;
 }
 

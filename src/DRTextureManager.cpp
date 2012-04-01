@@ -52,7 +52,11 @@ void DRTextureManager::exit()
 		SDL_DestroyMutex(mTextureLoadMutex);
 		SDL_DestroyCond(mTextureLoadCondition);
 	}
-    
+
+	while(!mLoadedAsynchronLoadTextures.empty()) 
+		mLoadedAsynchronLoadTextures.pop();
+	while(!mAsynchronLoadTextures.empty()) mAsynchronLoadTextures.pop();
+
     LOG_INFO("DRTextureManager beendet");
 }
 
