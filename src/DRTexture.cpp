@@ -124,6 +124,9 @@ DRReturn DRTexture::pixelsCopyToRenderer()
 	else if(format == GL_RGBA) numComponents = 4;
 	else LOG_ERROR("ungueltiges Format", DR_ERROR);
     
+    if(numComponents != 4)
+    printf("[DRTexture::pixelsCopyToRenderer] numComponents: %d\n", numComponents);
+    
     if(!mTexturID) 
         mTexturID = DRTextureManager::Instance()._getTexture(mImage->getSize(), numComponents);
 

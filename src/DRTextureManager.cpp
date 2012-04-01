@@ -53,8 +53,7 @@ void DRTextureManager::exit()
 		SDL_DestroyCond(mTextureLoadCondition);
 	}
 
-	while(!mLoadedAsynchronLoadTextures.empty()) 
-		mLoadedAsynchronLoadTextures.pop();
+	while(!mLoadedAsynchronLoadTextures.empty()) mLoadedAsynchronLoadTextures.pop();
 	while(!mAsynchronLoadTextures.empty()) mAsynchronLoadTextures.pop();
 
     LOG_INFO("DRTextureManager beendet");
@@ -147,6 +146,7 @@ GLuint DRTextureManager::_getTexture(DRVector2i size, GLuint format)
     if(DRGrafikError("[DRTextureManager::_getTexture]"))
         LOG_ERROR("Fehler beim Textur erstellen", 0);
     
+    //printf("")
     addGrafikMemTexture(size.x*size.y*format);
     
     return textureID;
@@ -184,6 +184,14 @@ DRReturn DRTextureManager::move(float fTime)
 {
     if(!mInitalized) return DR_ERROR;
     
+    static float second = 0.0f;
+    second += fTime;
+    if(second >= 1.0f)
+    {
+        second = 0.0f;
+        calculateGrafikMemTexture();
+    }
+    
     //timeout TextureMemoryEntry, and removed
     for(std::multimap<DHASH, TextureMemoryEntry>::iterator it = mTextureMemoryEntrys.begin(); it != mTextureMemoryEntrys.end(); it++)
     {
@@ -201,6 +209,7 @@ DRReturn DRTextureManager::move(float fTime)
     {
         if(it->second.getResourcePtrHolder()->getRefCount() == 1)
         {
+            it->second.release();
             mTextureEntrys.erase(it);
             break;
         }            
@@ -321,6 +330,32 @@ int DRTextureManager::asynchronTextureLoadThread(void* data)
 	}
 
 	return 0;
+}
+
+void DRTextureManager::calculateGrafikMemTexture()
+{
+    GLuint grafikMemTexture = 0;// mGrafikMemTexture
+    // count memory entrys
+    for(std::multimap<DHASH, TextureMemoryEntry>::iterator it = mTextureMemoryEntrys.begin(); it != mTextureMemoryEntrys.end(); it++)
+        grafikMemTexture += it->second.size.x*it->second.size.y*it->second.format;
+    
+    for(DR_TEXTURE_ENTRY_ITERATOR it = mTextureEntrys.begin(); it != mTextureEntrys.end(); it++)
+    {
+        if(it->second.getResourcePtrHolder() &&
+           it->second->isLoadingFinished())
+        {
+            grafikMemTexture += it->second->getResolution().x*it->second->getResolution().y*4;
+        }
+    }
+    
+    if(grafikMemTexture != mGrafikMemTexture)
+    {
+ /*       DRLog.writeToLog("abweichung in der Grafik berechnung: neuberechnet: %f, gezaehlt: %f", 
+            static_cast<double>(grafikMemTexture)/(1024.0*1024.0),
+            static_cast<double>(mGrafikMemTexture)/(1024.0*1024.0));
+  //*/
+        mGrafikMemTexture = grafikMemTexture;
+    }
 }
 
 void DRTextureManager::test()
