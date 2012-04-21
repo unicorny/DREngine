@@ -11,7 +11,9 @@ INCLUDE_DIRECTORIES(../include)
 INCLUDE_DIRECTORIES(../bin)
 INCLUDE_DIRECTORIES(../../include)
 INCLUDE_DIRECTORIES(../../bin)
+if(WIN32)
 INCLUDE_DIRECTORIES(dependencies/freeimage)
+endif(WIN32)
 
 cmake_minimum_required(VERSION 2.6)
 

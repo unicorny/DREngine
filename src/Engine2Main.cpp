@@ -149,13 +149,14 @@ DRReturn EnInit_INI(const char* iniFileName)
 	DRIni ini(iniFileName);
 	if(!ini.isValid())
 	{
-            fprintf(stderr, "given ini file isn't valid\n");
-            return DR_ERROR;
+        fprintf(stderr, "given ini file isn't valid\n");
+        return DR_ERROR;
 	}
 	DRReal version = ini.getReal("Base", "Version");
 	if(version == 0.0f) version = 1.0f;
 	//int initSound = ini.getInt("Base", "Sound");
 	const char* tempString = ini.getStr("Base", "Mode")->data();
+    printf("\ncompareStr: \n%s\n compare with: %s, result: %d\n", tempString, "OpenGL", strcmp("OpenGL", tempString));
 	if(!strcmp("OpenGL", tempString))
 	//|| !strcmp("SDL", tempString))
 	{

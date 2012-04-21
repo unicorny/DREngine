@@ -6,24 +6,25 @@ DRIni::DRIni(const char* fileName)
 : mFilePointer(NULL),
 mValid(false)
 {
-	mFilePointer  = fopen(fileName, "rt");
-	char c;
-	if(!mFilePointer)
-	{
-		fprintf(stderr, "Achtung, %s konnte nicht ge�ffnet werden!! (DRIni::DRIni)", fileName);
-	}
-	else
-	{
-    do {
-      c = fgetc (mFilePointer);
-	  if(c == '[')
-		  readEntry();
-	 // printf("%c", c);
-    } while (c != EOF);
-    fclose (mFilePointer);
-	mFilePointer = NULL;
-	mValid = true;
-	}
+    mFilePointer  = fopen(fileName, "rt");
+    char c;
+    if(!mFilePointer)
+    {
+        fprintf(stderr, "Achtung, %s konnte nicht ge�ffnet werden!! (DRIni::DRIni)", fileName);
+    }
+    else
+    {
+        do
+        {
+            c = fgetc (mFilePointer);
+            if(c == '[')
+                readEntry();
+            //printf("%c", c);
+        } while (c != EOF);
+        fclose (mFilePointer);
+        mFilePointer = NULL;
+        mValid = true;
+    }
 }
 
 DRIni::~DRIni()
@@ -57,7 +58,8 @@ void DRIni::readEntry()
 				c = fgetc(mFilePointer);
 			}
 		}
-		if(c != '\n' && c != ' ' && c != '\t' && c != '#' && c != '"')
+        // 13 = carriage return, used from unix systems
+		if(c != '\n' && c != ' ' && c != '\t' && c != '#' && c != '"' && c != 13)
 			line += c;
         if(c == '"') isString = !isString;
 		if(c == '\n' && !isString)

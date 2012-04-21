@@ -6,7 +6,7 @@
 #else
 #endif
 #include <Engine2Main.h>
-#include <SDLNET/SDL_net.h>
+#include <SDLNet/SDL_net.h>
 
 
 #ifdef _WIN32
