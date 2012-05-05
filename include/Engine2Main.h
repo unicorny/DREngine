@@ -123,6 +123,7 @@ const float PI = 3.1415926535f;
 //----------------------------------------------------------------------------------------------------------------------
 //Interne Header
 //#include "glExtensions.h"
+#include "DREngineLogger.h"
 #include "DRInterface.h"
 #include "DRINetwork.h"
 #include "DRIvlc.h"
@@ -169,8 +170,9 @@ ENGINE2_API DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRende
 ENGINE2_API void     EnExit();
 
 ENGINE2_API void		EnPostExitMessageToSDL();
-ENGINE2_API DRReal	EnSDL_Loop();
+ENGINE2_API DRReal              EnSDL_Loop();
 ENGINE2_API bool		EnIsButtonPressed(SDLKey button);
+ENGINE2_API DRString            EnGetTimeSinceStart();
 
 //----------------------------------------------------------------------------------------------------------------------
 // Ein paar Helferfunktionen

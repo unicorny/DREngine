@@ -55,7 +55,8 @@ public:
         
 	//Operatoren
 	//Casting
-	operator int* () {return (int*)(c);}
+	operator int* () {return c;}
+        operator const int* () const {return c;}
 
 		// Zuweisungsoperatoren
 	inline DRVector2i& operator = (const DRVector2i& v)	{x = v.x; y = v.y; return *this;}
@@ -71,7 +72,7 @@ public:
 	// Arithmetische Operatoren
     inline DRVector2i operator + (const DRVector2i& b) const	{return DRVector2i(this->x + b.x, this->y + b.y);}
     inline DRVector2i operator - (const DRVector2i& b) const	{return DRVector2i(this->x - b.x, this->y - b.y);}
-    inline DRVector2i operator - ()					 const 	{return DRVector2i(-this->x, -this->y);}
+    inline DRVector2i operator - ()		       const 	{return DRVector2i(-this->x, -this->y);}
     inline DRVector2i operator * (const DRVector2i& b) const	{return DRVector2i(this->x * b.x, this->y * b.y);}
     inline DRVector2i operator * (const int f)	 const  {return DRVector2i(this->x * f, this->y * f);}
     inline DRVector2i operator / (const DRVector2i& b) const	{return DRVector2i(this->x / b.x, this->y / b.y);}

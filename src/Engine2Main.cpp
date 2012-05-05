@@ -14,6 +14,7 @@ bool		g_bGL = false;
 
 Uint8*		g_piPressed = NULL;
 u16             g_CPU_Count = 0;
+DREngineLogger g_engineLogger;
 
 //********************************************************************************************************************++
 
@@ -54,18 +55,7 @@ int WINAPI DllMain(HINSTANCE DllHandle, unsigned long ReasonForCall, void* Reser
 #endif //_WIN32
 
 //********************************************************************************************************************++
-//***********************************************************************************************************************++
-void LockLoggerMutex()
-{
-	if(DRLog.mMutex)
-		SDL_LockMutex((SDL_mutex*)(DRLog.mMutex));
-}
-//-------------------------------------------------------------------------------------------------------------------------
-void UnlockLoggerMutex()
-{
-	if(DRLog.mMutex)
-		SDL_UnlockMutex((SDL_mutex*)(DRLog.mMutex));
-}
+
 //********************************************************************************************************************++
 DRReturn fVersionCheck(DRReal fVersion)
 {
@@ -95,10 +85,7 @@ DRReturn EnInit_Simple(DRReal fVersion /* = 0.0f*/, bool initSound/* = false*/)
             LOG_ERROR("Fehler bei SDL Init", DR_ERROR);
 	}
 
-	//Logger mutex
-	DRLog.mMutex = (void*)SDL_CreateMutex();
-	DRLog.mLockMutex = &LockLoggerMutex;
-	DRLog.mUnlockMutex = &UnlockLoggerMutex;
+	
 	//Not Exit Funktion festlegen
 	atexit(SDL_Quit);
 
@@ -108,37 +95,10 @@ DRReturn EnInit_Simple(DRReal fVersion /* = 0.0f*/, bool initSound/* = false*/)
 //******************************************************************************************
 DRReturn EnInit(DRReal fVersion /* = 1.0f */, bool initSound/* = false*/)
 {
-	Core2_init("Logger.html");
+    g_engineLogger.init("Logger.html", true);
+	Core2_init(static_cast<DRLogger&>(g_engineLogger));
 	if(fVersionCheck(fVersion)) return DR_ERROR;
 
-/*	if(initSound)
-		if(DRSoundManager::Instance().init(1.0f))
-		{
-			DRSoundManager::Instance().exit();
-			LOG_WARNING("Fehler beim Init der Sound Engine!");
-		}
-	//init freeimage
-#if defined(FREEIMAGE_LIB) || !defined(WIN32)
-	FreeImage_Initialise();
-#endif
-
-	if(DRObjektManager::Instance().Init()) LOG_ERROR("Fehler beim Init des Objektmanagers", DR_ERROR);
-	if(DRFileManager::Instance().Init()) LOG_ERROR("Fehler beim Init des FileManagers", DR_ERROR);
-
-	//DRFileManager::Instance().AddFile("Config.cfg");
-	g_pLuaState = lua_open();
-	if(!g_pLuaState){ LOG_WARNING("Fehler beim Lua init");}
-	else
-	{
-		tolua_EngineMain_open(g_pLuaState);
-/*		const char* version = lua_version();
-		char acInfoText[256];
-		sprintf(acInfoText, "%s erfolgreich initalisiert", version);
-		LOG_INFO(acInfoText);
-
-	}
-	if(DRLoadFromLua::getSingleton().init()) LOG_ERROR("Fehler bei Init von LoadFromLua", DR_ERROR);
-*/
 	g_bEnInit = true;
 	LOG_INFO("Engine wurde initalisiert");
 	return DR_OK;
@@ -248,11 +208,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
             DRLog.writeToLog("SDL konnte nicht initalisiert werden! Fehler: %s\n", SDL_GetError());
             LOG_ERROR("Fehler bei SDL Init", DR_ERROR);
 	}
-	//Logger mutex
-	DRLog.mMutex = (void*)SDL_CreateMutex();
-	DRLog.mLockMutex = &LockLoggerMutex;
-	DRLog.mUnlockMutex = &UnlockLoggerMutex;
-        
+	        
 #if SDL_VERSION_ATLEAST(1,3,0)
         g_CPU_Count = SDL_GetCPUCount();
 #endif
@@ -370,27 +326,7 @@ void EnExit()
     }
 	if(g_bEnInit)
 	{
-        
-		/*DRLoadFromLua::getSingleton().exit();
-		if(g_pLuaState) try
-		{lua_close(g_pLuaState); g_pLuaState = NULL; LOG_INFO("LUA erfolgreich beendet");}
-		catch(...) {LOG_WARNING("Fehler beim Exit von LUA.");}
-		DRLog.WriteToLog("Letzte SDL Error Message:\n%s", SDL_GetError());
-		DRTextManager::Instance().Exit();
-		DRSpriteM::Instance().Exit();
-		
-#if defined(FREEIMAGE_LIB) || !defined(WIN32)
-		FreeImage_DeInitialise();
-#endif
-		DRSoundManager::Instance().exit();
-		DRFileManager::Instance().Exit();
-		DRObjektManager::Instance().Exit();
-		*/
-		if(DRLog.mMutex)
-			SDL_DestroyMutex((SDL_mutex*)(DRLog.mMutex));
-		DRLog.mLockMutex = NULL;
-		DRLog.mUnlockMutex = NULL;
-		SDL_Quit();
+        SDL_Quit();
 	}
     
 	Core2_exit();
@@ -416,6 +352,19 @@ bool EnIsButtonPressed(SDLKey button)
 	}
 	else
 		return false;
+}
+
+// -----------------------------------------------------------------------------------------
+DRString EnGetTimeSinceStart()
+{
+    char timeBuffer[256];
+    double seconds = static_cast<double>(SDL_GetTicks())/1000.0;
+    double minutes = 0.0;
+	seconds = modf(seconds/60.0, &minutes);
+    seconds *= 60.0; 
+    sprintf(timeBuffer, "%.0f:%.2f", minutes, seconds);
+    
+    return DRString(timeBuffer);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

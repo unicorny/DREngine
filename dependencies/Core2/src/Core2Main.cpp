@@ -40,7 +40,17 @@ CORE2_API DRReturn Core2_init(const char* logFileName)
 {
     //Logger init
     gCurrentRun++;
-    DRLog.init(logFileName);
+    DRLog.init(logFileName, true);
+    LOG_INFO("Core2 init");
+    DRFileManager::getSingleton().init();
+    return DR_OK;
+}
+
+CORE2_API DRReturn Core2_init(DRLogger& log)
+{
+    //Logger init
+    gCurrentRun++;
+    DRLog = log;
     LOG_INFO("Core2 init");
     DRFileManager::getSingleton().init();
     return DR_OK;

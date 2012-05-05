@@ -2,13 +2,15 @@
 
 //Konstuktor und Deskonstruktor
 DRLogger::DRLogger()
-: mMutex(NULL), mLockMutex(NULL), mUnlockMutex(NULL)
+: m_bPrintToConsole(false)
 {
 	//m_pFile = NULL;
-	mMutex = NULL;
-	mLockMutex = NULL;
-	mUnlockMutex = NULL;
 	strcpy(m_acFilename, "NotInitLogger.html");
+}
+
+DRLogger::DRLogger(const DRLogger& log)
+{
+    strcpy(m_acFilename, log.m_acFilename);
 }
 
 //------------------------------------------------------
@@ -19,8 +21,10 @@ DRLogger::~DRLogger()
 //-------------------------------------------------------
 //--------------------------------------------------------
 //init und Exit
-DRReturn DRLogger::init(const char* pcFilename)
+DRReturn DRLogger::init(const char* pcFilename, bool printToConsole)
 {
+    m_bPrintToConsole = printToConsole;
+    
 	//Filenamen kopieren
 	//sprintf(m_acFilename, pcFilename);
 	strcpy(m_acFilename, pcFilename);
@@ -148,80 +152,47 @@ DRReturn DRLogger::writeColorToLog(const DRColor& c)
 //*/
 DRReturn DRLogger::writeToLog(const char* pcText, ...)
 {
-	if(mLockMutex) mLockMutex();
-	//Textbuffer zum schreiben
+    //Textbuffer zum schreiben
 	char acBuffer[1024];
-	char acBuffer1[1024];
-	memset(acBuffer1, 0, 1024*sizeof(char));
-	char acBuffer2[1024];
+	
 	va_list   Argumente;
 
-	//Datei zum anh�ngen �ffnen (wenn sie es nicht schon ist)
-//	if(!m_pFile)
-//		m_pFile = fopen(m_acFilename, "a");
-	if(!m_File.isOpen()) m_File.open(m_acFilename, false, "at");
-
-	//wenns nicht geht, Fehler
-	//if(!m_pFile) return DR_ERROR;
-	if(!m_File.isOpen()) return DR_ERROR;
-
-	m_File.setFilePointer(0, SEEK_END);
-
-	//Buffer f�llen
-        va_start(Argumente, pcText);
-        vsprintf(acBuffer, pcText, Argumente);
-        va_end(Argumente);
-
-	int iCursor = 0;
-	//ersetzen der \n durch <br>
-	for(int i = 0; i < 1024; i++)
-	{
-		if(acBuffer[i] == '\n')
-		{
-			acBuffer1[iCursor++] = '<';
-			acBuffer1[iCursor++] = 'b';
-			acBuffer1[iCursor++] = 'r';
-			acBuffer1[iCursor++] = '>';
-		}
-		else if(acBuffer[i] == '\0') break;
-		else
-		{
-			acBuffer1[iCursor++] = acBuffer[i];
-		}
-	}
-
-	//einf�gen eines Zeilenumbruchs und Formationen
-	sprintf(acBuffer2, "<tr><td><font size=\"2\" color=\"#000080\">%s</font></td></tr>", acBuffer1);
-	if(m_File.getFile())
-		fprintf(m_File.getFile(), "<tr><td><font size=\"2\" color=\"#000080\">%s</font></td></tr>", acBuffer1);
-
-
-	//in die Datei schreiben
-//	fprintf(m_pFile, acBuffer);
-	//if(m_File.write(acBuffer2, sizeof(char), strlen(acBuffer2))) return DR_ERROR;
-
-	DRRemoveHTMLTags(acBuffer2, acBuffer1, 1024);
-	printf("%s\n", acBuffer1);
-
-
-	//und Datei schlie�en (nur im Debug Modus)
-#ifdef _DEBUG
-//	fclose(m_pFile);
-	fflush(m_File.getFile());
-	//m_File.close();
-//	m_pFile = NULL;
-	// Zus�tzlich wird noch eine Debug-Ausgabe erzeugt.
-	OutputDebugString(acBuffer1);
-
-#endif
-	if(mUnlockMutex) mUnlockMutex();
-	return DR_OK;
+	//Buffer fuellen
+	va_start(Argumente, pcText);
+	vsprintf(acBuffer, pcText, Argumente);
+	va_end(Argumente);
+    
+    return writeToLog(DRString(acBuffer));
 }
 
 DRReturn DRLogger::writeToLog(DRString text)
 {
-    if(mLockMutex) mLockMutex();
+    DRString final = DRString("<tr><td><font size=\"2\" color=\"#000080\">");
+    final += text;
+    final += DRString("</font></td></tr>");
+    
+    return writeToLogDirect(final);
+}
 
+//***************************************************************************
+
+DRReturn DRLogger::writeToLogDirect(const char* pcText, ...)
+{
+	//Textbuffer zum schreiben
+	char acBuffer[1024];
+	
+	va_list   Argumente;
+
+	//Buffer fuellen
+	va_start(Argumente, pcText);
+	vsprintf(acBuffer, pcText, Argumente);
+	va_end(Argumente);
+    
+    return writeToLogDirect(DRString(acBuffer));
+}
+
+DRReturn DRLogger::writeToLogDirect(DRString text)
+{    
 	//Datei zum anh�ngen �ffnen (wenn sie es nicht schon ist)
 	if(!m_File.isOpen()) m_File.open(m_acFilename, false, "at");
 
@@ -230,26 +201,15 @@ DRReturn DRLogger::writeToLog(DRString text)
 
 	m_File.setFilePointer(0, SEEK_END);
 
-	printf("%s\n", text.data());
+    if(m_bPrintToConsole)
+        printf("%s\n", text.data());
         
 	//ersetzen der \n durch <br>
 	text.replace(text.find('\n'),1,"<br>");
 
-        DRString final = DRString("<tr><td><font size=\"2\" color=\"#000080\">");
-        final += text;
-        final += DRString("</font></td></tr>");
 	//einf�gen eines Zeilenumbruchs und Formationen
 	if(m_File.getFile())
-            fprintf(m_File.getFile(), final.data());
-
-
-	//in die Datei schreiben
-//	fprintf(m_pFile, acBuffer);
-	//if(m_File.write(acBuffer2, sizeof(char), strlen(acBuffer2))) return DR_ERROR;
-
-	//DRRemoveHTMLTags(acBuffer2, acBuffer1, 1024);
-	
-
+            fprintf(m_File.getFile(), text.data());
 
 	//und Datei schlie�en (nur im Debug Modus)
 #ifdef _DEBUG
@@ -259,88 +219,11 @@ DRReturn DRLogger::writeToLog(DRString text)
 //	m_pFile = NULL;
 	// Zus�tzlich wird noch eine Debug-Ausgabe erzeugt.
 	OutputDebugString(text.data());
-
 #endif
-	if(mUnlockMutex) mUnlockMutex();
+    
 	return DR_OK;
 }
 
-//***************************************************************************
-
-DRReturn DRLogger::writeToLogDirect(const char* pcText, ...)
-{
-	if(mLockMutex) mLockMutex();
-	//Textbuffer zum schreiben
-	char acBuffer[1024];
-	char acBuffer1[1024];
-	char acBuffer2[1024];
-	memset(acBuffer1, 0, 1024*sizeof(char));
-	va_list   Argumente;
-	//Datei zum anh�ngen �ffnen (wenn sie es nicht schon ist)
-//	if(!m_pFile)
-//		m_pFile = fopen(m_acFilename, "a");
-	if(!m_File.isOpen()) m_File.open(m_acFilename, false, "at");
-
-	//wenns nicht geht, Fehler
-	//if(!m_pFile) return DR_ERROR;
-	if(!m_File.isOpen()) return DR_ERROR;
-
-	m_File.setFilePointer(0, SEEK_END);
-
-	//Buffer f�llen
-	va_start(Argumente, pcText);
-	vsprintf(acBuffer, pcText, Argumente);
-	va_end(Argumente);
-
-	int iCursor = 0;
-	//ersetzen der \n durch <br>
-	for(int i = 0; i < 1024; i++)
-	{
-		if(acBuffer[i] == '\n')
-		{
-			acBuffer1[iCursor++] = '<';
-			acBuffer1[iCursor++] = 'b';
-			acBuffer1[iCursor++] = 'r';
-			acBuffer1[iCursor++] = '>';
-		}
-		else if(acBuffer[i] == '\0') break;
-		else
-		{
-			acBuffer1[iCursor++] = acBuffer[i];
-		}
-	}
-
-	//Formatieren
-//	sprintf(acBuffer2 /*"<tr><td><font size=\"2\" color=\"#000080\">%s</font></td></tr><br>"*/, acBuffer1);
-    strcpy(acBuffer2, acBuffer);
-
-
-	//in die Datei schreiben
-//	fprintf(m_pFile, acBuffer);
-	if(m_File.write(acBuffer2, sizeof(char), strlen(acBuffer2))) return DR_ERROR;
-
-	//und Datei schlie�en (nur im Debug Modus)
-#ifdef _DEBUG
-//	fclose(m_pFile);
-	m_File.close();
-//	m_pFile = NULL;
-	// Zus�tzlich wird noch eine Debug-Ausgabe erzeugt.
-	DRRemoveHTMLTags(acBuffer2, acBuffer1, 1024);
-	OutputDebugString(acBuffer1);
-
-#endif
-	if(mUnlockMutex) mUnlockMutex();
-	return DR_OK;
-}
-
-//--------------------------------------------------------------------
-/*
-DRReturn DRLogger::WriteDXError(HRESULT hr)
-{
-	const char* pcError = DXGetErrorDescription9(hr);
-	return WriteToLog(pcError);
-}
-*/
 
 //********************************************************************************************************************++
 
