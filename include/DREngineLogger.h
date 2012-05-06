@@ -37,6 +37,8 @@ public:
 
     //in die Log-Datei schreiben
     virtual DRReturn writeToLogDirect(DRString text);
+    virtual DRReturn writeToLog(const char* pcText, ...);
+    virtual DRReturn writeToLog(DRString text);
 protected:
     SDL_mutex*  mMutex;
         

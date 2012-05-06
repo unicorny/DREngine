@@ -63,9 +63,9 @@ public:
         void setPrintToConsole(bool printToConsole) {m_bPrintToConsole = printToConsole;}
 
 	//in die Log-Datei schreiben
-	DRReturn writeToLog(const char* pcText, ...);
-        DRReturn writeToLog(DRString text);
-	DRReturn writeToLogDirect(const char* pcText, ...);
+	virtual DRReturn writeToLog(const char* pcText, ...);
+        virtual DRReturn writeToLog(DRString text);
+	virtual DRReturn writeToLogDirect(const char* pcText, ...);
         virtual DRReturn writeToLogDirect(DRString text);
 
 	DRReturn writeVector2ToLog(const DRVector2& v, const char* name = NULL);			// 2D-Vektor ins Logbuch schreiben

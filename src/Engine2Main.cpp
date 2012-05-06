@@ -14,7 +14,7 @@ bool		g_bGL = false;
 
 Uint8*		g_piPressed = NULL;
 u16             g_CPU_Count = 0;
-DREngineLogger g_engineLogger;
+DREngineLogger DREngineLog;
 
 //********************************************************************************************************************++
 
@@ -95,8 +95,8 @@ DRReturn EnInit_Simple(DRReal fVersion /* = 0.0f*/, bool initSound/* = false*/)
 //******************************************************************************************
 DRReturn EnInit(DRReal fVersion /* = 1.0f */, bool initSound/* = false*/)
 {
-    g_engineLogger.init("Logger.html", true);
-	Core2_init(static_cast<DRLogger&>(g_engineLogger));
+    DREngineLog.init("EngineLogger.html", true);
+	Core2_init("Logger.html");
 	if(fVersionCheck(fVersion)) return DR_ERROR;
 
 	g_bEnInit = true;
@@ -328,7 +328,7 @@ void EnExit()
 	{
         SDL_Quit();
 	}
-    
+    DREngineLog.exit();
 	Core2_exit();
 }
 
@@ -362,7 +362,7 @@ DRString EnGetTimeSinceStart()
     double minutes = 0.0;
 	seconds = modf(seconds/60.0, &minutes);
     seconds *= 60.0; 
-    sprintf(timeBuffer, "%.0f:%.2f", minutes, seconds);
+    sprintf(timeBuffer, "[%.0f:%02.0f] ", minutes, seconds);
     
     return DRString(timeBuffer);
 }

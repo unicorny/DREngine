@@ -202,10 +202,26 @@ DRReturn DRLogger::writeToLogDirect(DRString text)
 	m_File.setFilePointer(0, SEEK_END);
 
     if(m_bPrintToConsole)
-        printf("%s\n", text.data());
+    {
+        int size = text.size();
+        char* buffer1 = new char[size+1];
+        char* buffer2 = new char[size+1];
+		memset(buffer1, 0, sizeof(size+1));
+		memset(buffer2, 0, sizeof(size+1));
+        if(buffer1 && buffer2)
+        {
+            strcpy(buffer1, text.data());
+            DRRemoveHTMLTags(buffer1, buffer2, size);
+            printf("%s\n", buffer2);
+            DR_SAVE_DELETE_ARRAY(buffer1);
+            DR_SAVE_DELETE_ARRAY(buffer2);
+        }
+    }
         
 	//ersetzen der \n durch <br>
-	text.replace(text.find('\n'),1,"<br>");
+	DRString final = text;
+	while(text.find('\n') != DRString::npos)
+		text.replace(text.find('\n'),1,"<br>");
 
 	//einf�gen eines Zeilenumbruchs und Formationen
 	if(m_File.getFile())

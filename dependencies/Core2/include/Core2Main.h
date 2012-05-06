@@ -170,7 +170,6 @@ CORE2_API extern DRLogger DRLog;
 #include "DRIndexReferenzHolder.h"
 
 CORE2_API DRReturn Core2_init(const char* logFileName = "Logger.html");
-CORE2_API DRReturn Core2_init(DRLogger& log);
 CORE2_API void      Core2_exit();
 
 
