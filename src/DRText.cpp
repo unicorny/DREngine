@@ -284,35 +284,23 @@ DRReturn DRText::drawText()
 			// Sechs Vertizes f�r das aktuelle Zeichen hinzuf�gen.
 			// Dazu verwenden wir Dreieckslisten - jeweils sechs Vertizes
 			// beschreiben ein Viereck.
-                        glBegin(GL_QUADS);
+       // glBegin(GL_QUADS);
 			// Erster Vertex: links oben
 			aVertex[uiVertexCursor].vPosition = DRVector3(vCursor.x + fItalic + fXOffset, vCursor.y, 0.0f);
 			aVertex[uiVertexCursor].Diffuse = Color1.interpolate(Color2, (float)(dwChar) / (float)(iLength));
 			aVertex[uiVertexCursor].vTexture = m_pFont->m_FInfo.avTopLeft[(unsigned char)(pcText[dwChar])];
-                        glColor4fv(aVertex[uiVertexCursor].Diffuse);
-                        glTexCoord2fv(aVertex[uiVertexCursor].vTexture);
-                        //glVertex3fv(aVertex[uiVertexCursor].vPosition);
-                        glVertex3f(vCursor.x + fItalic + fXOffset, vCursor.y, 0.0f);
-                        
+                                 
 			// Zweiter Vertex: rechts oben
 			aVertex[uiVertexCursor + 1].vPosition = DRVector3(vCursor.x + fCharWidth + fItalic + fXOffset, vCursor.y, 0.0f);
 			aVertex[uiVertexCursor + 1].Diffuse = Color1.interpolate(Color2, (float)(dwChar + 1) / (float)(iLength));
 			aVertex[uiVertexCursor + 1].vTexture.x = m_pFont->m_FInfo.avBottomRight[(unsigned char)(pcText[dwChar])].x;
 			aVertex[uiVertexCursor + 1].vTexture.y = m_pFont->m_FInfo.avTopLeft[(unsigned char)(pcText[dwChar])].y;
-                        glColor4fv(aVertex[uiVertexCursor+1].Diffuse);
-                        glTexCoord2fv(aVertex[uiVertexCursor+1].vTexture);
-                        //glVertex3fv(aVertex[uiVertexCursor+1].vPosition);
-                        glVertex3f(vCursor.x + fCharWidth + fItalic + fXOffset, vCursor.y, 0.0f);
-
+         
 			// Dritter Vertex: rechts unten
 			aVertex[uiVertexCursor + 2].vPosition = DRVector3(vCursor.x + fCharWidth + fXOffset, vCursor.y + fCharHeight, 0.0f);
 			aVertex[uiVertexCursor + 2].Diffuse = aVertex[uiVertexCursor + 1].Diffuse;
 			aVertex[uiVertexCursor + 2].vTexture = m_pFont->m_FInfo.avBottomRight[(unsigned char)(pcText[dwChar])];
-                        glColor4fv(aVertex[uiVertexCursor+2].Diffuse);
-                        glTexCoord2fv(aVertex[uiVertexCursor+2].vTexture);
-                        //glVertex3fv(aVertex[uiVertexCursor+2].vPosition);
-                        glVertex3f(vCursor.x + fCharWidth + fXOffset, vCursor.y + fCharHeight, 0.0f);
-
+         
 		/*	// Vierter Vertex = erster Vertex
 			aVertex[uiVertexCursor + 3] = aVertex[uiVertexCursor];
 
@@ -325,12 +313,8 @@ DRReturn DRText::drawText()
 			aVertex[uiVertexCursor + 3].Diffuse = aVertex[uiVertexCursor].Diffuse;
 			aVertex[uiVertexCursor + 3].vTexture.x = m_pFont->m_FInfo.avTopLeft[(unsigned char)(pcText[dwChar])].x;
 			aVertex[uiVertexCursor + 3].vTexture.y = m_pFont->m_FInfo.avBottomRight[(unsigned char)(pcText[dwChar])].y;
-                        glColor4fv(aVertex[uiVertexCursor+3].Diffuse);
-                        glTexCoord2fv(aVertex[uiVertexCursor+3].vTexture);
-                        //glVertex3fv(aVertex[uiVertexCursor+3].vPosition);
-                        glVertex3f(vCursor.x + fXOffset, vCursor.y + fCharHeight, 0.0f);
-                        
-                        glEnd();
+          
+      //  glEnd();
                         
                         
 			// Vertexcursor aktualisieren
@@ -360,12 +344,13 @@ DRReturn DRText::drawText()
 		*/
 		if(uiVertexCursor >= 600 || dwChar == (unsigned int)(iLength - 1))
 		{
+            
 			//Jetzt Zeichnen, mit Vertex-Arrays
 			glVertexPointer(3, GL_FLOAT, sizeof(SFontVertex), &aVertex[0].vPosition);
 			glColorPointer(4, GL_FLOAT, sizeof(SFontVertex), &aVertex[0].Diffuse);
 			glTexCoordPointer(2, GL_FLOAT, sizeof(SFontVertex), &aVertex[0].vTexture);
 
-			//glDrawArrays(GL_QUADS, 0, uiVertexCursor);
+			glDrawArrays(GL_QUADS, 0, uiVertexCursor);
                                                 
 			//glTranslated(10.0, 0.0f, 0.0f);
 		}
@@ -402,15 +387,19 @@ DRReturn DRFont::begin(bool bSmall /* = false */)
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glLoadIdentity();
+        
+        glMatrixMode(GL_TEXTURE);
+        glPushMatrix();
+        glRotatef(180.0f, 1.0f, 0.0f, 0.0f);
                 
-                glDisable(GL_CULL_FACE);
+        glDisable(GL_CULL_FACE);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_COLOR_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
 
 //	glBindTexture(GL_TEXTURE_2D, m_uiTextureID);
-        mTexture->bind();
+    mTexture->bind();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	if(DRGrafikError("Fehler in Font::Begin()")) return DR_ERROR;
@@ -428,12 +417,14 @@ DRReturn DRFont::end()
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+    glMatrixMode(GL_TEXTURE);
+    glPopMatrix();
 
 	glEnable(GL_DEPTH_TEST);
 //	glEnable(GL_FOG);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
-        glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);

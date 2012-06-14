@@ -11,6 +11,7 @@ ENGINE2_API DRVector2  g_v2WindowLength = DRVector2(0.0f);
 bool		g_bOgre = false;
 bool		g_bEnInit = false;
 bool		g_bGL = false;
+DRGameStateManager* g_pGameStateManager = NULL;
 
 Uint8*		g_piPressed = NULL;
 u16             g_CPU_Count = 0;
@@ -99,6 +100,8 @@ DRReturn EnInit(DRReal fVersion /* = 1.0f */, bool initSound/* = false*/)
 	Core2_init("Logger.html");
 	if(fVersionCheck(fVersion)) return DR_ERROR;
 
+    g_pGameStateManager = new DRGameStateManager;
+    
 	g_bEnInit = true;
 	LOG_INFO("Engine wurde initalisiert");
 	return DR_OK;
@@ -258,6 +261,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 	//OpenGL einrichten f�r Ohrtogonale Projection
 	glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
+    
     //DRActivateVBExtension();
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -320,6 +324,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 void EnExit()
 {
+    DR_SAVE_DELETE(g_pGameStateManager);
     if(g_bGL)
     {
         DRTextureManager::Instance().exit();
@@ -327,9 +332,10 @@ void EnExit()
 	if(g_bEnInit)
 	{
         SDL_Quit();
-	}
+	}    
     DREngineLog.exit();
 	Core2_exit();
+    
 }
 
 //********************************************************************************************************************++
@@ -399,6 +405,12 @@ DRReal EnSDL_Loop()
 }
  //********************************************************************************************+
 
+DRReturn EnGameLoop(DRGameStatePtr firstGameState, bool bExitByEsc)
+{    
+    g_pGameStateManager->pushState(firstGameState);
+    return EnGameLoop(NULL, NULL, bExitByEsc);
+}
+
 //Hauptspielschleife
 DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRReal), bool bExitByEsc /* = false*/)
 {
@@ -454,12 +466,10 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
             case SDL_KEYDOWN:
                 switch(event.key.keysym.sym)
 				{
-					if(bExitByEsc)
-					{
 				case SDLK_ESCAPE:
-					bRun = false;
+                    if(bExitByEsc)
+                        bRun = false;
 					break;
-					}
 				}
                 break;
             case SDL_QUIT:
@@ -470,8 +480,15 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
         }
         DRTextureManager::Instance().move(fTime);
 		//Render und Move aufrufen
-		if(pMoveProc(fTime)) LOG_ERROR("Fehler beim Bewegen des Spiels", DR_ERROR);
-		if(pRenderProc(fTime)) LOG_ERROR("Fehler beim Rendern des Spiels", DR_ERROR);
+        if(pMoveProc)
+            if(pMoveProc(fTime)) LOG_ERROR("Fehler beim Bewegen des Spiels", DR_ERROR);
+        if(pRenderProc)
+            if(pRenderProc(fTime)) LOG_ERROR("Fehler beim Rendern des Spiels", DR_ERROR);
+        if(g_pGameStateManager)
+        {
+            if(g_pGameStateManager->move(fTime)) LOG_ERROR("Error by moving gameStateManager", DR_ERROR);
+            if(g_pGameStateManager->render(fTime)) LOG_ERROR("Error by rendering gameStateManager", DR_ERROR);
+        }
 
 		dGesTime += double(SDL_GetTicks() - uiStartTime)/1000.0;
         // Pageflip: Back- und Frontbuffer werden vertauscht
