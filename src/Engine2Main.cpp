@@ -484,7 +484,7 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
             if(pMoveProc(fTime)) LOG_ERROR("Fehler beim Bewegen des Spiels", DR_ERROR);
         if(pRenderProc)
             if(pRenderProc(fTime)) LOG_ERROR("Fehler beim Rendern des Spiels", DR_ERROR);
-        if(g_pGameStateManager)
+        if(g_pGameStateManager && g_pGameStateManager->getStateCount())
         {
             if(g_pGameStateManager->move(fTime)) LOG_ERROR("Error by moving gameStateManager", DR_ERROR);
             if(g_pGameStateManager->render(fTime)) LOG_ERROR("Error by rendering gameStateManager", DR_ERROR);
