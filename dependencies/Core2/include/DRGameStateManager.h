@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
  *                                                                         *
  ***************************************************************************/
-/* 
+/*
  * File:   DRGameStateManager.h
  * Author: Dario
  *
@@ -32,19 +32,23 @@ class CORE2_API DRGameState: public DRIResource
 {
 public:
     //! \param transparency 1 is not transparent, < 1 is transparent
-    DRGameState(float transparency = 1.0f) 
-    : mTransparency(transparency) {};
+    DRGameState(float transparency = 1.0f)
+    : mTransparency(transparency), mFirstState(false) {};
     virtual ~DRGameState() {};
-    
+
     virtual DRReturn render(float fTime) = 0;
     virtual DRReturn move(float fTime) = 0;
-    
+
     inline void setTransparency(float transparency) {mTransparency = transparency;}
     inline float getTransparency() const {return mTransparency;}
-    
-    
+
+    inline bool isFirstState() {return mFirstState;}
+    inline void setFirstState(bool firstState) {mFirstState = firstState;}
+
+
 protected:
     float       mTransparency;
+    bool        mFirstState;//the state who call glClear
 };
 typedef DRResourcePtr<DRGameState> DRGameStatePtr;
 
@@ -55,23 +59,24 @@ public:
     ~DRGameStateManager();
 
     void addConstantState(DRGameStatePtr newGameState, const char* name);
-    
+
     //! \return DR_ERROR if state with this name didn't exist in constant states map
     DRReturn pushState(const char* name);
     void pushState(DRGameStatePtr gameState);
     void popState();
-    
+
     int getStateCount() const {return mGameStates.size();}
-    
+    int getConstantStateCount() const {return mConstantGameStates.size();}
+
     DRReturn move(float fTime);
     DRReturn render(float fTime);
-    
+
 private:
     std::map<DHASH, DRGameStatePtr> mConstantGameStates;
     typedef std::pair<DHASH, DRGameStatePtr> CONSTANT_GAME_STATE_ENTRY;
-    
+
     std::list<DRGameStatePtr> mGameStates;
-    
+
 };
 
 #endif //__DR_CORE2_GAME_STATE_MANAGER__
