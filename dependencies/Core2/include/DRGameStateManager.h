@@ -67,7 +67,7 @@ public:
 
     int getStateCount() const {return mGameStates.size();}
     int getConstantStateCount() const {return mConstantGameStates.size();}
-
+    
     DRReturn move(float fTime);
     DRReturn render(float fTime);
 
