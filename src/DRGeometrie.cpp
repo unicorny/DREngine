@@ -275,7 +275,7 @@ DRReturn DRGeometrie::render()
     {
         if(mRenderVertexBuffer && mVertexBufferObjects[2])
         {
-	    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mVertexBufferObjects[2]);             
+            glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, mVertexBufferObjects[2]);             
             glDrawElements(mRenderMode, mIndexCount, GL_UNSIGNED_INT, 0);
             //glDrawArrays( mRenderMode, 0, mVertexCount );             
         }
@@ -286,6 +286,7 @@ DRReturn DRGeometrie::render()
     }
     else if(mVertexCount)
     {
+		if(mRenderVertexBuffer) LOG_WARNING("VertexBuffer without indices isn't possible");
         glDrawArrays(mRenderMode, 0, mVertexCount);    
     }
     glDisableClientState(GL_VERTEX_ARRAY);
