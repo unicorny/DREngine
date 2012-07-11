@@ -4,14 +4,15 @@ DRTextureManager::DRTextureManager()
 : mInitalized(false), mGrafikMemTexture(0), mTextureLoadMutex(NULL), mTextureLoadThread(NULL), mTextureLoadCondition(NULL),
   mTextureLoadSemaphore(NULL)
 {
-	mTextureLoadSemaphore = SDL_CreateSemaphore(1);
-	mTextureLoadCondition = SDL_CreateCond();
-	SDL_SemWait(mTextureLoadSemaphore);
-	mTextureLoadMutex = SDL_CreateMutex();   
+    mTextureLoadSemaphore = SDL_CreateSemaphore(1);
+    mTextureLoadCondition = SDL_CreateCond();
+    SDL_SemWait(mTextureLoadSemaphore);
+    mTextureLoadMutex = SDL_CreateMutex();   
+    mGetTextureMutex  = SDL_CreateMutex();
 #if SDL_VERSION_ATLEAST(1,3,0)
-	mTextureLoadThread = SDL_CreateThread(asynchronTextureLoadThread, "DRTexLoa", this);
+    mTextureLoadThread = SDL_CreateThread(asynchronTextureLoadThread, "DRTexLoa", this);
 #else
-	mTextureLoadThread = SDL_CreateThread(asynchronTextureLoadThread, this);
+    mTextureLoadThread = SDL_CreateThread(asynchronTextureLoadThread, this);
 #endif
 }
 
@@ -38,23 +39,27 @@ void DRTextureManager::exit()
     mTextureMemoryEntrys.clear();
     mTextureEntrys.clear();    
 
-	if(mTextureLoadThread)
-	{
-		//Post Exit to Stream Thread
-		SDL_SemPost(mTextureLoadSemaphore); LOG_WARNING_SDL();
-		//kill TextureLoad Thread after 1/2 second
-		SDL_Delay(500);
-		SDL_KillThread(mTextureLoadThread);
-		LOG_WARNING_SDL();
+    if(mTextureLoadThread)
+    {
+        //Post Exit to Stream Thread
+        SDL_SemPost(mTextureLoadSemaphore); LOG_WARNING_SDL();
+        //kill TextureLoad Thread after 1/2 second
+        SDL_Delay(500);
+        SDL_KillThread(mTextureLoadThread);
+        LOG_WARNING_SDL();
 
-		mTextureLoadThread = NULL;
-		SDL_DestroySemaphore(mTextureLoadSemaphore);
-		SDL_DestroyMutex(mTextureLoadMutex);
-		SDL_DestroyCond(mTextureLoadCondition);
-	}
+        mTextureLoadThread = NULL;
+        SDL_DestroySemaphore(mTextureLoadSemaphore);
+        SDL_DestroyMutex(mTextureLoadMutex);
+        SDL_DestroyCond(mTextureLoadCondition);
+    }
+    SDL_LockMutex(mGetTextureMutex);
+    SDL_UnlockMutex(mGetTextureMutex);
+    SDL_DestroyMutex(mGetTextureMutex);
+    mGetTextureMutex = NULL;
 
-	while(!mLoadedAsynchronLoadTextures.empty()) mLoadedAsynchronLoadTextures.pop();
-	while(!mAsynchronLoadTextures.empty()) mAsynchronLoadTextures.pop();
+    while(!mLoadedAsynchronLoadTextures.empty()) mLoadedAsynchronLoadTextures.pop();
+    while(!mAsynchronLoadTextures.empty()) mAsynchronLoadTextures.pop();
 
     LOG_INFO("DRTextureManager beendet");
 }
@@ -73,18 +78,23 @@ DHASH DRTextureManager::makeTextureHash(const TextureMemoryEntry &entry)
 //! lädt oder return instance auf Textur
 DRTexturePtr DRTextureManager::getTexture(const char* filename, bool loadAsynchron /*= false*/, GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* = GL_LINEAR*/)
 {
-	if(!mInitalized) return 0;
+    if(!mInitalized) return 0;
+    SDL_LockMutex(mGetTextureMutex);
 
     DHASH id = makeTextureHash(filename, glMinFilter, glMagFilter);
 	//Schauen ob schon vorhanden
     if(mTextureEntrys.find(id) != mTextureEntrys.end())
     {
+        SDL_UnlockMutex(mGetTextureMutex);
         return mTextureEntrys[id];
     }
-	DRTexturePtr tex(new DRTexture(filename));
-   
-	if(!tex.getResourcePtrHolder()->mResource)
+    DRTexturePtr tex(new DRTexture(filename));
+
+    if(!tex.getResourcePtrHolder()->mResource)
+    {
+        SDL_UnlockMutex(mGetTextureMutex);
         LOG_ERROR("No Memory for new Texture left", 0);
+    }
     
     if(loadAsynchron)
     {
@@ -98,9 +108,12 @@ DRTexturePtr DRTextureManager::getTexture(const char* filename, bool loadAsynchr
     }
     
     if(!mTextureEntrys.insert(DR_TEXTURE_ENTRY(id, tex)).second)
-		LOG_ERROR("Unerwarteter Fehler in DRTextureManager::getTexture aufgetreten", 0);
-
-	return tex;
+    {
+        SDL_UnlockMutex(mGetTextureMutex);
+        LOG_ERROR("Unerwarteter Fehler in DRTextureManager::getTexture aufgetreten", 0);
+    }
+    SDL_UnlockMutex(mGetTextureMutex);
+    return tex;
 }
 DRTexturePtr DRTextureManager::getTexture(DRVector2i size, GLuint format, GLubyte* data/* = NULL*/, GLint dataSize /*= 0*/)
 {

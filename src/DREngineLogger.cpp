@@ -13,16 +13,16 @@ DREngineLogger::DREngineLogger()
 
 DRReturn DREngineLogger::init(const char* pcFilename, bool printToConsole)
 {
-	mMutex = SDL_CreateMutex(); 
+    mMutex = SDL_CreateMutex(); 
     DRReturn ret = DRLogger::init(pcFilename, printToConsole);    
-	return ret;
+    return ret;
 }
 
 void DREngineLogger::exit()
 {
     DRLogger::exit();
     if(mMutex)
-		SDL_DestroyMutex(mMutex); 
+        SDL_DestroyMutex(mMutex); 
 	
 }
 
@@ -35,21 +35,38 @@ DRReturn DREngineLogger::writeToLogDirect(DRString text)
     return ret;
 }
 
+DRReturn DREngineLogger::writeToLogDirect(const char* pcText, ...)
+{
+    //Textbuffer zum schreiben
+    char acBuffer[1024];
+
+    va_list   Argumente;
+
+    //Buffer fuellen
+    va_start(Argumente, pcText);
+    vsprintf(acBuffer, pcText, Argumente);
+    va_end(Argumente);
+    DRString final = EnGetTimeSinceStart();
+    final += DRString(acBuffer);
+
+    return writeToLogDirect(final);
+}
+
 DRReturn DREngineLogger::writeToLog(const char* pcText, ...)
 {
     //Textbuffer zum schreiben
-	char acBuffer[1024];
-	
-	va_list   Argumente;
+    char acBuffer[1024];
 
-	//Buffer fuellen
-	va_start(Argumente, pcText);
-	vsprintf(acBuffer, pcText, Argumente);
-	va_end(Argumente);
-	DRString final = EnGetTimeSinceStart();
-	final += DRString(acBuffer);
-    
-	return writeToLog(final);
+    va_list   Argumente;
+
+    //Buffer fuellen
+    va_start(Argumente, pcText);
+    vsprintf(acBuffer, pcText, Argumente);
+    va_end(Argumente);
+    DRString final = EnGetTimeSinceStart();
+    final += DRString(acBuffer);
+
+    return writeToLog(final);
 }
 DRReturn DREngineLogger::writeToLog(DRString text)
 {

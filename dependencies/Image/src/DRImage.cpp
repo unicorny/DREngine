@@ -47,7 +47,7 @@ const char* DRImage::imageFormatName(FREE_IMAGE_FORMAT type)
         case FIF_PNG:           return "PNG";
         case FIF_TARGA:         return "tga (Targa)";
         case FIF_GIF:           return "gif";
-        default: "- unknow -";
+        default: "- unknown -";
     }
     return "- nothing -";
 }
@@ -125,20 +125,23 @@ DRReturn DRImage::loadFromFile(const char* filename)
 		LOG_ERROR("bits, width or height is zero", -1);
 	}
 //*/
-    //Swap Colors to get RGB
-    FIBITMAP *red = NULL, *blue = NULL;
-    if(!(red  = FreeImage_GetChannel(mImage, FICC_RED )))
-        LOG_WARNING("Fehler bei get red channel!");
-    if(!(blue = FreeImage_GetChannel(mImage, FICC_BLUE)))
-        LOG_WARNING("Fehler bei get blue channel!");
+    //Swap Colors to get RGB by tga and jpg files
+    //if(fif == FIF_TARGA || fif == FIF_JPEG)
+    {
+        FIBITMAP *red = NULL, *blue = NULL;
+        if(!(red  = FreeImage_GetChannel(mImage, FICC_RED )))
+            LOG_WARNING("Fehler bei get red channel!");
+        if(!(blue = FreeImage_GetChannel(mImage, FICC_BLUE)))
+            LOG_WARNING("Fehler bei get blue channel!");
 
-    if(!FreeImage_SetChannel(mImage, blue, FICC_RED ))
-        LOG_WARNING("Fehler bei set Blue channel to red!");
-    if(!FreeImage_SetChannel(mImage, red , FICC_BLUE))
-        LOG_WARNING("Fehler bei set Red Channel to blue!");
-    
-    FreeImage_Unload(red);
-    FreeImage_Unload(blue);
+        if(!FreeImage_SetChannel(mImage, blue, FICC_RED ))
+            LOG_WARNING("Fehler bei set Blue channel to red!");
+        if(!FreeImage_SetChannel(mImage, red , FICC_BLUE))
+            LOG_WARNING("Fehler bei set Red Channel to blue!");
+
+        FreeImage_Unload(red);
+        FreeImage_Unload(blue);
+    }
 
     mLoadedSucessfully = true;
 	//LOG_INFO("Image loaded sucessfully");
