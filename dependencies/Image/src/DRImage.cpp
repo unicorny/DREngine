@@ -227,23 +227,28 @@ void DRImage::getPixel(DRColor* buffer)
 {
     if(!mLoadedSucessfully) LOG_ERROR_VOID("not loaded");
     //FIBITMAP* b = FreeImage_ConvertTo32Bits(mImage);
-    FIBITMAP *red = NULL, *green = NULL, *blue = NULL;
+    FIBITMAP *red = NULL, *green = NULL, *blue = NULL, *alpha = NULL;
      if(!(red  = FreeImage_GetChannel(mImage, FICC_RED )))
         LOG_WARNING("Fehler bei get red channel!");
     if(!(blue = FreeImage_GetChannel(mImage, FICC_BLUE)))
         LOG_WARNING("Fehler bei get blue channel!");
     if(!(green = FreeImage_GetChannel(mImage, FICC_GREEN)))
         LOG_WARNING("Fehler bei get green channel!");
+    if(!(alpha = FreeImage_GetChannel(mImage, FICC_ALPHA)))
+        LOG_WARNING("Fehler bei get alpha channel!");
     
     u8* rp = (u8*)FreeImage_GetBits(red);
     u8* gp = (u8*)FreeImage_GetBits(green);
     u8* bp = (u8*)FreeImage_GetBits(blue);
+    u8* ap = (u8*)FreeImage_GetBits(alpha);
     u32 size = getWidth()*getHeight();
     for(u32 i = 0; i < size; i++)
     {
         buffer[i].b = (float)(rp[i])/255.0f;
         buffer[i].g = (float)(gp[i])/255.0f;
         buffer[i].r = (float)(bp[i])/255.0f;
+        if(ap)
+            buffer[i].a = (float)(ap[i]/255.0f);
     }
     
    // FreeImage_Unload(b);  

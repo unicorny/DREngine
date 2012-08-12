@@ -17,6 +17,11 @@
 		DRIImage::deleteImage(mImage);
 		mImage = NULL;
 	}
+    if(mPboSaveID)
+    {
+        LOG_WARNING("PBO wasn't deleted");
+        glDeleteBuffersARB(1, &mPboSaveID);
+    }
  }
 
 DRReturn DRSaveTexture::getPixelsToSave()

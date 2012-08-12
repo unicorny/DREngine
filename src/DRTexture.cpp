@@ -110,7 +110,7 @@ DRReturn DRTexture::loadFromFile()
     }
     mSize = mImage->getSize();
     mLoadingState = 1;
-	return DR_OK;
+    return DR_OK;
 }
 
 DRReturn DRTexture::pixelsCopyToRenderer()
