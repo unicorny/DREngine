@@ -1,7 +1,7 @@
 #include "Engine2Main.h"
 
 DRTextureManager::DRTextureManager()
-: mInitalized(false), mGrafikMemTexture(0), mTextureLoadThread(new TextureThreadData), mTextureSaveThread(new TextureThreadData), mSaveTextureCount(0)
+: mInitalized(false), mGrafikMemTexture(0), mTextureLoadThread(new TextureThreadData), mTextureSaveThread(new TextureThreadData)
 {
     mGetTextureMutex  = SDL_CreateMutex();
 #if SDL_VERSION_ATLEAST(1,3,0)
@@ -175,13 +175,8 @@ void DRTextureManager::saveTexture(DRTexturePtr texture, const char* path, GLuin
     DRSaveTexture* savingTexture = new DRSaveTexture(path, stepSize);
     texture->bind();
     savingTexture->getPixelsToSave();
-    //addAsynchronTextureSaveTask(savingTexture);
     mAsynchronSaveTextures.push(savingTexture);
-    mTextureSaveThread->lock();
-    mSaveTextureCount++;
-    mTextureSaveThread->unlock();
-
-}
+ }
     
 // update timeout, release lange nicht verwendete Texturen
 DRReturn DRTextureManager::move(float fTime)
@@ -234,9 +229,6 @@ DRReturn DRTextureManager::move(float fTime)
         {
             DR_SAVE_DELETE(cur);
             mAsynchronSaveTextures.pop();
-            mTextureSaveThread->lock();
-            mSaveTextureCount--;
-            mTextureSaveThread->unlock();
         }
         else if(cur->isTextureReadyToSave())
         {
@@ -249,7 +241,6 @@ DRReturn DRTextureManager::move(float fTime)
         }
     }
         
-    //printf("\r[DRTextureManager::move] SaveTexture: %d", mSaveTextureCount);
     return DR_OK;
 }
 
@@ -262,17 +253,6 @@ void DRTextureManager::addAsynchronTextureLoadTask(DRTexturePtr texture)
 	
 	mTextureLoadThread->unlock();
 }
-
-void DRTextureManager::addAsynchronTextureSaveTask(DRSaveTexture* texture)
-{
-    mTextureSaveThread->lock();
-	mAsynchronSaveTextures.push(texture);
-
-    mTextureSaveThread->condSignal();
-	
-	mTextureSaveThread->unlock();
-}
-
 
 
 int DRTextureManager::asynchronTextureLoadThread(void* data)
@@ -342,7 +322,6 @@ int DRTextureManager::asynchronTextureSaveThread(void* data)
                 cur->saveImage();
                 DR_SAVE_DELETE(cur);                
                 d.lock();
-                t.mSaveTextureCount--;
 			}
             d.unlock();
 		}
