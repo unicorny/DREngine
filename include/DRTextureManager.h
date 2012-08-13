@@ -45,6 +45,7 @@ public:
     DRTexturePtr getTexture(DRVector2i size, GLuint format, DRColor* colors);
     
     void saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize = 16384);
+    void saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture);
     
     //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
     //GLuint    getGLTextureMemory(GLuint width, GLuint height, GLuint format);

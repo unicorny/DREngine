@@ -170,10 +170,16 @@ void DRTextureManager::saveTexture(DRTexturePtr texture, const char* path, GLuin
 {
     if(!mInitalized) LOG_ERROR_VOID("not initalized");
     DRSaveTexture* savingTexture = new DRSaveTexture(path, stepSize);
-    texture->bind();
-    savingTexture->getPixelsToSave();
-    mTextureSaveThread->addSaveTask(savingTexture);
+    saveTexture(texture, savingTexture);
  }
+
+void DRTextureManager::saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture)
+{
+    if(!mInitalized) LOG_ERROR_VOID("not initalized");
+    texture->bind();
+    saveTexture->getPixelsToSave();
+    mTextureSaveThread->addSaveTask(saveTexture);
+}
     
 DRReturn DRTextureManager::TextureSaveThread::move()
 {
