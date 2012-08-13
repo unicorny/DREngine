@@ -1,16 +1,9 @@
 #include "Engine2Main.h"
 
 DRTextureManager::DRTextureManager()
-: mInitalized(false), mGrafikMemTexture(0), mTextureLoadThread(new TextureThreadData), mTextureSaveThread(new TextureThreadData)
+: mInitalized(false), mGrafikMemTexture(0), mTextureLoadThread(NULL), mTextureSaveThread(NULL)
 {
-    mGetTextureMutex  = SDL_CreateMutex();
-#if SDL_VERSION_ATLEAST(1,3,0)
-    mTextureLoadThread->thread = SDL_CreateThread(asynchronTextureLoadThread, "DRTexLoa", this);
-    mTextureSaveThread->thread = SDL_CreateThread(asynchronTextureSaveThread, "DRTexSav", this);
-#else
-    mTextureLoadThread->thread = SDL_CreateThread(asynchronTextureLoadThread, this);
-    mTextureSaveThread->thread = SDL_CreateThread(asynchronTextureSaveThread, this);
-#endif
+    
 }
 
 DRTextureManager& DRTextureManager::Instance()
@@ -21,6 +14,12 @@ DRTextureManager& DRTextureManager::Instance()
 
 DRReturn DRTextureManager::init()
 {
+    mTextureLoadThread = new TextureLoadThread;
+    mTextureSaveThread = new TextureSaveThread;
+    if(!mTextureSaveThread || !mTextureLoadThread)
+        LOG_ERROR("can't init threads", DR_ERROR);
+    mGetTextureMutex  = SDL_CreateMutex();
+    
     mInitalized = true;
     LOG_INFO("DRTextureManager initalisiert");
     return DR_OK;
@@ -43,9 +42,6 @@ void DRTextureManager::exit()
     SDL_UnlockMutex(mGetTextureMutex);
     SDL_DestroyMutex(mGetTextureMutex);
     mGetTextureMutex = NULL;
-
-    while(!mLoadedAsynchronLoadTextures.empty()) mLoadedAsynchronLoadTextures.pop();
-    while(!mAsynchronLoadTextures.empty()) mAsynchronLoadTextures.pop();
 
     LOG_INFO("DRTextureManager beendet");
 }
@@ -84,7 +80,7 @@ DRTexturePtr DRTextureManager::getTexture(const char* filename, bool loadAsynchr
     
     if(loadAsynchron)
     {
-        addAsynchronTextureLoadTask(tex);
+        mTextureLoadThread->addLoadTask(tex);
     }
     else
     {
@@ -172,12 +168,48 @@ void DRTextureManager::freeTexture(GLuint textureID)
 
 void DRTextureManager::saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize/* = 16384*/)
 {
+    if(!mInitalized) LOG_ERROR_VOID("not initalized");
     DRSaveTexture* savingTexture = new DRSaveTexture(path, stepSize);
     texture->bind();
     savingTexture->getPixelsToSave();
-    mAsynchronSaveTextures.push(savingTexture);
+    mTextureSaveThread->addSaveTask(savingTexture);
  }
     
+DRReturn DRTextureManager::TextureSaveThread::move()
+{
+    if(!mAsynchronSaveTextures.empty())
+    {
+        DRSaveTexture* cur = mAsynchronSaveTextures.front();
+
+        if(cur->putPixelsToImage())
+        {
+            DR_SAVE_DELETE(cur);
+            mAsynchronSaveTextures.pop();
+        }
+        else if(cur->isTextureReadyToSave())
+        {
+            lock();
+            mAsynchronReadyToSaveTextures.push(cur);
+            mAsynchronSaveTextures.pop();
+            //send the texture load Thread a signal to continue
+            condSignal();
+            unlock();
+        }
+    }
+    return DR_OK;
+}
+DRReturn DRTextureManager::TextureLoadThread::move()
+{
+    lock();
+    if(!mLoadedAsynchronLoadTextures.empty())
+    {
+        mLoadedAsynchronLoadTextures.front()->pixelsCopyToRenderer();
+        mLoadedAsynchronLoadTextures.pop();
+    //	printf("\rtextures to load left: %d", mAsynchronLoadTextures.size());
+    }
+    unlock();
+    return DR_OK;
+}
 // update timeout, release lange nicht verwendete Texturen
 DRReturn DRTextureManager::move(float fTime)
 {
@@ -213,126 +245,58 @@ DRReturn DRTextureManager::move(float fTime)
             break;
         }            
     }
-    mTextureLoadThread->lock();
-    if(!mLoadedAsynchronLoadTextures.empty())
-    {
-        mLoadedAsynchronLoadTextures.front()->pixelsCopyToRenderer();
-        mLoadedAsynchronLoadTextures.pop();
-    //	printf("\rtextures to load left: %d", mAsynchronLoadTextures.size());
-    }
-    mTextureLoadThread->unlock();
-    if(!mAsynchronSaveTextures.empty())
-    {
-        DRSaveTexture* cur = mAsynchronSaveTextures.front();
-
-        if(cur->putPixelsToImage())
-        {
-            DR_SAVE_DELETE(cur);
-            mAsynchronSaveTextures.pop();
-        }
-        else if(cur->isTextureReadyToSave())
-        {
-            mTextureSaveThread->lock();
-            mAsynchronReadyToSaveTextures.push(cur);
-            mAsynchronSaveTextures.pop();
-            //send the texture load Thread a signal to continue
-            mTextureSaveThread->condSignal();
-            mTextureSaveThread->unlock();
-        }
-    }
+    mTextureLoadThread->move();
+    mTextureSaveThread->move();    
         
     return DR_OK;
 }
 
-void DRTextureManager::addAsynchronTextureLoadTask(DRTexturePtr texture)
+void DRTextureManager::TextureLoadThread::addLoadTask(DRTexturePtr texture)
 {
-    mTextureLoadThread->lock();
+    lock();
 	mAsynchronLoadTextures.push(texture);
 
-    mTextureLoadThread->condSignal();
+    condSignal();
 	
-	mTextureLoadThread->unlock();
+	unlock();
 }
 
-
-int DRTextureManager::asynchronTextureLoadThread(void* data)
+int DRTextureManager::TextureLoadThread::ThreadFunction()
 {
-	DRLog.writeToLog("asynchronTextureLoadThread start");
-	DRTextureManager& t = DRTextureManager::Instance();
-    TextureThreadData& d = *DRTextureManager::Instance().mTextureLoadThread;
-	while(SDL_SemTryWait(d.semaphore)==SDL_MUTEX_TIMEDOUT)
-	{
-		// Lock work mutex
-		d.lock();
-		int status = SDL_CondWait(d.condition, d.mutex); LOG_ERROR_SDL(-1);
-		if( status == 0)
-		{
-			while(!t.mAsynchronLoadTextures.empty())
-			{
-				// get top textur
-				DRTexturePtr cur = t.mAsynchronLoadTextures.front();
-				t.mAsynchronLoadTextures.pop();
-                d.unlock();
-				// call load
-				DRReturn ret = cur->loadFromFile(); 
-                d.lock();
-				if(ret)
-				{
-					cur->setErrorByLoading();
-				}
-				else
-				{
-					// push it onto the other queue
-					t.mLoadedAsynchronLoadTextures.push(cur);
-				}
-			}
-            d.unlock();
-		}
-		else
-		{
-			//unlock mutex and exit
-            d.unlock();
-			LOG_ERROR("Fehler im asynchronTextureLoadThread, exit", -1);
-		}
-	}
-	DRLog.writeToLog("asynchronTextureLoadThread ende");
-
-	return 0;
+    while(!mAsynchronLoadTextures.empty())
+    {
+        // get top textur
+        DRTexturePtr cur = mAsynchronLoadTextures.front();
+        mAsynchronLoadTextures.pop();
+        unlock();
+        // call load
+        DRReturn ret = cur->loadFromFile(); 
+        lock();
+        if(ret)
+        {
+            cur->setErrorByLoading();
+        }
+        else
+        {
+            // push it onto the other queue
+            mLoadedAsynchronLoadTextures.push(cur);
+        }
+    }
+    return 0;
 }
-
-int DRTextureManager::asynchronTextureSaveThread(void* data)
+int DRTextureManager::TextureSaveThread::ThreadFunction()
 {
-    DRLog.writeToLog("asynchronTextureSaveThread start");
-	DRTextureManager& t = DRTextureManager::Instance();
-    TextureThreadData& d = *DRTextureManager::Instance().mTextureSaveThread;
-	while(SDL_SemTryWait(d.semaphore)==SDL_MUTEX_TIMEDOUT)
-	{
-		// Lock work mutex
-        d.lock();
-		int status = SDL_CondWait(d.condition, d.mutex); LOG_ERROR_SDL(-1);
-		if( status == 0)
-		{
-			while(!t.mAsynchronReadyToSaveTextures.empty())
-			{
-                // get top textur
-                DRSaveTexture* cur = t.mAsynchronReadyToSaveTextures.front();
-                t.mAsynchronReadyToSaveTextures.pop();
-                d.unlock();
-                // call save
-                cur->saveImage();
-                DR_SAVE_DELETE(cur);                
-                d.lock();
-			}
-            d.unlock();
-		}
-		else
-		{
-			//unlock mutex and exit
-            d.unlock();
-			LOG_ERROR("Fehler im asynchronTextureSaveThread, exit", -1);
-		}
-	}
-	DRLog.writeToLog("asynchronTextureSaveThread ende");
+    while(!mAsynchronReadyToSaveTextures.empty())
+    {
+        // get top textur
+        DRSaveTexture* cur = mAsynchronReadyToSaveTextures.front();
+        mAsynchronReadyToSaveTextures.pop();
+        unlock();
+        // call save
+        cur->saveImage();
+        DR_SAVE_DELETE(cur);                
+        lock();
+    }
     return 0;
 }
 
