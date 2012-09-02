@@ -63,18 +63,21 @@ DRReturn DRSaveTexture::putPixelsToImage()
 	if(ptr)
 	{
 		GLuint bufferSize = mSize.x*mSize.y*4*sizeof(u8);
+        //memcpy(mSavingBuffer, ptr, bufferSize);
+        //mSavingState = 2;
+        
 		//printf("\rstepSize KByte: %d, KBytes left: %d", stepSize/1024, (bufferSize-mSavingCursor)/1024);
 		if(mSavingCursor+mStepSize >= bufferSize)
 		{
 			memcpy(&mSavingBuffer[mSavingCursor], &ptr[mSavingCursor], bufferSize-mSavingCursor);
-			mSavingState = 2;
+            mSavingState = 2;
 		}
 		else
 		{
 			memcpy(&mSavingBuffer[mSavingCursor], &ptr[mSavingCursor], mStepSize);
 			mSavingCursor += mStepSize;
 		}
-
+//*/
 		glUnmapBufferARB(GL_PIXEL_PACK_BUFFER_ARB);
 	}
 
@@ -84,6 +87,7 @@ DRReturn DRSaveTexture::putPixelsToImage()
 		glDeleteBuffersARB(1, &mPboSaveID);
 		mPboSaveID = 0;
 	}
+    
 
 	if(DRGrafikError("[Texture::getPixelsToSave()] error by asynchronously saving an image!"))
 		LOG_ERROR("Fehler bei save image", DR_ERROR);
