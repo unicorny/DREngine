@@ -101,22 +101,24 @@ DRTexturePtr DRTextureManager::getTexture(DRVector2i size, GLuint format, GLubyt
 {
     if(!mInitalized) return 0;
     
-    GLuint texID = _getTexture(size, format);
+    DRTextureBufferPtr texID = _getTexture(size, format);
     if(texID)
         return DRTexturePtr(new DRTexture(texID, data, dataSize));
-    return DRTexturePtr();
+    //error
+    LOG_ERROR("couldn't create texture", DRTexturePtr());
 }
 //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
 DRTexturePtr DRTextureManager::getTexture(DRVector2i size, GLuint format, DRColor* colors)
 {
     if(!mInitalized) return 0;
     
-    GLuint texID = _getTexture(size, format);
+    DRTextureBufferPtr texID = _getTexture(size, format);
     if(texID)
         return DRTexturePtr(new DRTexture(texID, reinterpret_cast<GLubyte*>(colors), size.x*size.y*sizeof(DRColor), GL_FLOAT));
-    return DRTexturePtr();
+    //error
+    LOG_ERROR("couldn't create texture", DRTexturePtr());
 }
-GLuint DRTextureManager::_getTexture(DRVector2i size, GLuint format)
+DRTextureBufferPtr DRTextureManager::_getTexture(DRVector2i size, GLuint format)
 {
     TextureMemoryEntry entry(size, format);
     DHASH id = makeTextureHash(entry);
@@ -127,9 +129,8 @@ GLuint DRTextureManager::_getTexture(DRVector2i size, GLuint format)
         
         return entry.textureID;
     }
-    GLuint textureID = 0;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    DRTextureBufferPtr textureID(new DRTextureBuffer);
+    glBindTexture(GL_TEXTURE_2D, *textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             
@@ -148,12 +149,12 @@ GLuint DRTextureManager::_getTexture(DRVector2i size, GLuint format)
 }
 
 //! packt die Textur in die Liste, falls noch jemand den Speicher benötigt
-void DRTextureManager::freeTexture(GLuint textureID)
+void DRTextureManager::freeTexture(DRTextureBufferPtr textureID)
 {
     if(!mInitalized) return;
     
     TextureMemoryEntry entry;
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glBindTexture(GL_TEXTURE_2D, *textureID);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &entry.size.x);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &entry.size.y);
     //glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_DEPTH, &entry.type);
@@ -166,19 +167,20 @@ void DRTextureManager::freeTexture(GLuint textureID)
     mTextureMemoryEntrys.insert(DR_TEXTURE_MEMORY_ENTRY(id, entry));       
 }
 
-void DRTextureManager::saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize/* = 16384*/)
+DRSaveTexture* DRTextureManager::saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize/* = 16384*/)
 {
-    if(!mInitalized) LOG_ERROR_VOID("not initalized");
-    DRSaveTexture* savingTexture = new DRSaveTexture(path, stepSize);
-    saveTexture(texture, savingTexture);
+    if(!mInitalized) LOG_ERROR("not initalized", NULL);
+    DRSaveTexture* savingTexture = new DRSaveTexture(path, texture->getTextureBuffer(), stepSize);
+    return saveTexture(texture, savingTexture);
  }
 
-void DRTextureManager::saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture)
+DRSaveTexture* DRTextureManager::saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture)
 {
-    if(!mInitalized) LOG_ERROR_VOID("not initalized");
+    if(!mInitalized) LOG_ERROR("not initalized", NULL);
     texture->bind();
     saveTexture->getPixelsToSave();
     mTextureSaveThread->addSaveTask(saveTexture);
+    return saveTexture;
 }
     
 DRReturn DRTextureManager::TextureSaveThread::move()
@@ -233,7 +235,9 @@ DRReturn DRTextureManager::move(float fTime)
     for(std::multimap<DHASH, TextureMemoryEntry>::iterator it = mTextureMemoryEntrys.begin(); it != mTextureMemoryEntrys.end(); it++)
     {
         it->second.timeout -= fTime;
-        if(it->second.timeout < 0.0f)
+        if(it->second.timeout < 0.0f && 
+           it->second.textureID.getResourcePtrHolder() &&
+           it->second.textureID.getResourcePtrHolder()->getRefCount() <= 1)
         {
             //printf("DRTextureManager::move, timeout texture will be deleted\n");
             it->second.clear();
@@ -349,7 +353,7 @@ void DRTextureManager::test()
 
 void DRTextureManager::TextureMemoryEntry::clear()
 {
-    glDeleteTextures(1, &textureID);
+    //glDeleteTextures(1, &textureID);
 	//printf("[DRTextureManager::TextureMemoryEntry::clear] remove %f MB\n", (size.x*size.y*format)/(1024.0f*1024.0f));
     DRTextureManager::Instance().removeGrafikMemTexture(size.x*size.y*format);
 }
