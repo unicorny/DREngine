@@ -1,7 +1,7 @@
 #include "Engine2Main.h"
 
- DRSaveTexture::DRSaveTexture(const char* savingPath, GLuint stepSize/* = 16384*/)
- : mPboSaveID(0), mSavingState(0), mSavingCursor(0), mSavingBuffer(NULL),
+ DRSaveTexture::DRSaveTexture(const char* savingPath, DRTextureBufferPtr textureBuffer, GLuint stepSize/* = 16384*/)
+ : mPboSaveID(0), mTextureBuffer(textureBuffer), mSavingState(0), mSavingCursor(0), mSavingBuffer(NULL),
    mFilename(savingPath), mImage(NULL), mSize(0), mStepSize(stepSize)
  {
      glGenBuffersARB(1, &mPboSaveID);
@@ -86,6 +86,7 @@ DRReturn DRSaveTexture::putPixelsToImage()
 	{
 		glDeleteBuffersARB(1, &mPboSaveID);
 		mPboSaveID = 0;
+        mTextureBuffer = DRTextureBufferPtr();
 	}
     
 
