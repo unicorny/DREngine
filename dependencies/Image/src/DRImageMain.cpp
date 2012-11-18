@@ -1,4 +1,4 @@
-d#include "DRImageMain.h"
+#include "DRImageMain.h"
 
 int g_ProzessCount = 0;
 int g_ThreadCount = 0;
