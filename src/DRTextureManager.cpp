@@ -120,6 +120,7 @@ DRTexturePtr DRTextureManager::getTexture(DRVector2i size, GLuint format, DRColo
 }
 DRTextureBufferPtr DRTextureManager::_getTexture(DRVector2i size, GLuint format)
 {
+    if(size.x <= 0 || size.y <= 0) LOG_ERROR("size isn't valid", DRTextureBufferPtr());
     TextureMemoryEntry entry(size, format);
     DHASH id = makeTextureHash(entry);
     if(mTextureMemoryEntrys.find(id) != mTextureMemoryEntrys.end())
