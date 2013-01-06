@@ -4,7 +4,11 @@ cmake_minimum_required(VERSION 2.6)
 SET(Engine2Src Engine2Main DRInterface DRINetwork DRIvlc DRVideoConfig 
 			   DRIImage DRTexture DRSaveTexture DRTextureManager				
                DRText DRGeometrie DRGeometrieSphere DRGeometrieIcoSphere
+<<<<<<< HEAD
 			   DREngineLogger)
+=======
+			   DREngineLogger DRThread)
+>>>>>>> c37351f9e0c94b224a2c1c50521b9d24d2581b25
 SET(PA ../dependencies/bin ../dependencies/lib ../dependencies/Core2/lib)
 find_library(SDL2_LIB libSDL PATHS ${PA})
 
@@ -19,7 +23,11 @@ if(WIN32)
 SET(Engine2Src ${Engine2Src} glew ../include/Engine2Main.h ../include/DRInterface.h ../include/DRINetwork.h ../include/DRIvlc.h ../include/DRVideoConfig.h 
 							 ../include/DRIImage.h ../include/DRTexture.h ../include/DRSaveTexture.h ../include/DRTextureManager.h
                              ../include/DRText.h ../include/DRGeometrie.h ../include/DRGeometrieSphere.h ../include/DRGeometrieIcoSphere.h ../include/glew.h ../include/wglew.h
+<<<<<<< HEAD
 							 ../include/DREngineLogger.h)
+=======
+							 ../include/DREngineLogger.h ../include/DRThread.h)
+>>>>>>> c37351f9e0c94b224a2c1c50521b9d24d2581b25
 endif(WIN32)
 ADD_LIBRARY(DREngine2 SHARED ${Engine2Src})
 TARGET_LINK_LIBRARIES(DREngine2 ${Engine2Libs})

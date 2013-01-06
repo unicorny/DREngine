@@ -3,7 +3,7 @@
 
 
 DRTexture::DRTexture(const char* filename)
-: mTexturID(0), mPboID(0), mFilename(filename), mLoadingState(0), 
+: mTexturID(), mPboID(0), mFilename(filename), mLoadingState(0), 
   mImage(NULL),  mSize(0, 0)
 {
 	//glGenTextures(1, &mTexturID);
@@ -13,13 +13,13 @@ DRTexture::DRTexture(const char* filename)
 	
 }
 
-DRTexture::DRTexture(GLuint textureID, GLubyte* data/* = NULL*/, GLint dataSize/* = 0*/,
+DRTexture::DRTexture(DRTextureBufferPtr textureID, GLubyte* data/* = NULL*/, GLint dataSize/* = 0*/,
     GLint dataType/* = GL_UNSIGNED_BYTE*/)
 : mTexturID(textureID), mPboID(0), mFilename(""), mLoadingState(0),
   mImage(NULL), mSize(0, 0)
 {
     GLint format, format2 = GL_RGB;
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glBindTexture(GL_TEXTURE_2D, *textureID);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &mSize.x);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &mSize.y);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
@@ -46,39 +46,14 @@ DRTexture::DRTexture(GLuint textureID, GLubyte* data/* = NULL*/, GLint dataSize/
 	mLoadingState = 3;	
 }
 
-DRTexture::DRTexture(DRVector2i size, GLuint format, GLubyte* data, GLint dataSize)
-: mTexturID(0), mPboID(0), mFilename(""), mLoadingState(0),
-  mImage(NULL), mSize(size)
-{
-	//glGenTextures(1, &mTexturID);
-    mTexturID = DRTextureManager::Instance()._getTexture(size, format);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    GLuint format2 = GL_RGB;
-    if(format == 4) format2 = GL_RGBA;
-
-    if(data && dataSize)
-    {
-            glGenBuffersARB(1, &mPboID);
-            glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, mPboID);	
-
-            glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, dataSize, 
-                    data, GL_STREAM_DRAW_ARB);	
-    }
-    glTexSubImage2D(GL_TEXTURE_2D, 0,
-                0, 0, mSize.x, mSize.y, 
-                format2, GL_UNSIGNED_BYTE, NULL);
-    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-    mLoadingState = 3;	
-}
 
 DRTexture::~DRTexture()
 {
     if(mTexturID)
     {
         DRTextureManager::Instance().freeTexture(mTexturID);
-        mTexturID = 0;
+        //mTexturID = 0;
     }	
     if(mPboID)
     {
@@ -110,7 +85,7 @@ DRReturn DRTexture::loadFromFile()
     }
     mSize = mImage->getSize();
     mLoadingState = 1;
-	return DR_OK;
+    return DR_OK;
 }
 
 DRReturn DRTexture::pixelsCopyToRenderer()
@@ -130,7 +105,7 @@ DRReturn DRTexture::pixelsCopyToRenderer()
     if(!mTexturID) 
         mTexturID = DRTextureManager::Instance()._getTexture(mImage->getSize(), numComponents);
 
-    glBindTexture(GL_TEXTURE_2D, mTexturID);
+    glBindTexture(GL_TEXTURE_2D, *mTexturID);
     glGenBuffersARB(1, &mPboID);
     glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, mPboID);
 
@@ -156,7 +131,7 @@ void DRTexture::bind()
 {
     if(mLoadingState >= 2)
     {
-        glBindTexture(GL_TEXTURE_2D, mTexturID);
+        glBindTexture(GL_TEXTURE_2D, *mTexturID);
         DRGrafikError("[Texture::bind]");
     }
     else
@@ -185,7 +160,7 @@ DRVector2i DRTexture::getResolution()
     if(mLoadingState < 2) return DRVector2i(-1, -1);
 
     DRVector2i v;
-    glBindTexture(GL_TEXTURE_2D, mTexturID);
+    glBindTexture(GL_TEXTURE_2D, *mTexturID);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &v.x);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &v.y);
     DRGrafikError("[Texture::getResolution]");

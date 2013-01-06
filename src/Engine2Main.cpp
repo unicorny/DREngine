@@ -211,6 +211,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
             DRLog.writeToLog("SDL konnte nicht initalisiert werden! Fehler: %s\n", SDL_GetError());
             LOG_ERROR("Fehler bei SDL Init", DR_ERROR);
 	}
+    DRLog.writeToLog("SDL-Version: %d", SDL_COMPILEDVERSION);
 	        
 #if SDL_VERSION_ATLEAST(1,3,0)
         g_CPU_Count = SDL_GetCPUCount();
@@ -553,7 +554,7 @@ DRReturn DRGrafikError(const char* pcErrorMessage)
 	GLenum GLError = glGetError();
 	if(GLError)
 	{
-		DRLog.writeToLog("OpenGL Fehler: %s (%d)", DRGetGLErrorText(GLError), GLError);
+		DREngineLog.writeToLog("OpenGL Fehler: %s (%d)", DRGetGLErrorText(GLError), GLError);
 		LOG_ERROR(pcErrorMessage, DR_ERROR);
 	}
 	return DR_OK;

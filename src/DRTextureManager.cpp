@@ -1,19 +1,9 @@
 #include "Engine2Main.h"
 
 DRTextureManager::DRTextureManager()
-: mInitalized(false), mGrafikMemTexture(0), mTextureLoadMutex(NULL), mTextureLoadThread(NULL), mTextureLoadCondition(NULL),
-  mTextureLoadSemaphore(NULL)
+: mInitalized(false), mGrafikMemTexture(0), mTextureLoadThread(NULL), mTextureSaveThread(NULL)
 {
-    mTextureLoadSemaphore = SDL_CreateSemaphore(1);
-    mTextureLoadCondition = SDL_CreateCond();
-    SDL_SemWait(mTextureLoadSemaphore);
-    mTextureLoadMutex = SDL_CreateMutex();   
-    mGetTextureMutex  = SDL_CreateMutex();
-#if SDL_VERSION_ATLEAST(1,3,0)
-    mTextureLoadThread = SDL_CreateThread(asynchronTextureLoadThread, "DRTexLoa", this);
-#else
-    mTextureLoadThread = SDL_CreateThread(asynchronTextureLoadThread, this);
-#endif
+    
 }
 
 DRTextureManager& DRTextureManager::Instance()
@@ -24,6 +14,12 @@ DRTextureManager& DRTextureManager::Instance()
 
 DRReturn DRTextureManager::init()
 {
+    mTextureLoadThread = new TextureLoadThread;
+    mTextureSaveThread = new TextureSaveThread;
+    if(!mTextureSaveThread || !mTextureLoadThread)
+        LOG_ERROR("can't init threads", DR_ERROR);
+    mGetTextureMutex  = SDL_CreateMutex();
+    
     mInitalized = true;
     LOG_INFO("DRTextureManager initalisiert");
     return DR_OK;
@@ -38,28 +34,14 @@ void DRTextureManager::exit()
     }
     mTextureMemoryEntrys.clear();
     mTextureEntrys.clear();    
-
-    if(mTextureLoadThread)
-    {
-        //Post Exit to Stream Thread
-        SDL_SemPost(mTextureLoadSemaphore); LOG_WARNING_SDL();
-        //kill TextureLoad Thread after 1/2 second
-        SDL_Delay(500);
-        SDL_KillThread(mTextureLoadThread);
-        LOG_WARNING_SDL();
-
-        mTextureLoadThread = NULL;
-        SDL_DestroySemaphore(mTextureLoadSemaphore);
-        SDL_DestroyMutex(mTextureLoadMutex);
-        SDL_DestroyCond(mTextureLoadCondition);
-    }
+    
+    DR_SAVE_DELETE(mTextureLoadThread);
+    DR_SAVE_DELETE(mTextureSaveThread);    
+    
     SDL_LockMutex(mGetTextureMutex);
     SDL_UnlockMutex(mGetTextureMutex);
     SDL_DestroyMutex(mGetTextureMutex);
     mGetTextureMutex = NULL;
-
-    while(!mLoadedAsynchronLoadTextures.empty()) mLoadedAsynchronLoadTextures.pop();
-    while(!mAsynchronLoadTextures.empty()) mAsynchronLoadTextures.pop();
 
     LOG_INFO("DRTextureManager beendet");
 }
@@ -98,7 +80,7 @@ DRTexturePtr DRTextureManager::getTexture(const char* filename, bool loadAsynchr
     
     if(loadAsynchron)
     {
-        addAsynchronTextureLoadTask(tex);
+        mTextureLoadThread->addLoadTask(tex);
     }
     else
     {
@@ -119,23 +101,26 @@ DRTexturePtr DRTextureManager::getTexture(DRVector2i size, GLuint format, GLubyt
 {
     if(!mInitalized) return 0;
     
-    GLuint texID = _getTexture(size, format);
+    DRTextureBufferPtr texID = _getTexture(size, format);
     if(texID)
         return DRTexturePtr(new DRTexture(texID, data, dataSize));
-    return DRTexturePtr();
+    //error
+    LOG_ERROR("couldn't create texture", DRTexturePtr());
 }
 //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
 DRTexturePtr DRTextureManager::getTexture(DRVector2i size, GLuint format, DRColor* colors)
 {
     if(!mInitalized) return 0;
     
-    GLuint texID = _getTexture(size, format);
+    DRTextureBufferPtr texID = _getTexture(size, format);
     if(texID)
         return DRTexturePtr(new DRTexture(texID, reinterpret_cast<GLubyte*>(colors), size.x*size.y*sizeof(DRColor), GL_FLOAT));
-    return DRTexturePtr();
+    //error
+    LOG_ERROR("couldn't create texture", DRTexturePtr());
 }
-GLuint DRTextureManager::_getTexture(DRVector2i size, GLuint format)
+DRTextureBufferPtr DRTextureManager::_getTexture(DRVector2i size, GLuint format)
 {
+    if(size.x <= 0 || size.y <= 0) LOG_ERROR("size isn't valid", DRTextureBufferPtr());
     TextureMemoryEntry entry(size, format);
     DHASH id = makeTextureHash(entry);
     if(mTextureMemoryEntrys.find(id) != mTextureMemoryEntrys.end())
@@ -145,9 +130,8 @@ GLuint DRTextureManager::_getTexture(DRVector2i size, GLuint format)
         
         return entry.textureID;
     }
-    GLuint textureID = 0;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    DRTextureBufferPtr textureID(new DRTextureBuffer);
+    glBindTexture(GL_TEXTURE_2D, *textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             
@@ -166,12 +150,12 @@ GLuint DRTextureManager::_getTexture(DRVector2i size, GLuint format)
 }
 
 //! packt die Textur in die Liste, falls noch jemand den Speicher benötigt
-void DRTextureManager::freeTexture(GLuint textureID)
+void DRTextureManager::freeTexture(DRTextureBufferPtr textureID)
 {
     if(!mInitalized) return;
     
     TextureMemoryEntry entry;
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glBindTexture(GL_TEXTURE_2D, *textureID);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &entry.size.x);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &entry.size.y);
     //glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_DEPTH, &entry.type);
@@ -184,14 +168,57 @@ void DRTextureManager::freeTexture(GLuint textureID)
     mTextureMemoryEntrys.insert(DR_TEXTURE_MEMORY_ENTRY(id, entry));       
 }
 
-void DRTextureManager::saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize/* = 16384*/)
+DRSaveTexture* DRTextureManager::saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize/* = 16384*/)
 {
-    DRSaveTexture* savingTexture = new DRSaveTexture(path, stepSize);
+    if(!mInitalized) LOG_ERROR("not initalized", NULL);
+    DRSaveTexture* savingTexture = new DRSaveTexture(path, texture->getTextureBuffer(), stepSize);
+    return saveTexture(texture, savingTexture);
+ }
+
+DRSaveTexture* DRTextureManager::saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture)
+{
+    if(!mInitalized) LOG_ERROR("not initalized", NULL);
     texture->bind();
-    savingTexture->getPixelsToSave();
-    addAsynchronTextureSaveTask(savingTexture);
+    saveTexture->getPixelsToSave();
+    mTextureSaveThread->addSaveTask(saveTexture);
+    return saveTexture;
 }
     
+DRReturn DRTextureManager::TextureSaveThread::move()
+{
+    if(!mAsynchronSaveTextures.empty())
+    {
+        DRSaveTexture* cur = mAsynchronSaveTextures.front();
+
+        if(cur->putPixelsToImage())
+        {
+            DR_SAVE_DELETE(cur);
+            mAsynchronSaveTextures.pop();
+        }
+        else if(cur->isTextureReadyToSave())
+        {
+            lock();
+            mAsynchronReadyToSaveTextures.push(cur);
+            mAsynchronSaveTextures.pop();
+            //send the texture load Thread a signal to continue
+            condSignal();
+            unlock();
+        }
+    }
+    return DR_OK;
+}
+DRReturn DRTextureManager::TextureLoadThread::move()
+{
+    lock();
+    if(!mLoadedAsynchronLoadTextures.empty())
+    {
+        mLoadedAsynchronLoadTextures.front()->pixelsCopyToRenderer();
+        mLoadedAsynchronLoadTextures.pop();
+    //	printf("\rtextures to load left: %d", mAsynchronLoadTextures.size());
+    }
+    unlock();
+    return DR_OK;
+}
 // update timeout, release lange nicht verwendete Texturen
 DRReturn DRTextureManager::move(float fTime)
 {
@@ -209,7 +236,9 @@ DRReturn DRTextureManager::move(float fTime)
     for(std::multimap<DHASH, TextureMemoryEntry>::iterator it = mTextureMemoryEntrys.begin(); it != mTextureMemoryEntrys.end(); it++)
     {
         it->second.timeout -= fTime;
-        if(it->second.timeout < 0.0f)
+        if(it->second.timeout < 0.0f && 
+           it->second.textureID.getResourcePtrHolder() &&
+           it->second.textureID.getResourcePtrHolder()->getRefCount() <= 1)
         {
             //printf("DRTextureManager::move, timeout texture will be deleted\n");
             it->second.clear();
@@ -227,122 +256,59 @@ DRReturn DRTextureManager::move(float fTime)
             break;
         }            
     }
-	SDL_LockMutex(mTextureLoadMutex);
-	if(!mLoadedAsynchronLoadTextures.empty())
-	{
-		mLoadedAsynchronLoadTextures.front()->pixelsCopyToRenderer();
-		mLoadedAsynchronLoadTextures.pop();
-	//	printf("\rtextures to load left: %d", mAsynchronLoadTextures.size());
-	}
-	if(!mAsynchronSaveTextures.empty())
-	{
-		DRSaveTexture* cur = mAsynchronSaveTextures.front();
+    mTextureLoadThread->move();
+    mTextureSaveThread->move();    
         
-		if(cur->putPixelsToImage())
-        {
-            DR_SAVE_DELETE(cur);
-            mAsynchronSaveTextures.pop();
-        }
-        else if(cur->isTextureReadyToSave())
-		{
-			mAsynchronReadyToSaveTextures.push(cur);
-			mAsynchronSaveTextures.pop();
-			//send the texture load Thread a signal to continue
-			if(SDL_CondSignal(mTextureLoadCondition)== -1) //LOG_ERROR_SDL(DR_ERROR);
-			{
-				LOG_WARNING_SDL();
-				LOG_WARNING("Fehler beim Aufruf von SDL_CondSignal"); 
-			}
-		}
-	}
-	SDL_UnlockMutex(mTextureLoadMutex);
     return DR_OK;
 }
 
-void DRTextureManager::addAsynchronTextureLoadTask(DRTexturePtr texture)
+void DRTextureManager::TextureLoadThread::addLoadTask(DRTexturePtr texture)
 {
-	SDL_LockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
+    lock();
 	mAsynchronLoadTextures.push(texture);
 
-	//send the texture load Thread a signal to continue
-	if(SDL_CondSignal(mTextureLoadCondition)== -1) //LOG_ERROR_SDL(DR_ERROR);
-	{
-		LOG_WARNING_SDL();
-		LOG_WARNING("Fehler beim Aufruf von SDL_CondSignal"); 
-	}
-
-	SDL_UnlockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
+    condSignal();
+	
+	unlock();
 }
 
-void DRTextureManager::addAsynchronTextureSaveTask(DRSaveTexture* texture)
+int DRTextureManager::TextureLoadThread::ThreadFunction()
 {
-	SDL_LockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
-	mAsynchronSaveTextures.push(texture);
-
-	//send the texture load Thread a signal to continue
-	if(SDL_CondSignal(mTextureLoadCondition)== -1) //LOG_ERROR_SDL(DR_ERROR);
-	{
-		LOG_WARNING_SDL();
-		LOG_WARNING("Fehler beim Aufruf von SDL_CondSignal"); 
-	}
-
-	SDL_UnlockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
+    while(!mAsynchronLoadTextures.empty())
+    {
+        // get top textur
+        DRTexturePtr cur = mAsynchronLoadTextures.front();
+        mAsynchronLoadTextures.pop();
+        unlock();
+        // call load
+        DRReturn ret = cur->loadFromFile(); 
+        lock();
+        if(ret)
+        {
+            cur->setErrorByLoading();
+        }
+        else
+        {
+            // push it onto the other queue
+            mLoadedAsynchronLoadTextures.push(cur);
+        }
+    }
+    return 0;
 }
-
-
-int DRTextureManager::asynchronTextureLoadThread(void* data)
+int DRTextureManager::TextureSaveThread::ThreadFunction()
 {
-	DRLog.writeToLog("asynchronTextureLoadThread start");
-	DRTextureManager& t = DRTextureManager::Instance();
-	while(SDL_SemTryWait(t.mTextureLoadSemaphore)==SDL_MUTEX_TIMEDOUT)
-	{
-		// Lock work mutex
-		SDL_LockMutex(t.mTextureLoadMutex); LOG_ERROR_SDL(-1);
-		int status = SDL_CondWait(t.mTextureLoadCondition, t.mTextureLoadMutex); LOG_ERROR_SDL(-1);
-		if( status == 0)
-		{
-			while(!t.mAsynchronLoadTextures.empty())
-			{
-				// get top textur
-				DRTexturePtr cur = t.mAsynchronLoadTextures.front();
-				t.mAsynchronLoadTextures.pop();
-				SDL_UnlockMutex(t.mTextureLoadMutex);
-				// call load
-				DRReturn ret = cur->loadFromFile(); 
-				SDL_LockMutex(t.mTextureLoadMutex);
-				if(ret)
-				{
-					cur->setErrorByLoading();
-				}
-				else
-				{
-					// push it onto the other queue
-					t.mLoadedAsynchronLoadTextures.push(cur);
-				}
-				//SDL_UnlockMutex(t.mTextureLoadMutex);
-			}
-			if(!t.mAsynchronReadyToSaveTextures.empty())
-			{
-				// get top textur
-				DRSaveTexture* cur = t.mAsynchronReadyToSaveTextures.front();
-				t.mAsynchronReadyToSaveTextures.pop();
-				SDL_UnlockMutex(t.mTextureLoadMutex);
-				// call save
-				cur->saveImage();
-                DR_SAVE_DELETE(cur);                
-			}
-			else
-				SDL_UnlockMutex(t.mTextureLoadMutex); LOG_ERROR_SDL(-1);
-		}
-		else
-		{
-			//unlock mutex and exit
-			SDL_UnlockMutex(t.mTextureLoadMutex); LOG_ERROR_SDL(-1);
-			LOG_ERROR("Fehler im Stream Thread, exit", -1);
-		}
-	}
-
-	return 0;
+    while(!mAsynchronReadyToSaveTextures.empty())
+    {
+        // get top textur
+        DRSaveTexture* cur = mAsynchronReadyToSaveTextures.front();
+        mAsynchronReadyToSaveTextures.pop();
+        unlock();
+        // call save
+        cur->saveImage();
+        DR_SAVE_DELETE(cur);                
+        lock();
+    }
+    return 0;
 }
 
 void DRTextureManager::calculateGrafikMemTexture()
@@ -388,7 +354,7 @@ void DRTextureManager::test()
 
 void DRTextureManager::TextureMemoryEntry::clear()
 {
-    glDeleteTextures(1, &textureID);
+    //glDeleteTextures(1, &textureID);
 	//printf("[DRTextureManager::TextureMemoryEntry::clear] remove %f MB\n", (size.x*size.y*format)/(1024.0f*1024.0f));
     DRTextureManager::Instance().removeGrafikMemTexture(size.x*size.y*format);
 }

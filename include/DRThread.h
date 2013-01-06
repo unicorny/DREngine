@@ -19,39 +19,43 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef __DR_ENGINE2_SAVE_TEXTURE__
-#define __DR_ENGINE2_SAVE_TEXTURE__
-
-/**!
- * class for saving texture to filesystem
+/**
+ * @Author Dario Rekowski
+ * 
+ * @Date 13.08.12
+ * 
+ * @Desc Class for easy handling threading
  */
+ 
+#ifndef __DR_ENGINE2_THREAD__
+#define __DR_ENGINE2_THREAD__
 
-class ENGINE2_API DRSaveTexture
+class ENGINE2_API DRThread
 {
 public:
-    DRSaveTexture(const char* savingPath, DRTextureBufferPtr textureBuffer, GLuint stepSize = 16384);
-    // no openGL funtion called
-    ~DRSaveTexture();
-    // create a pbo buffer with currently bind texture
-    DRReturn getPixelsToSave();
-    //! \param stepSize how many bytes pro call will be readed
-    DRReturn putPixelsToImage();
-    //! cann be called in other thread, no openGL functions called
-    virtual DRReturn saveImage();
+    //! \param threadName used up SDL 1.3, for BeOS max. 32, for Linux max 16, for Visual Studio 6.0 max 9 char
+    DRThread(const char* threadName = NULL);
+    virtual ~DRThread();
+        
+    __inline__ DRReturn lock() {SDL_LockMutex(mutex); LOG_ERROR_SDL(DR_ERROR); return DR_OK;}
+    __inline__ DRReturn unlock() {SDL_UnlockMutex(mutex); LOG_ERROR_SDL(DR_ERROR); return DR_OK;} 
+    // signal data chance, will continue thread, if he is paused
+    DRReturn condSignal();
     
-    __inline__ bool isTextureReadyToSave() {return mSavingState == 2;}
-    __inline__ bool isTextureSaved() {return mSavingState == 3;}
-    
+    //! \brief will be called every time from thread, when condSignal was called
+    //! will be called from thread with locked working mutex,<br>
+    //! mutex will be unlock after calling this function
+    //! \return if return isn't 0, thread will exit
+    virtual int ThreadFunction() = 0;
+        
 protected:
-    GLuint      mPboSaveID;// OpenGL Pixel Buffer Object to save texture
-    DRTextureBufferPtr mTextureBuffer;
-    short	mSavingState; //
-    GLuint	mSavingCursor;
-    u8* 	mSavingBuffer;
-    DRString    mFilename;
-    DRIImage*   mImage;
-    DRVector2i  mSize;
-    GLuint      mStepSize;
+    
+    static int Thread(void* data);
+    
+    SDL_mutex*		   mutex;
+    SDL_Thread*		   thread;
+    SDL_cond*		   condition;
+    SDL_sem*		   semaphore;
 };
 
-#endif //__DR_ENGINE2_SAVE_TEXTURE__
+#endif //__DR_ENGINE2_THREAD__

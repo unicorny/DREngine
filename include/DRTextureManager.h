@@ -44,12 +44,10 @@ public:
     //! Warning. not testet yet!
     DRTexturePtr getTexture(DRVector2i size, GLuint format, DRColor* colors);
     
-    void saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize = 16384);
+    DRSaveTexture* saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize = 16384);
+    DRSaveTexture* saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture);
     
-    //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
-    //GLuint    getGLTextureMemory(GLuint width, GLuint height, GLuint format);
-    //! packt die Textur in die Liste, falls noch jemand den Speicher benötigt
-    void      freeTexture(GLuint textureID);
+   
     
     
     // update timeout, release lange nicht verwendete Texturen
@@ -63,25 +61,57 @@ private:
     __inline__ void addGrafikMemTexture(GLuint addValue) {mGrafikMemTexture += addValue;}
     __inline__ void removeGrafikMemTexture(GLuint subtractValue) {mGrafikMemTexture -= subtractValue;}
     void calculateGrafikMemTexture();
-    GLuint _getTexture(DRVector2i size, GLuint format);
-
-    void      addAsynchronTextureLoadTask(DRTexturePtr texture);
-    void      addAsynchronTextureSaveTask(DRSaveTexture* texture);
-    static int asynchronTextureLoadThread(void* data);
+    DRTextureBufferPtr _getTexture(DRVector2i size, GLuint format);
     
+     //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
+    //GLuint    getGLTextureMemory(GLuint width, GLuint height, GLuint format);
+    //! packt die Textur in die Liste, falls noch jemand den Speicher benötigt
+    void      freeTexture(DRTextureBufferPtr textureID);
+
+   
     //! daten für alte Einträge, dessen Speicher noch Verwendung finden könnte
     struct TextureMemoryEntry
     {
         TextureMemoryEntry(DRVector2i _size, GLint _format)
-                : textureID(0), size(_size), format(_format) {}
+                : textureID(), size(_size), format(_format) {}
         TextureMemoryEntry() 
-                : textureID(0), size(0, 0), format(0) {}
+                : textureID(), size(0, 0), format(0) {}
         void print() {printf("width: %d, height: %d, format: %d", size.x, size.y, format);}
         void clear();
-        GLuint textureID;
+        DRTextureBufferPtr textureID;
         DRVector2i size;
         GLint format;
         float  timeout; //Speicher wird freigegeben, wenn null erreicht,  0 kein timeout
+    };
+    
+    class TextureLoadThread : public DRThread
+    {
+    public:
+        TextureLoadThread() : DRThread("DRTexLoa") {}
+        ~TextureLoadThread() {while(!mAsynchronLoadTextures.empty()) mAsynchronLoadTextures.pop();
+                              while(!mLoadedAsynchronLoadTextures.empty()) mLoadedAsynchronLoadTextures.pop();}
+        
+        virtual int ThreadFunction();
+        void addLoadTask(DRTexturePtr texture);
+        DRReturn move();
+    protected:
+        std::queue<DRTexturePtr> mAsynchronLoadTextures;
+        std::queue<DRTexturePtr> mLoadedAsynchronLoadTextures;
+    };
+    
+    class TextureSaveThread : public DRThread
+    {
+    public:
+        TextureSaveThread() : DRThread("DRTexSav") {}
+        ~TextureSaveThread() {while(!mAsynchronSaveTextures.empty()) mAsynchronSaveTextures.pop();
+                              while(!mAsynchronReadyToSaveTextures.empty()) mAsynchronReadyToSaveTextures.pop();}
+        
+        virtual int ThreadFunction();
+        __inline__ void addSaveTask(DRSaveTexture* texture) {mAsynchronSaveTextures.push(texture);}
+        DRReturn move();
+    protected:
+        std::queue<DRSaveTexture*> mAsynchronSaveTextures;
+        std::queue<DRSaveTexture*> mAsynchronReadyToSaveTextures;
     };
     
     DHASH makeTextureHash(const char* filename, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
@@ -95,17 +125,12 @@ private:
     typedef std::pair<DHASH, TextureMemoryEntry>        DR_TEXTURE_MEMORY_ENTRY;
     bool                                                mInitalized;
     GLuint						mGrafikMemTexture;
-
+    
     //! stuff for asynchron texture load and save
-    std::queue<DRTexturePtr> mAsynchronLoadTextures;
-    std::queue<DRTexturePtr> mLoadedAsynchronLoadTextures;
-    std::queue<DRSaveTexture*> mAsynchronSaveTextures;
-    std::queue<DRSaveTexture*> mAsynchronReadyToSaveTextures;
-    SDL_mutex*		   mTextureLoadMutex;
+    
+    TextureLoadThread*     mTextureLoadThread;
+    TextureSaveThread*     mTextureSaveThread;
     SDL_mutex*             mGetTextureMutex;
-    SDL_Thread*		   mTextureLoadThread;
-    SDL_cond*		   mTextureLoadCondition;
-    SDL_sem*		   mTextureLoadSemaphore;
 };
 
 #endif //__DR_ENGINE2_TEXTURE_MANAGER__
