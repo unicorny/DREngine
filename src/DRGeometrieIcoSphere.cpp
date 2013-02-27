@@ -517,7 +517,7 @@ DRReturn DRGeometrieIcoSphere::grabIndicesFromFaces(DRGeometrieIcoSphere::IcoSph
         //DRLog.writeToLog("[DRGeometrieIcoSphere::grabIndicesFromFaces] %d indices used", indexCurser);
         //printf("maxIndex: %d, minIndex: %d\n", maxIndex, minIndex);
         mVertexCount = maxIndex+1;
-        printf("\r ebene: %d, indexCount: %d, vertexCount: %d (%.4f MByte)", mCurrentEbene, indexCurser, mVertexCount, (indexCurser*sizeof(GLuint)+mVertexCount*(sizeof(DRVector3)))/(1024.0f*1024.0f));
+        printf("\r ebene: %d, indexCount: %ld, vertexCount: %ld (%.4f MByte)", mCurrentEbene, indexCurser, mVertexCount, (indexCurser*sizeof(GLuint)+mVertexCount*(sizeof(DRVector3)))/(1024.0f*1024.0f));
     }
     else
     {

@@ -344,10 +344,10 @@ void DRTextureManager::test()
     TextureMemoryEntry second(DRVector2i(800, 600), 3);
     TextureMemoryEntry third(DRVector2i(1280, 1024), 3);
     TextureMemoryEntry four(DRVector2i(1280, 1024), 4);
-    printf("first: "); first.print(); printf(" HASH: %d\n", makeTextureHash(first));
-    printf("second: "); second.print(); printf(" HASH: %d\n", makeTextureHash(second));
-    printf("third: "); third.print(); printf(" HASH: %d\n", makeTextureHash(third));
-    printf("four: "); four.print(); printf(" HASH: %d\n", makeTextureHash(four));
+    printf("first: "); first.print(); printf(" HASH: %ld\n", makeTextureHash(first));
+    printf("second: "); second.print(); printf(" HASH: %ld\n", makeTextureHash(second));
+    printf("third: "); third.print(); printf(" HASH: %ld\n", makeTextureHash(third));
+    printf("four: "); four.print(); printf(" HASH: %ld\n", makeTextureHash(four));
         
     printf("\n--- DRTextureManager::test ende ----\n");
 }

@@ -2,7 +2,11 @@
 #define __NET_CONNECTION__
 
 #include <Engine2Main.h>
+#ifdef _WIN32
 #include <SDLNet/SDL_net.h>
+#else
+#include <SDL/SDL_net.h>
+#endif
 
 class Connection
 {

@@ -85,7 +85,7 @@ void DRGeometrieSphere::makeSphericalLandscape(GLuint numIterations, GLuint rand
 #else
         threads[i] = SDL_CreateThread(makeLandscapeThread, &workingData[i]);
 #endif
-        printf("thread: %d, vertexIndex: %d, vertexCount: %d, ges vertexCount: %d\n",i, mVertexCount/threadCount*i, mVertexCount/threadCount, mVertexCount);
+        printf("thread: %d, vertexIndex: %ld, vertexCount: %ld, ges vertexCount: %ld\n",i, mVertexCount/threadCount*i, mVertexCount/threadCount, mVertexCount);
     }
     
     for(int i = 0; i < threadCount; i++)
