@@ -2,7 +2,11 @@
 #define __REQUEST_H
 
 #include <Engine2Main.h>
+#ifdef _WIN32
 #include <SDLNet/SDL_net.h>
+#else
+#include <SDL/SDL_net.h>
+#endif
 #include "Connection.h"
 
 class Request : public Connection

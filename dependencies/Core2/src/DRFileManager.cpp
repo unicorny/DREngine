@@ -738,9 +738,9 @@ DRReturn DRFileManager::addFolderToFileSystem(const char* folderName)
 	}
 #else
     int state = mkdir(folderName, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    if(!state)
+    if(!state && errno != EEXIST && errno != EAGAIN)
     {
-        DRLog.writeToLog("Fehlernummer: %d", errno);
+        DRLog.writeToLog("Fehlernummer: %d, folderName: %s", errno, folderName);
         LOG_ERROR("Fehler beim anlegen eines Ordners", DR_ERROR);
     }
 #endif

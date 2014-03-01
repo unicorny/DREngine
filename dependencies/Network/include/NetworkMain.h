@@ -3,10 +3,11 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <SDLNet/SDL_net.h>
 #else
 #endif
 #include <Engine2Main.h>
-#include <SDLNet/SDL_net.h>
+
 
 
 #ifdef _WIN32
