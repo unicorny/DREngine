@@ -135,6 +135,7 @@ enum /*CORE_API*/ DRReturn
 // core includes (ohne log)
  #include "DRVector2i.h"
 #include "DRVector2.h"
+#include "DRVector3i.h"
 #include "DRVector3.h"
 #include "DRColor.h"
 #include "DRPlane.h"

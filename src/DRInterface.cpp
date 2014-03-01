@@ -67,7 +67,7 @@ DRReturn DRInterface::loadDll(const char* dllname)
     if(!mDLL)
     {
 #ifdef _WIN32
-        mDLL = LoadLibrary(dllname);
+        mDLL = LoadLibraryA(dllname);
 #else
         mDLL = dlopen(dllname, RTLD_LAZY);
 #endif

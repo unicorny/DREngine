@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.6)
 SET(CoreSrc 
 	Core2Main.cpp DRFile.cpp DRFileManager.cpp DRHashList.cpp
 	DRLogger.cpp DRUtils.cpp DRMatrix.cpp DRVector2.cpp DRVector2i DRDampingSpring.cpp DRIni.cpp
-    DRVector3.cpp DRObjekt.cpp DRFrustumCulling DRPlane DRIndexReferenzHolder DRRandom
+    DRVector3.cpp DRVector3i DRObjekt.cpp DRFrustumCulling DRPlane DRIndexReferenzHolder DRRandom
 	DRResourcePtr DRResourcePtrHolder DRGameStateManager)
 
 
@@ -14,7 +14,7 @@ SET(CoreSrc
 #IF(WIN32)
 SET(CoreSrc ${CoreSrc} ../include/Core2Main.h ../include/DRFile.h ../include/DRFileManager.h ../include/DRHash.hpp ../include/DRHashList.hpp
                        ../include/DRLogger.h ../include/DRUtils.h 
-					   ../include/DRVector2.h ../include/DRVector2i.h ../include/DRVector3.h ../include/DRMatrix.h
+					   ../include/DRVector2.h ../include/DRVector2i.h ../include/DRVector3.h ../include/DRVector3i.h ../include/DRMatrix.h
 					   ../include/DRColor.h ../include/DRPlane.h ../include/DRDampingSpring.h ../include/DRIni.h
                        ../include/DRObjekt.h ../include/DRFrustumCulling.h ../include/DRIndexReferenzHolder.h
 					   ../include/DRRandom.h ../include/DRGameStateManager.h
