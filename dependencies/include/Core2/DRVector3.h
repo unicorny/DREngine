@@ -188,4 +188,6 @@ private:
 
 };
 
+inline DRVector3 operator *  (const float f, const DRVector3 v)  {return DRVector3(v.x*f, v.y*f, v.z*f);}
+
 #endif //__DR_CORE2_VECTOR3__

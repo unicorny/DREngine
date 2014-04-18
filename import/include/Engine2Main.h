@@ -60,7 +60,11 @@ const float PI = 3.1415926535f;
 
 //Engines
 //einbinden der Simple Direct Layer Bibliothek
+#ifdef _WIN32
 #include <sdl/sdl.h>
+#else
+#include <SDL/SDL.h>
+#endif
 
 //einbinden von OpenGL
 //#include <GL/glu.h>   // Damit kann Glu32 genutzt werden.
