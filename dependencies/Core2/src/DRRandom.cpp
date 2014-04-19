@@ -235,7 +235,7 @@ void DRRandom::seedf(long seed)
 
 long DRRandom::core2_rand()
 {
-    return xorshift();
+   // return xorshift();
     if(rand_buffer_cursor >= KK)
     {
         rand_buffer_cursor = 0;

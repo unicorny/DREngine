@@ -52,7 +52,7 @@ DRReturn DRRNS::addNode(DRVector3 _position)
 	{
 		if(_position == mNodes[i].position)
 		{
-			DRLog.WriteVector3ToLog(_position);
+			DRLog.writeVector3ToLog(_position);
 			mNodes.pop_back();
 			size--;
 			LOG_ERROR("Der Neue Punkt ist schon im Array vorhanden", DR_ERROR);
@@ -108,7 +108,7 @@ DRVector3 DRRNS::getPoint(float fTime, int rekursion)
 	if(mNodes.size() == 0) return DRVector3(0.0f);
 	float distance = fTime * mMaxDistance;
 	float currentDistance = 0.f;
-	int i = 0;
+	uint i = 0;
 	while (currentDistance + mNodes[i].distance < distance
 	    && i < mNodes.size())
 	{

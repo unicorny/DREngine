@@ -6,7 +6,8 @@ const DRReal g_fVersion = 2.0f;
 //Z�hler, wie oft die dll gerade benutzt wird
 int         g_iProzess = 0;
 int			g_iProzessFunk = 0;
-SDL_Surface* g_pSDLWindow = NULL;
+SDL_Window* g_pSDLWindow = NULL;
+SDL_GLContext g_glContext;
 ENGINE2_API DRVector2  g_v2WindowLength = DRVector2(0.0f);
 bool		g_bOgre = false;
 bool		g_bEnInit = false;
@@ -220,11 +221,12 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 	//Not Exit Funktion festlegen
 	atexit(SDL_Quit);
 
+    
 	//Fenster Titel setzen
-	SDL_WM_SetCaption(pcTitel, NULL);
-	if(pcBMPIcon)
+	//SDL_WM_SetCaption(pcTitel, NULL);
+	//if(pcBMPIcon)
 		//Icon setzen
-		SDL_WM_SetIcon(SDL_LoadBMP(pcBMPIcon), NULL);
+		//SDL_WM_SetIcon(SDL_LoadBMP(pcBMPIcon), NULL);
 
 	//Grafik Einstellungen
 	g_v2WindowLength = video.getResolution();
@@ -243,25 +245,40 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 
 	Uint32 flags = 0;
 	if(video.isFullscreen())
-		flags = SDL_OPENGL | SDL_FULLSCREEN;
+		flags = SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE | SDL_WINDOW_FULLSCREEN;
 	else
-		flags = SDL_OPENGL;
+		flags = SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE;
 	fprintf(stderr, "Bitte einen Augenblick Geduld, OpenGL wird initalisiert....\n");
+    
 #ifndef _DEBUG
-	g_pSDLWindow = SDL_SetVideoMode(XWIDTH, YHEIGHT, 32, flags);
+	//g_pSDLWindow = SDL_SetVideoMode(XWIDTH, YHEIGHT, 32, flags);
+    g_pSDLWindow = SDL_CreateWindow(pcTitel, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, XWIDTH, YHEIGHT, flags);
 #else
-	g_pSDLWindow = SDL_SetVideoMode((int)XWIDTH, (int)YHEIGHT, 32, SDL_OPENGL);
+	//g_pSDLWindow = SDL_SetVideoMode((int)XWIDTH, (int)YHEIGHT, 32, SDL_OPENGL);
+    g_pSDLWindow = SDL_CreateWindow(pcTitel, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, XWIDTH, YHEIGHT, SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE );
 #endif //_DEBUG
 	if(!g_pSDLWindow)
 	{
 		DRLog.writeToLog("Konnte Bildschirmmodus nicht setzen!: %s\n", SDL_GetError());
 		return DR_ERROR;
 	}
+    g_glContext = SDL_GL_CreateContext(g_pSDLWindow);
+    if(!g_glContext)
+    {
+        DRLog.writeToLog("Fehler beim erstellen des OpenGL Contextes: %s\n", SDL_GetError());
+        return DR_ERROR;
+    }
+    if(SDL_GL_MakeCurrent(g_pSDLWindow, g_glContext))
+    {
+        DRLog.writeToLog("Fehler beim aktivieren des OpenGL Contextes: %s\n", SDL_GetError());
+    };
 	Uint32 uiNachGLInit = SDL_GetTicks();
 	DRLog.writeToLog("Für OpenGL Init benötigte zeit: %f Sekunden", (float)(uiNachGLInit-uiVorGLInit)/1000.0f);
 
 	//OpenGL einrichten f�r Ohrtogonale Projection
-	glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
+    int w = 0, h = 0;
+    SDL_GL_GetDrawableSize(g_pSDLWindow, &w, &h);
+	glViewport(0, 0, w, h);
     
     //DRActivateVBExtension();
     GLenum err = glewInit();
@@ -275,7 +292,7 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
         
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, g_pSDLWindow->w, g_pSDLWindow->h, 0, -1.0, 1.0);
+    glOrtho(0, w, h, 0, -1.0, 1.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -330,6 +347,11 @@ void EnExit()
     {
         DRTextureManager::Instance().exit();
     }
+
+    SDL_GL_DeleteContext(g_glContext);  
+    // Close and destroy the window
+    SDL_DestroyWindow(g_pSDLWindow);
+
 	if(g_bEnInit)
 	{
         SDL_Quit();
@@ -349,7 +371,7 @@ void EnPostExitMessageToSDL()
 }
 
 //********************************************************************************************************************++
-bool EnIsButtonPressed(SDLKey button)
+bool EnIsButtonPressed(SDL_Scancode button)
 {
 	if(!g_piPressed) return false;
 	if(g_piPressed[button] == 1)
@@ -439,7 +461,7 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
 	{
 		uiStartTime = SDL_GetTicks();
 #if SDL_VERSION_ATLEAST(1,3,0)
-		Uint8* pKeys = SDL_GetKeyboardState(NULL);
+		const Uint8* pKeys = SDL_GetKeyboardState(NULL);
 #else
 		Uint8* pKeys = SDL_GetKeyState(NULL);
 #endif		
@@ -495,12 +517,13 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
         // Pageflip: Back- und Frontbuffer werden vertauscht
 		if(g_bGL)
 		{
-            SDL_GL_SwapBuffers();
+            //SDL_GL_SwapBuffers();
+            SDL_GL_SwapWindow(g_pSDLWindow);
 		}
 		else
 		{
 			if(g_pSDLWindow)
-				SDL_Flip(g_pSDLWindow);
+				SDL_GL_SwapWindow(g_pSDLWindow);
 		}
 
 		uiEndTime = SDL_GetTicks();

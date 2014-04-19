@@ -7,12 +7,12 @@ SET(Engine2Src Engine2Main DRInterface DRINetwork DRIvlc DRVideoConfig
 			   DREngineLogger DRThread)
 
 SET(PA ../dependencies/bin ../dependencies/lib ../dependencies/Core2/lib)
-find_library(SDL2_LIB libSDL PATHS ${PA})
+find_library(SDL2_LIB SDL2 PATHS ${PA})
 
 if(WIN32)
 SET(Engine2Libs ${SDL2_LIB} opengl32 DRCore2 Winmm)
 elseif(UNIX)
-SET(Engine2Libs ${SDL2_LIB} GL GLEW DRCore2)
+#SET(Engine2Libs SDL2 GL GLEW DRCore2)
 endif(WIN32)
 #ENABLE_EXPORTS()
 #DEFINE_SYMBOL(BUILD_DLL)

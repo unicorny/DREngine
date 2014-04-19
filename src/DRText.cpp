@@ -125,9 +125,11 @@ DRReturn DRFont::init(const char* pcTGAFilename, const char* pcTBFFilename)
 	}
 
 	fclose(file);
-	SDL_Surface* pTempS = SDL_GetVideoSurface();
-	m_vScreenSize.x = (DRReal)pTempS->w;
-	m_vScreenSize.y = (DRReal)pTempS->h;
+	//SDL_Surface* pTempS = SDL_GetVideoSurface();
+    int w = 0, h = 0;
+    SDL_GL_GetDrawableSize(g_pSDLWindow, &w, &h);
+	m_vScreenSize.x = static_cast<DRReal>(w);
+	m_vScreenSize.y = static_cast<DRReal>(h);
 
 	return DR_OK;
 }

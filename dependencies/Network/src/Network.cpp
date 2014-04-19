@@ -55,8 +55,10 @@ void Network::exit()
 
     mThreadRunning = false;
     SDL_Delay(300);
-    SDL_KillThread(mConnectionThread);          LOG_WARNING_SDL();
-    SDL_KillThread(mServerThread);              LOG_WARNING_SDL();
+//    SDL_KillThread(mConnectionThread);          LOG_WARNING_SDL();
+    //SDL_KillThread(mServerThread);              LOG_WARNING_SDL();
+    SDL_WaitThread(mConnectionThread, NULL);
+    SDL_WaitThread(mServerThread, NULL);
 
     SDL_DestroyMutex(mConnectionWorkingMutex);  LOG_WARNING_SDL();
     SDL_DestroyMutex(mNetCallbackMutex);        LOG_WARNING_SDL();
