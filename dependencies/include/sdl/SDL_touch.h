@@ -20,15 +20,17 @@
 */
 
 /**
- *  \file SDL_error.h
+ *  \file SDL_touch.h
  *
- *  Simple error message routines for SDL.
+ *  Include file for SDL touch event handling.
  */
 
-#ifndef _SDL_error_h
-#define _SDL_error_h
+#ifndef _SDL_touch_h
+#define _SDL_touch_h
 
 #include "SDL_stdinc.h"
+#include "SDL_error.h"
+#include "SDL_video.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -36,34 +38,42 @@
 extern "C" {
 #endif
 
-/* Public functions */
-/* SDL_SetError() unconditionally returns -1. */
-extern DECLSPEC int SDLCALL SDL_SetError(const char *fmt, ...);
-extern DECLSPEC const char *SDLCALL SDL_GetError(void);
-extern DECLSPEC void SDLCALL SDL_ClearError(void);
+typedef Sint64 SDL_TouchID;
+typedef Sint64 SDL_FingerID;
+
+typedef struct SDL_Finger
+{
+    SDL_FingerID id;
+    float x;
+    float y;
+    float pressure;
+} SDL_Finger;
+
+/* Used as the device ID for mouse events simulated with touch input */
+#define SDL_TOUCH_MOUSEID ((Uint32)-1)
+
+
+/* Function prototypes */
 
 /**
- *  \name Internal error functions
- *
- *  \internal
- *  Private error reporting function - used internally.
+ *  \brief Get the number of registered touch devices.
  */
-/* @{ */
-#define SDL_OutOfMemory()   SDL_Error(SDL_ENOMEM)
-#define SDL_Unsupported()   SDL_Error(SDL_UNSUPPORTED)
-#define SDL_InvalidParamError(param)    SDL_SetError("Parameter '%s' is invalid", (param))
-typedef enum
-{
-    SDL_ENOMEM,
-    SDL_EFREAD,
-    SDL_EFWRITE,
-    SDL_EFSEEK,
-    SDL_UNSUPPORTED,
-    SDL_LASTERROR
-} SDL_errorcode;
-/* SDL_Error() unconditionally returns -1. */
-extern DECLSPEC int SDLCALL SDL_Error(SDL_errorcode code);
-/* @} *//* Internal error functions */
+extern DECLSPEC int SDLCALL SDL_GetNumTouchDevices(void);
+
+/**
+ *  \brief Get the touch ID with the given index, or 0 if the index is invalid.
+ */
+extern DECLSPEC SDL_TouchID SDLCALL SDL_GetTouchDevice(int index);
+
+/**
+ *  \brief Get the number of active fingers for a given touch device.
+ */
+extern DECLSPEC int SDLCALL SDL_GetNumTouchFingers(SDL_TouchID touchID);
+
+/**
+ *  \brief Get the finger object of the given touch, with the given index.
+ */
+extern DECLSPEC SDL_Finger * SDLCALL SDL_GetTouchFinger(SDL_TouchID touchID, int index);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -71,6 +81,6 @@ extern DECLSPEC int SDLCALL SDL_Error(SDL_errorcode code);
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_error_h */
+#endif /* _SDL_touch_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -20,13 +20,13 @@
 */
 
 /**
- *  \file SDL_error.h
+ * \file SDL_clipboard.h
  *
- *  Simple error message routines for SDL.
+ * Include file for SDL clipboard handling
  */
 
-#ifndef _SDL_error_h
-#define _SDL_error_h
+#ifndef _SDL_clipboard_h
+#define _SDL_clipboard_h
 
 #include "SDL_stdinc.h"
 
@@ -36,34 +36,29 @@
 extern "C" {
 #endif
 
-/* Public functions */
-/* SDL_SetError() unconditionally returns -1. */
-extern DECLSPEC int SDLCALL SDL_SetError(const char *fmt, ...);
-extern DECLSPEC const char *SDLCALL SDL_GetError(void);
-extern DECLSPEC void SDLCALL SDL_ClearError(void);
+/* Function prototypes */
 
 /**
- *  \name Internal error functions
+ * \brief Put UTF-8 text into the clipboard
  *
- *  \internal
- *  Private error reporting function - used internally.
+ * \sa SDL_GetClipboardText()
  */
-/* @{ */
-#define SDL_OutOfMemory()   SDL_Error(SDL_ENOMEM)
-#define SDL_Unsupported()   SDL_Error(SDL_UNSUPPORTED)
-#define SDL_InvalidParamError(param)    SDL_SetError("Parameter '%s' is invalid", (param))
-typedef enum
-{
-    SDL_ENOMEM,
-    SDL_EFREAD,
-    SDL_EFWRITE,
-    SDL_EFSEEK,
-    SDL_UNSUPPORTED,
-    SDL_LASTERROR
-} SDL_errorcode;
-/* SDL_Error() unconditionally returns -1. */
-extern DECLSPEC int SDLCALL SDL_Error(SDL_errorcode code);
-/* @} *//* Internal error functions */
+extern DECLSPEC int SDLCALL SDL_SetClipboardText(const char *text);
+
+/**
+ * \brief Get UTF-8 text from the clipboard, which must be freed with SDL_free()
+ *
+ * \sa SDL_SetClipboardText()
+ */
+extern DECLSPEC char * SDLCALL SDL_GetClipboardText(void);
+
+/**
+ * \brief Returns a flag indicating whether the clipboard exists and contains a text string that is non-empty
+ *
+ * \sa SDL_GetClipboardText()
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasClipboardText(void);
+
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -71,6 +66,6 @@ extern DECLSPEC int SDLCALL SDL_Error(SDL_errorcode code);
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_error_h */
+#endif /* _SDL_clipboard_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

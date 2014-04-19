@@ -20,15 +20,13 @@
 */
 
 /**
- *  \file SDL_error.h
+ *  \file SDL_blendmode.h
  *
- *  Simple error message routines for SDL.
+ *  Header file declaring the SDL_BlendMode enumeration
  */
 
-#ifndef _SDL_error_h
-#define _SDL_error_h
-
-#include "SDL_stdinc.h"
+#ifndef _SDL_blendmode_h
+#define _SDL_blendmode_h
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -36,34 +34,23 @@
 extern "C" {
 #endif
 
-/* Public functions */
-/* SDL_SetError() unconditionally returns -1. */
-extern DECLSPEC int SDLCALL SDL_SetError(const char *fmt, ...);
-extern DECLSPEC const char *SDLCALL SDL_GetError(void);
-extern DECLSPEC void SDLCALL SDL_ClearError(void);
-
 /**
- *  \name Internal error functions
- *
- *  \internal
- *  Private error reporting function - used internally.
+ *  \brief The blend mode used in SDL_RenderCopy() and drawing operations.
  */
-/* @{ */
-#define SDL_OutOfMemory()   SDL_Error(SDL_ENOMEM)
-#define SDL_Unsupported()   SDL_Error(SDL_UNSUPPORTED)
-#define SDL_InvalidParamError(param)    SDL_SetError("Parameter '%s' is invalid", (param))
 typedef enum
 {
-    SDL_ENOMEM,
-    SDL_EFREAD,
-    SDL_EFWRITE,
-    SDL_EFSEEK,
-    SDL_UNSUPPORTED,
-    SDL_LASTERROR
-} SDL_errorcode;
-/* SDL_Error() unconditionally returns -1. */
-extern DECLSPEC int SDLCALL SDL_Error(SDL_errorcode code);
-/* @} *//* Internal error functions */
+    SDL_BLENDMODE_NONE = 0x00000000,     /**< no blending
+                                              dstRGBA = srcRGBA */
+    SDL_BLENDMODE_BLEND = 0x00000001,    /**< alpha blending
+                                              dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))
+                                              dstA = srcA + (dstA * (1-srcA)) */
+    SDL_BLENDMODE_ADD = 0x00000002,      /**< additive blending
+                                              dstRGB = (srcRGB * srcA) + dstRGB
+                                              dstA = dstA */
+    SDL_BLENDMODE_MOD = 0x00000004       /**< color modulate
+                                              dstRGB = srcRGB * dstRGB
+                                              dstA = dstA */
+} SDL_BlendMode;
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -71,6 +58,6 @@ extern DECLSPEC int SDLCALL SDL_Error(SDL_errorcode code);
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_error_h */
+#endif /* _SDL_video_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

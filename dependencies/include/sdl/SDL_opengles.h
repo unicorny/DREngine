@@ -19,15 +19,20 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _SDLname_h_
-#define _SDLname_h_
+/**
+ *  \file SDL_opengles.h
+ *
+ *  This is a simple file to encapsulate the OpenGL ES 1.X API headers.
+ */
 
-#if defined(__STDC__) || defined(__cplusplus)
-#define NeedFunctionPrototypes 1
+#ifdef __IPHONEOS__
+#include <OpenGLES/ES1/gl.h>
+#include <OpenGLES/ES1/glext.h>
+#else
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 #endif
 
-#define SDL_NAME(X) SDL_##X
-
-#endif /* _SDLname_h_ */
-
-/* vi: set ts=4 sw=4 expandtab: */
+#ifndef APIENTRY
+#define APIENTRY
+#endif

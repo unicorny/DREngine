@@ -19,14 +19,14 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-/**
- *  \file SDL_error.h
- *
- *  Simple error message routines for SDL.
- */
+#ifndef _SDL_power_h
+#define _SDL_power_h
 
-#ifndef _SDL_error_h
-#define _SDL_error_h
+/**
+ *  \file SDL_power.h
+ *
+ *  Header for the SDL power management routines.
+ */
 
 #include "SDL_stdinc.h"
 
@@ -36,34 +36,33 @@
 extern "C" {
 #endif
 
-/* Public functions */
-/* SDL_SetError() unconditionally returns -1. */
-extern DECLSPEC int SDLCALL SDL_SetError(const char *fmt, ...);
-extern DECLSPEC const char *SDLCALL SDL_GetError(void);
-extern DECLSPEC void SDLCALL SDL_ClearError(void);
-
 /**
- *  \name Internal error functions
- *
- *  \internal
- *  Private error reporting function - used internally.
+ *  \brief The basic state for the system's power supply.
  */
-/* @{ */
-#define SDL_OutOfMemory()   SDL_Error(SDL_ENOMEM)
-#define SDL_Unsupported()   SDL_Error(SDL_UNSUPPORTED)
-#define SDL_InvalidParamError(param)    SDL_SetError("Parameter '%s' is invalid", (param))
 typedef enum
 {
-    SDL_ENOMEM,
-    SDL_EFREAD,
-    SDL_EFWRITE,
-    SDL_EFSEEK,
-    SDL_UNSUPPORTED,
-    SDL_LASTERROR
-} SDL_errorcode;
-/* SDL_Error() unconditionally returns -1. */
-extern DECLSPEC int SDLCALL SDL_Error(SDL_errorcode code);
-/* @} *//* Internal error functions */
+    SDL_POWERSTATE_UNKNOWN,      /**< cannot determine power status */
+    SDL_POWERSTATE_ON_BATTERY,   /**< Not plugged in, running on the battery */
+    SDL_POWERSTATE_NO_BATTERY,   /**< Plugged in, no battery available */
+    SDL_POWERSTATE_CHARGING,     /**< Plugged in, charging battery */
+    SDL_POWERSTATE_CHARGED       /**< Plugged in, battery charged */
+} SDL_PowerState;
+
+
+/**
+ *  \brief Get the current power supply details.
+ *
+ *  \param secs Seconds of battery life left. You can pass a NULL here if
+ *              you don't care. Will return -1 if we can't determine a
+ *              value, or we're not running on a battery.
+ *
+ *  \param pct Percentage of battery life left, between 0 and 100. You can
+ *             pass a NULL here if you don't care. Will return -1 if we
+ *             can't determine a value, or we're not running on a battery.
+ *
+ *  \return The state of the battery (if any).
+ */
+extern DECLSPEC SDL_PowerState SDLCALL SDL_GetPowerInfo(int *secs, int *pct);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -71,6 +70,6 @@ extern DECLSPEC int SDLCALL SDL_Error(SDL_errorcode code);
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_error_h */
+#endif /* _SDL_power_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
