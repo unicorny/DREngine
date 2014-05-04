@@ -1,7 +1,7 @@
 #include "Engine2Main.h"
 
 DRThread::DRThread(const char* threadName/* = NULL*/)
-: mutex(NULL), thread(NULL), condition(NULL), semaphore(NULL)
+: mutex(NULL), thread(NULL), condition(NULL), semaphore(NULL), exitCalled(false)
 {
     semaphore = SDL_CreateSemaphore(1);
     if(!semaphore) LOG_WARNING_SDL();
@@ -24,8 +24,10 @@ DRThread::~DRThread()
     if(thread)
     {
         //Post Exit to Stream Thread
+        exitCalled = true;
         if(SDL_SemPost(semaphore)) LOG_WARNING_SDL();
         //kill TextureLoad Thread after 1/2 second
+        
         SDL_Delay(500);
 //        SDL_KillThread(thread);
         SDL_WaitThread(thread, NULL);
@@ -53,6 +55,7 @@ int DRThread::Thread(void* data)
 	DRThread* t = static_cast<DRThread*>(data);
 	while(SDL_SemTryWait(t->semaphore)==SDL_MUTEX_TIMEDOUT)
 	{
+        if(t->exitCalled) break;
 		// Lock work mutex
 		t->lock();
 		int status = SDL_CondWait(t->condition, t->mutex); 
