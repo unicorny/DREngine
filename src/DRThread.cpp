@@ -26,6 +26,7 @@ DRThread::~DRThread()
         //Post Exit to Stream Thread
         exitCalled = true;
         if(SDL_SemPost(semaphore)) LOG_WARNING_SDL();
+		condSignal();
         //kill TextureLoad Thread after 1/2 second
         
         SDL_Delay(500);
@@ -55,10 +56,11 @@ int DRThread::Thread(void* data)
 	DRThread* t = static_cast<DRThread*>(data);
 	while(SDL_SemTryWait(t->semaphore)==SDL_MUTEX_TIMEDOUT)
 	{
-        if(t->exitCalled) break;
+        if(t->exitCalled) return 0;
 		// Lock work mutex
 		t->lock();
 		int status = SDL_CondWait(t->condition, t->mutex); 
+		if(t->exitCalled) return 0;
 		if( status == 0)
 		{
             int ret = t->ThreadFunction();
