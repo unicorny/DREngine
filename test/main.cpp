@@ -41,6 +41,13 @@ int main()
     EnInit_Simple();
     EnInit_OpenGL(1.0, DRVideoConfig(640, 480), "Test Suit!");
 
+	int videoDriverCount = SDL_GetNumVideoDrivers();
+	for(int i = 0; i < videoDriverCount; i++)
+	{
+		printf("videodriver(%d): %s\n", i, SDL_GetVideoDriver(i));
+	}
+	printf("current video drove: %s\n", SDL_GetCurrentVideoDriver());
+
     printf("\n");
     IniTest ini("test.ini");
     if(!ini.test(false))
