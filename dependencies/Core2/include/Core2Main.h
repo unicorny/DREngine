@@ -59,7 +59,9 @@
 #ifdef _WIN32
 #pragma warning (disable : 4251) 
 #pragma warning (disable : 4201)
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS 1
+#endif
 #ifdef BUILD_CORE2_DLL
     #define CORE2_API __declspec(dllexport)
 #else
