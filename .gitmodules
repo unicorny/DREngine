@@ -1,0 +1,3 @@
+[submodule "dependencies/DRCore2"]
+	path = dependencies/DRCore2
+	url = https://github.com/unicorny/DRCore2
