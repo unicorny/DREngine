@@ -1,20 +1,19 @@
 /*/*************************************************************************
  *                                                                         *
- * EngineDLL, Engine for my programs, using SDL and OpenGL		   *
- * Copyright (C) 2012, 2013, 2014 Dario Rekowski.			   *
- * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ * DREngine, Engine for my programs, using SDL and OpenGL                 *
+ * Copyright (C) 2012, 2013, 2014 github.com/unicorny                      *
  *                                                                         *
  * This program is free software: you can redistribute it and/or modify    *
  * it under the terms of the GNU General Public License as published by    *
  * the Free Software Foundation, either version 3 of the License, or       *
- * any later version.							   *
- *									   *
- * This program is distributed in the hope that it will be useful,	   *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
- * GNU General Public License for more details.				   *
- *									   *
- * You should have received a copy of the GNU General Public License	   *
+ * any later version.                                                      *
+ *                                                                         *
+ * This program is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of          *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
+ * GNU General Public License for more details.                            *
+ *                                                                         *
+ * You should have received a copy of the GNU General Public License       *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
  *                                                                         *
  ***************************************************************************/
@@ -43,7 +42,7 @@ public:
     //! \param stencilBuffer Stencil-Buffer Tiefe, default is 0 (disabled)
     //! \param multiSampling default is 0 (disabled)
     DRVideoConfig(int width = 640, int height = 480, int bpp = 32, int fullscreen = 0, int zbuffer = 8, int stencilBuffer = 0, int multiSampling = 0);
-    
+
     //Kopierkonstruktor
     DRVideoConfig(const DRVideoConfig& cfg);
 
@@ -62,7 +61,7 @@ public:
 
     // get and setter
     __inline__ DRVector2 getResolution() {return DRVector2((DRReal)mWidth, (DRReal)mHeight);}
-    
+
     __inline__ void setWidth(int width) {mWidth = width;}
     __inline__ void setHeight(int height) {mHeight = height;}
     __inline__ void setPixelDeep(int pixelDeep) {mPixelDeep = pixelDeep;}

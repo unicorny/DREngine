@@ -16,7 +16,7 @@ if(MSVC)
 endif()
 
 # for linux, assume that sdl will be installed
-if(MSVC) 
+if(MSVC)
     message(STATUS "Download SDL2 Binary")
 	# Fetch Content Module
 	include(FetchContent)
