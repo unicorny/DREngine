@@ -1,5 +1,8 @@
-#include "Engine2Main.h"
-
+#include "DREngine/DRGeometrieSphere.h"
+#include "DREngine/Const.h"
+#include "DREngine/Engine2Main.h"
+#include "DRCore2/Foundation/DRColor.h"
+#include "DRCore2/Foundation/DRRandom.h"
 
 DRGeometrieSphere::DRGeometrieSphere()
  : DRGeometrie()
@@ -21,7 +24,7 @@ DRReturn DRGeometrieSphere::initSphere(GLuint segmentSize)
     if(init(vertexCount, indexCount, 0, true)) LOG_ERROR("no memory allocatet for geometrie!", DR_ERROR);
     
     // generate a round line
-    for(uint i = 0; i < segmentSize; i++)
+    for(GLuint i = 0; i < segmentSize; i++)
     {
         DRReal _sin = sinf(((PI)/(float)(segmentSize-1))*(float)i);
         DRReal _cos = cosf(((PI)/(float)(segmentSize-1))*(float)i);        
@@ -30,12 +33,12 @@ DRReturn DRGeometrieSphere::initSphere(GLuint segmentSize)
     }   
 
     // rotate the line to make a whole sphere (rotation count = segmentSize)
-    for(uint j = 0; j < segmentSize; j++)
+    for(GLuint j = 0; j < segmentSize; j++)
     {
         // PI/segs*2 = 360°
         // PI/segs = 180°
         DRMatrix rot = DRMatrix::rotationX((PI/(segmentSize-1)*2)*j);
-        for(uint i = 0; i < segmentSize; i++)
+        for(GLuint i = 0; i < segmentSize; i++)
         {
             if(segmentSize*j + i >= vertexCount) LOG_ERROR("critical 1", DR_ERROR);
             mVertices[segmentSize*j + i] = mVertices[i].transformNormal(rot);//*DRRandom::rReal(1.02, 0.98f);
@@ -45,9 +48,9 @@ DRReturn DRGeometrieSphere::initSphere(GLuint segmentSize)
 	mVertexCount = vertexCount;
 
     // generate indices to render sphere as QUAD_STRIP
-    for(uint j = 0; j < segmentSize-1; j++)
+    for(GLuint j = 0; j < segmentSize-1; j++)
     {
-        for(uint i = 0; i < segmentSize; i++)
+        for(GLuint i = 0; i < segmentSize; i++)
         {
             if(i*2+1+(segmentSize*2)*j >= indexCount) LOG_ERROR("critical 2", DR_ERROR);
             if(j*segmentSize + segmentSize+i >= vertexCount) LOG_ERROR("critical 3", DR_ERROR);
@@ -111,7 +114,7 @@ int DRGeometrieSphere::makeLandscapeThread(void* data)
     int m = 1;
     DRPlane pl;
     
-    for(uint i = 0; i < planes->absPlaneCount; i++)
+    for(GLuint i = 0; i < planes->absPlaneCount; i++)
     {
         planes->lock();
         //plane gibts noch nicht? dann machen wir eine neue

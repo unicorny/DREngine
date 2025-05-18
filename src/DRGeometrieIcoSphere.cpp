@@ -1,4 +1,6 @@
-#include "Engine2Main.h"
+#include "DREngine/DRGeometrieIcoSphere.h"
+#include "DRCore2/Foundation/DRColor.h"
+#include "DREngine/Const.h"
 
 float DRGeometrieIcoSphere::mVektorLength = 0.0f;
 
@@ -56,7 +58,7 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene, int seed /*= 0*/)
     
     const GLuint indexCount = 60;
    
-    if(init(12*(uint)powf(4.0f, (float)maxEbene-1.0f), indexCount*(uint)powf(4.0f, (float)maxEbene-1.0f), 1, true, true))
+    if(init(12*(u32)powf(4.0f, (float)maxEbene-1.0f), indexCount*(u32)powf(4.0f, (float)maxEbene-1.0f), 1, true, true))
         LOG_ERROR("Fehler bei init Geometrie", DR_ERROR);
     mIndexReferenzen = new DRIndexReferenzHolder(mMaxVertexCount);
  //   if(initVertexBuffer())
@@ -83,7 +85,7 @@ DRReturn DRGeometrieIcoSphere::initIcoSphere(u8 maxEbene, int seed /*= 0*/)
     mVektorLength = 1.0f;//mVertices[mVertexCursor-1].length();    
     
     //einfärben der Start Vertices
-    for(uint i = 0; i < mVertexCursor; i++)
+    for(u32 i = 0; i < mVertexCursor; i++)
     {
         float percent = (float)i*(1.0f/12.0f);
         mColors[i] = DRColor(percent, 0.0f, 0.0f);//1.0f-percent, (percent+0.0001f)/2.0f);
@@ -227,30 +229,30 @@ DRReturn DRGeometrieIcoSphere::update()
 int DRGeometrieIcoSphere::updateGeometrieThread(void* data)
 {
 	DRGeometrieIcoSphere* t = (DRGeometrieIcoSphere*)data;
-        uint oldVertexCount = t->mVertexCount;
+    u32 oldVertexCount = t->mVertexCount;
         
-        t->mFacesSphereCount = 0;
-        t->mUpdateChanged = false;
+    t->mFacesSphereCount = 0;
+    t->mUpdateChanged = false;
         
-        for(int i = 0; i < 2; i++)
-        {
-            t->removeLeafs();   
-            t->subdivide();   	
-        }
+    for(int i = 0; i < 2; i++)
+    {
+        t->removeLeafs();   
+        t->subdivide();   	
+    }
 	
-        if(t->mUpdateChanged)
-        {
-            printf("update Change Geometrie Thread\n");
-            SDL_mutexP(t->mUpdateGeometrieMutex);
-            if(t->grabIndicesFromFaces())
-            LOG_ERROR("grabIndicesFromFaces", -2);
-            t->mVertexCursor = t->mVertexCount;
+    if(t->mUpdateChanged)
+    {
+        printf("update Change Geometrie Thread\n");
+        SDL_mutexP(t->mUpdateGeometrieMutex);
+        if(t->grabIndicesFromFaces())
+        LOG_ERROR("grabIndicesFromFaces", -2);
+        t->mVertexCursor = t->mVertexCount;
 
-            if(t->calculateNormals(oldVertexCount))
-            LOG_ERROR("calculateNormals", -3);
-            SDL_mutexV(t->mUpdateGeometrieMutex);                
-        }
-        t->mCurrentEbene = t->mNewEbene;
+        if(t->calculateNormals(oldVertexCount))
+        LOG_ERROR("calculateNormals", -3);
+        SDL_mutexV(t->mUpdateGeometrieMutex);                
+    }
+    t->mCurrentEbene = t->mNewEbene;
 //	if(t->copyDataToVertexBuffer()) 
 //		LOG_ERROR("copyDataToVertexBuffer", -1);
 
@@ -417,7 +419,7 @@ DRGeometrieIcoSphere::IcoSphereFace* DRGeometrieIcoSphere::newChildFace(DRGeomet
             }
             else
             {
-                uint newIndex = mIndexReferenzen->getFree();
+                u32 newIndex = mIndexReferenzen->getFree();
                 mNormals[newIndex] = temp.normalize();
                 mVertices[newIndex] = mNormals[newIndex] * mVektorLength;
                 mColors[newIndex] = DRColor(0.0f, 1.0f, 0.0f);
@@ -590,11 +592,11 @@ void DRGeometrieIcoSphere::deleteFace(DRGeometrieIcoSphere::IcoSphereFace* face)
     }
 }
 
-DRReturn DRGeometrieIcoSphere::calculateNormals(uint oldVertexCount)
+DRReturn DRGeometrieIcoSphere::calculateNormals(u32 oldVertexCount)
 {
     //DRLog.writeToLog("vertexCount: %d", mVertexCount);
     if(oldVertexCount > mVertexCount) return DR_OK;
-    for(uint i = 0; i < mVertexCount; i++)
+    for(u32 i = 0; i < mVertexCount; i++)
     {
         mNormals[i] = mVertices[i].normalize();
         //mColors[i] = DRColor(1.0f, 1.0f, 1.0f);

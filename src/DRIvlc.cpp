@@ -1,4 +1,5 @@
-#include "Engine2Main.h"
+#include "DREngine/DRIvlc.h"
+#include "DREngine/DRLogging.h"
 
 #ifdef _WIN32
 HMODULE   DRIvlc::mDLL = 0;

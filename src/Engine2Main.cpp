@@ -1,22 +1,32 @@
-#include "Engine2Main.h"
+#include "DREngine/Engine2Main.h"
+#include "DREngine/DRLogging.h"
+#include "DRCore2/Utils/DRIni.h"
+#include "DRCore2/Foundation/DRRandom.h"
+#include "DREngine/DRTextureManager.h"
 
-//F�r Versionskontrolle
-const DRReal g_fVersion = 2.0f;
+#include <chrono>
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif //_WIN32
+
+//Fuer Versionskontrolle
+const DRReal g_fVersion = 2.1f;
 
 //Z�hler, wie oft die dll gerade benutzt wird
 int         g_iProzess = 0;
 int			g_iProzessFunk = 0;
 SDL_Window* g_pSDLWindow = NULL;
 SDL_GLContext g_glContext;
-ENGINE2_API DRVector2  g_v2WindowLength = DRVector2(0.0f);
+DRVector2   g_v2WindowLength = DRVector2(0.0f);
 bool		g_bOgre = false;
 bool		g_bEnInit = false;
 bool		g_bGL = false;
 DRGameStateManager* g_pGameStateManager = NULL;
 
 Uint8*		g_piPressed = NULL;
-u16             g_CPU_Count = 0;
-DREngineLogger DREngineLog;
+u16         g_CPU_Count = 0;
 
 //********************************************************************************************************************++
 
@@ -29,14 +39,14 @@ int WINAPI DllMain(HINSTANCE DllHandle, unsigned long ReasonForCall, void* Reser
    {
       case DLL_PROCESS_ATTACH:
       {
-         //Der Referenzz�hler wird um eins erh�ht
+         //Der Referenzzaehler wird um eins erhoeht
 		  //Start
 		  g_iProzess++;
       } break;
 
       case DLL_PROCESS_DETACH:
       {
-         //Der Referenzz�hler wird um eins reduziert
+         //Der Referenzzaehler wird um eins reduziert
 		  //Ende
 		  g_iProzess--;
 
@@ -63,7 +73,7 @@ DRReturn fVersionCheck(DRReal fVersion)
 {
 	if(fVersion > g_fVersion)
 	{
-		DRLog.writeToLog("Programm ben�tigt eine zu hohe EngineDLL Version, ben�tigt: %f, verf�gbar: %f", fVersion, g_fVersion);
+		DRLog.writeToLog("Programm benoetigt eine zu hohe EngineDLL Version, benoetigt: %f, verfuegbar: %f", fVersion, g_fVersion);
 		return DR_ERROR;
 	}
 	return DR_OK;
@@ -97,7 +107,6 @@ DRReturn EnInit_Simple(DRReal fVersion /* = 0.0f*/, bool initSound/* = false*/)
 //******************************************************************************************
 DRReturn EnInit(DRReal fVersion /* = 1.0f */, bool initSound/* = false*/)
 {
-    DREngineLog.init("EngineLogger.html", true);
 	Core2_init("Logger.html");
 	if(fVersionCheck(fVersion)) return DR_ERROR;
 
@@ -232,11 +241,9 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 	g_v2WindowLength = video.getResolution();
 
 	//Zufalllsgenerator starten
-#ifdef _WIN32
-	DRRandom::seed(timeGetTime());
-#else
-	DRRandom::seed(SDL_GetTicks());
-#endif //_WIN32
+	// Hole aktuelle Zeit seit Unix-Epoche in Sekunden:
+	auto now = std::chrono::system_clock::now();
+	DRRandom::seed(std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count());
 
 	//OpenGL Einstellungen tätigen
 	video.setGLParams();
@@ -281,14 +288,15 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
 	glViewport(0, 0, w, h);
     
     //DRActivateVBExtension();
-    GLenum err = glewInit();
+    /*GLenum err = glewInit();
     if (GLEW_OK != err)
     {
-        /* Problem: glewInit failed, something is seriously wrong. */
+        // Problem: glewInit failed, something is seriously wrong. 
         DRLog.writeToLog("Error: %s\n", glewGetErrorString(err));
         LOG_ERROR("Fehler bei Glew Init", DR_ERROR);
     }
-    DRLog.writeToLog("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+	*/
+    // DRLog.writeToLog("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
         
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -356,9 +364,7 @@ void EnExit()
 	{
         SDL_Quit();
 	}    
-    DREngineLog.exit();
-	Core2_exit();
-    
+	Core2_exit();    
 }
 
 //********************************************************************************************************************++
@@ -384,7 +390,7 @@ bool EnIsButtonPressed(SDL_Scancode button)
 }
 
 // -----------------------------------------------------------------------------------------
-DRString EnGetTimeSinceStart()
+std::string EnGetTimeSinceStart()
 {
     char timeBuffer[256];
     double seconds = static_cast<double>(SDL_GetTicks())/1000.0;
@@ -393,7 +399,7 @@ DRString EnGetTimeSinceStart()
     seconds *= 60.0; 
     sprintf(timeBuffer, "[%.0f:%02.0f] ", minutes, seconds);
     
-    return DRString(timeBuffer);
+    return std::string(timeBuffer);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -555,30 +561,3 @@ DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRRea
 }
 
 //********************************************************************************************************************
-const char* DRGetGLErrorText(GLenum eError)
-{
-	switch(eError)
-	{
-	case GL_INVALID_ENUM:		return "GL_INVALID_ENUM";
-	case GL_INVALID_VALUE:		return "GL_INVALID_VALUE";
-	case GL_INVALID_OPERATION:	return "GL_INVALID_OPERATION";
-	case GL_STACK_OVERFLOW:		return "GL_STACK_OVERFLOW";
-	case GL_STACK_UNDERFLOW:	return "GL_STACK_UNDERFLOW";
-	case GL_OUT_OF_MEMORY:		return "GL_OUT_OF_MEMORY";
-    case GL_NO_ERROR:			return "GL_NO_ERROR";
-	default: return "- gl Unknown error-";
-	}
-	return "- error -";
-}
-
-
-DRReturn DRGrafikError(const char* pcErrorMessage)
-{
-	GLenum GLError = glGetError();
-	if(GLError)
-	{
-		DREngineLog.writeToLog("OpenGL Fehler: %s (%d)", DRGetGLErrorText(GLError), GLError);
-		LOG_ERROR(pcErrorMessage, DR_ERROR);
-	}
-	return DR_OK;
-}

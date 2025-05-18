@@ -1,4 +1,5 @@
-#include "Engine2Main.h"
+#include "DREngine/DRINetwork.h"
+#include "DREngine/DRLogging.h"
 
 DRINetwork* DRINetwork::mTheOneAndOnly = NULL;
 

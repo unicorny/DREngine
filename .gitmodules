@@ -1,3 +1,6 @@
 [submodule "dependencies/DRCore2"]
 	path = dependencies/DRCore2
 	url = https://github.com/unicorny/DRCore2
+[submodule "dependencies/magic_enum"]
+	path = dependencies/magic_enum
+	url = https://github.com/Neargye/magic_enum

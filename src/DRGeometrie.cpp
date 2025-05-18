@@ -1,4 +1,8 @@
-#include "Engine2Main.h"
+#include "DREngine/DRGeometrie.h"
+#include "DREngine/DRLogging.h"
+#include "DRCore2/Foundation/DRVector3.h"
+#include "DRCore2/Foundation/DRVector2.h"
+#include "DRCore2/Foundation/DRColor.h"
 
 DRGeometrie::DRGeometrie()
 : mVertices(NULL), mNormals(NULL), mIndices(NULL), mColors(NULL), mTextureCoords(NULL),
@@ -49,7 +53,7 @@ DRReturn DRGeometrie::init(u32 vertexCount, u32 indexCount/* = 0*/, u32 textureC
             mTextureCoords = new DRVector2*[textureCount];
             mNumTextureCoords = textureCount;
             if(!mTextureCoords) LOG_ERROR("get no memory for texture coords pointer array", DR_ERROR);
-            for(uint i = 0; i < textureCount; i++)
+            for(u32 i = 0; i < textureCount; i++)
             {
                 mTextureCoords[i] = new DRVector2[vertexCount];
                 if(!mTextureCoords[i]) LOG_ERROR("get no memory for texture coords array", DR_ERROR);
@@ -79,7 +83,7 @@ void DRGeometrie::clearData()
     
     if(mNumTextureCoords)
     {
-        for(uint i = 0; i < mNumTextureCoords; i++)
+        for(u32 i = 0; i < mNumTextureCoords; i++)
         {
             DR_SAVE_DELETE_ARRAY(mTextureCoords[i]);
         }
@@ -141,7 +145,7 @@ DRReturn DRGeometrie::copyDataToVertexBuffer(GLenum usage /*= GL_STATIC_DRAW_ARB
     if(mNumTextureCoords && mTextureCoords && mVertexBufferObjects[4] && mVertexCount)
     {
         GLuint* buffers = (GLuint*)mVertexBufferObjects[4];
-        for(uint i = 0; i < mNumTextureCoords; i++)
+        for(u32 i = 0; i < mNumTextureCoords; i++)
         {
             if(!mTextureCoords[i])
             {
@@ -255,7 +259,7 @@ DRReturn DRGeometrie::render()
     if((mNumTextureCoords && mTextureCoords) || (mVertexBufferObjects[4] && mRenderVertexBuffer))
     {
         GLuint* buffers = (GLuint*)mVertexBufferObjects[4];
-        for(uint i = 0; i < mNumTextureCoords; i++)
+        for(u32 i = 0; i < mNumTextureCoords; i++)
         {
             if(i > 0) break;
             glEnableClientState(GL_TEXTURE_COORD_ARRAY);

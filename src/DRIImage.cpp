@@ -1,4 +1,5 @@
-#include "Engine2Main.h"
+#include "DREngine/DRIImage.h"
+#include "DRCore2/DRCore2Main.h"
 
 DRIImage::DRIImage()
 {

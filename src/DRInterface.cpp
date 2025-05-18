@@ -1,4 +1,5 @@
-#include "Engine2Main.h"
+#include "DREngine/DRInterface.h"
+#include "DREngine/DRLogging.h"
 
 #ifdef _WIN32
 HMODULE   DRInterface::mDLL = 0;
