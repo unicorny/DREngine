@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.29.2)
 project(DREngine VERSION 2.1)
 enable_language(CXX)
 
+# Option zum Ein-/Ausschalten von Plugins
+option(BUILD_PLUGINS "Build plugin modules" ON)
+
 # download glew for windows
 if(MSVC)
     message(STATUS "Make GLEW Available for Windows")
@@ -46,7 +49,12 @@ if(MSVC)
 
 	# Suppress warning C4003 for Visual Studio Compiler
 	add_compile_options(/wd4003)
-
+	# Ensure correct architecture is defined
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        add_compile_definitions(_AMD64_)
+    else()
+        add_compile_definitions(_X86_)
+    endif()
 endif()
 
 if (NOT DEFINED CMAKE_CXX_VISIBILITY_PRESET AND
@@ -105,3 +113,8 @@ option(DREngine_INCLUDE_PACKAGING "Include packaging rules for DREngine" "${is_t
 if (DREngine_INCLUDE_PACKAGING)
     add_subdirectory(packaging)
 endif ()
+
+# Plugin-Support
+if(BUILD_PLUGINS)
+    add_subdirectory(plugins)
+endif()

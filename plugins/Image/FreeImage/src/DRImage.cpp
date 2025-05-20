@@ -1,4 +1,6 @@
-#include "DRImageMain.h"
+#include <libloaderapi.h>
+#include "DRImage.h"
+#include "DREngine/DRLogging.h"
 
 DRImage::DRImage()
 : mImage(NULL), mFilename(""), mSize(0.0f), mImageFormat(0), mLoadedSucessfully(false)

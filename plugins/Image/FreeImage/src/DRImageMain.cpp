@@ -1,4 +1,8 @@
+#include <libloaderapi.h>
+#include "DRImage.h"
 #include "DRImageMain.h"
+#include "DRCore2/Foundation/DRHashList.h"
+#include "DREngine/DRLogging.h"
 
 int g_ProzessCount = 0;
 int g_ThreadCount = 0;
@@ -6,7 +10,7 @@ DRHashList mImageList;
 
 void clearImageList()
 {
-    for(uint i = 0; i < mImageList.getNItems(); i++)
+    for(u32 i = 0; i < mImageList.getNItems(); i++)
     {
         DRImage* img = (DRImage*)mImageList.findHashByIndex(i);
         DRImage* last = (DRImage*)mImageList.findByIndex(i);

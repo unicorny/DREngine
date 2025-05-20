@@ -4,3 +4,6 @@
 [submodule "dependencies/magic_enum"]
 	path = dependencies/magic_enum
 	url = https://github.com/Neargye/magic_enum
+[submodule "plugins/Image/FreeImage/dependencies/FreeImage"]
+	path = plugins/Image/FreeImage/dependencies/FreeImage
+	url = https://github.com/danoli3/FreeImage

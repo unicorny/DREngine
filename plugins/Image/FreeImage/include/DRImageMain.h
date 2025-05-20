@@ -3,22 +3,10 @@
 
 #ifdef _WIN32
 #include <windows.h>
-#else
-#endif
-#include <Engine2Main.h>
-
-#ifdef _WIN32
-    #ifdef BUILD_DLL_IMAGE
-        #define IMAGE_API __declspec(dllexport)
-    #else
-        #define IMAGE_API __declspec(dllimport)
-    #endif
-#else
-    #define IMAGE_API
 #endif
 
-#include "FreeImage.h"
-#include "DRImage.h"
+#include "DREngine/DRIImage.h"
+#include "export.h"
 
 #ifdef __cplusplus
 extern "C"
