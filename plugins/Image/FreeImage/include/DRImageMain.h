@@ -6,18 +6,18 @@
 #endif
 
 #include "DREngine/DRIImage.h"
-#include "export.h"
+#include "DRImage/export.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-IMAGE_API DRIImage* getInstance();
-IMAGE_API DRIImage* getInstances(int count);
+DRIMAGE_EXPORT DRIImage* getInstance();
+DRIMAGE_EXPORT DRIImage* getInstances(int count);
 
-IMAGE_API void releaseInstance(DRInterface* data);
-IMAGE_API void releaseInstances(DRInterface* datas);
+DRIMAGE_EXPORT void releaseInstance(DRInterface* data);
+DRIMAGE_EXPORT void releaseInstances(DRInterface* datas);
 
 #ifdef __cplusplus
 }

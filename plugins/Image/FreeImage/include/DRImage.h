@@ -1,13 +1,14 @@
 #ifndef __DR_IMAGE__
 #define __DR_IMAGE__
 
+#define FREEIMAGE_LIB
 #include "FreeImage.h"
 #include "DREngine/DRIImage.h"
-#include "export.h"
+#include "DRImage/export.h"
 
 #include <string>
 
-class IMAGE_API DRImage : public DRIImage
+class DRIMAGE_EXPORT DRImage : public DRIImage
 {
 public:
     DRImage();

@@ -29,7 +29,7 @@ Uint8*		g_piPressed = NULL;
 u16         g_CPU_Count = 0;
 
 //********************************************************************************************************************++
-
+#ifndef DRENGINE_STATIC_DEFINE
 #ifdef _WIN32
 //DLL Main Funktion
 int WINAPI DllMain(HINSTANCE DllHandle, unsigned long ReasonForCall, void* Reserved)
@@ -65,7 +65,7 @@ int WINAPI DllMain(HINSTANCE DllHandle, unsigned long ReasonForCall, void* Reser
    return 1;
 }
 #endif //_WIN32
-
+#endif // DRENGINE_STATIC_DEFINE
 //********************************************************************************************************************++
 
 //********************************************************************************************************************++

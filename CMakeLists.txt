@@ -6,6 +6,15 @@ enable_language(CXX)
 
 # Option zum Ein-/Ausschalten von Plugins
 option(BUILD_PLUGINS "Build plugin modules" ON)
+option(DRCore2_SHARED_LIBS "Build DRCore2 as a shared library" ON)
+option(DREngine_SHARED_LIBS "Build DREngine as a shared library" ON)
+
+# Basis-Ausgabeordner setzen
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")       # Für .exe und .dll
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")       # Für .so und .dll (wenn als SHARED lib gebaut)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")       # Für .lib und .a (statische Libs)
+
+find_package(OpenGL REQUIRED)
 
 # download glew for windows
 if(MSVC)
@@ -17,8 +26,22 @@ if(MSVC)
 		URL_MD5 1feddfe8696c192fa46a0df8eac7d4bf
 	)
 	FetchContent_MakeAvailable(glew)
-	message(STATUS "glew source: ${glew_SOURCE_DIR}")
-	message(STATUS "glew binary: ${glew_BINARY_DIR}")
+    add_library(glew STATIC IMPORTED GLOBAL)
+    set(glew_LIB_PATH "${glew_SOURCE_DIR}/lib/Release")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(glew_LIB_PATH "${glew_LIB_PATH}/x64")
+    else()
+        set(glew_LIB_PATH "${glew_LIB_PATH}/Win32")
+    endif()
+    if(DREngine_SHARED_LIBS)
+        set(glew_LIB_FULL "${glew_LIB_PATH}/glew32.lib")
+    else()
+        set(glew_LIB_FULL "${glew_LIB_PATH}/glew32s.lib")
+    endif()
+    set_target_properties(glew PROPERTIES
+        IMPORTED_LOCATION "${glew_LIB_FULL}"
+        INTERFACE_INCLUDE_DIRECTORIES "${glew_SOURCE_DIR}/include"
+    )
 endif()
 
 # for linux, assume that sdl will be installed
@@ -35,8 +58,17 @@ if(MSVC)
 		URL_MD5 375d933452c6cf623aedf9a4acc58c33
 	)
 	FetchContent_MakeAvailable(sdl2)
-	message(STATUS "SDL2 source: ${sdl2_SOURCE_DIR}")
-	message(STATUS "SDL2 binary: ${sdl2_BINARY_DIR}")
+    add_library(SDL2 STATIC IMPORTED GLOBAL)
+    set(SDL2_LIB_PATH "${sdl2_SOURCE_DIR}/lib")
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SDL2_LIB_PATH "${SDL2_LIB_PATH}/x64")
+    else()
+        set(SDL2_LIB_PATH "${SDL2_LIB_PATH}/x86")
+    endif()
+    set_target_properties(SDL2 PROPERTIES
+        IMPORTED_LOCATION "${SDL2_LIB_PATH}/SDL2.lib"
+        INTERFACE_INCLUDE_DIRECTORIES "${sdl2_SOURCE_DIR}/include"
+    )
 else()
 	find_package(SDL2 REQUIRED)
 endif()
@@ -86,7 +118,7 @@ add_library(DREngine ${DREngine_SOURCES})
 add_library(DREngine::DREngine ALIAS DREngine)
 
 if(BUILD_SHARED_LIBS)
-    target_link_libraries(DREngine DRCore2 ${SDL2_LIBRARIES} ${GLEW_LIBRARIES})
+    target_link_libraries(DREngine DRCore2 SDL2 glew OpenGL::GL)
     message(STATUS "Building DREngine as a shared library")
 else()
     add_definitions(-DGLEW_STATIC)
@@ -111,7 +143,7 @@ target_include_directories(
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
 option(DREngine_INCLUDE_PACKAGING "Include packaging rules for DREngine" "${is_top_level}")
 if (DREngine_INCLUDE_PACKAGING)
-    add_subdirectory(packaging)
+    #add_subdirectory(packaging)
 endif ()
 
 # Plugin-Support
