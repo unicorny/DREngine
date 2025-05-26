@@ -1,5 +1,10 @@
-#include "Engine2Main.h"
+#include "DREngine/DRText.h"
+#include "DREngine/DRLogging.h"
+#include "DREngine/Engine2Main.h"
+#include "DREngine/DRTextureManager.h"
+#include "DREngine/DRTexture.h"
 
+#include <stdarg.h>
 
 DRText::DRText(DRFont* pFont)
 : m_vPosition(0.0f), pcText(NULL), uiFlags(0),Color1(1.0f), Color2(-1.0f),
@@ -29,7 +34,7 @@ void DRText::setText(const char* _pcText, ...)
 	char acBuffer[1024];
 	resetText();
 
-	//Buffer f�llen
+	//Buffer fuellen
 	va_start(Argumente, _pcText);
  	vsprintf(acBuffer, _pcText, Argumente);
 	va_end(Argumente);

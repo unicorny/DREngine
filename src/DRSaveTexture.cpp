@@ -1,4 +1,5 @@
-#include "Engine2Main.h"
+#include "DREngine/DRSaveTexture.h"
+#include "DREngine/DRLogging.h"
 
  DRSaveTexture::DRSaveTexture(const char* savingPath, DRTextureBufferPtr textureBuffer, GLuint stepSize/* = 16384*/)
  : mPboSaveID(0), mTextureBuffer(textureBuffer), mSavingState(0), mSavingCursor(0), mSavingBuffer(NULL),

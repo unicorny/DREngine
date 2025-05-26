@@ -1,6 +1,15 @@
-//#include "Texture.h"
-#include "Engine2Main.h"
+#include "DREngine/DRTexture.h"
+#include "DREngine/DRTextureManager.h"
+#include "DREngine/DRLogging.h"
 
+#include "DRCore2/Manager/DRFileManager.h"
+
+// #define GL_GLEXT_PROTOTYPES
+// #include "SDL_opengl.h"
+// #define GL_GLEXT_PROTOTYPES
+
+// #include <SDL.h>
+// #include <SDL_opengl.h>
 
 DRTexture::DRTexture(const char* filename)
 : mTexturID(), mPboID(0), mFilename(filename), mLoadingState(0), 
@@ -80,7 +89,7 @@ DRReturn DRTexture::loadFromFile()
     }
     else
     {
-        if(mImage->loadFromFile(DRString(DRString(path)+"/"+mFilename).data()))
+        if(mImage->loadFromFile(std::string(std::string(path)+"/"+mFilename).data()))
                 LOG_ERROR("Fehler2 beim Textur laden", DR_ERROR);
     }
     mSize = mImage->getSize();

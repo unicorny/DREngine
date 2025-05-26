@@ -1,4 +1,9 @@
-#include "Engine2Main.h"
+#include "DREngine/DRVideoConfig.h"
+#include "DREngine/DRLogging.h"
+
+#include <memory>
+
+#include "SDL_video.h"
 
 DRVideoConfig::DRVideoConfig(int width/* = 640*/, int height/* = 480*/, int bpp/* = 32*/, int fullscreen/* = 0*/, int zbuffer /*= 8*/, int stencilBuffer/* = 0*/, int multiSampling/* = 0*/)
 : mVersion(VIDEOCONFIGVERSION), mWidth(width), mHeight(height), mPixelDeep(bpp), mFullscreen(fullscreen), mZBuffer(zbuffer), mStencilBuffer(stencilBuffer), mMultiSampling(multiSampling)
@@ -14,7 +19,7 @@ DRVideoConfig::DRVideoConfig(const DRVideoConfig& cfg)
     memcpy(this, &cfg, sizeof(DRVideoConfig));
 }
 
-void DRVideoConfig::print()
+void DRVideoConfig::print() const
 {
     printf("---- Video Config -----\n");
     printf("Version: %f\n", mVersion);
