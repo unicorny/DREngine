@@ -279,6 +279,11 @@ DRReturn EnInit_OpenGL(DRReal fVersion/* = 1.0f*/, DRVideoConfig video/* = DRVid
     {
         DRLog.writeToLog("Fehler beim aktivieren des OpenGL Contextes: %s\n", SDL_GetError());
     };
+	GLenum err = glewInit();
+	if (GLEW_OK != err) {
+		DRLog.writeToLog("glew init error: %s", glewGetErrorString(err));
+		LOG_ERROR("Error with glew init", DR_ERROR);
+	}
 	Uint32 uiNachGLInit = SDL_GetTicks();
 	DRLog.writeToLog("Für OpenGL Init benötigte zeit: %f Sekunden", (float)(uiNachGLInit-uiVorGLInit)/1000.0f);
 
